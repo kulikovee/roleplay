@@ -1,23 +1,17 @@
 import FiringUnit from './FiringUnit.js';
 
-class Player extends FiringUnit {
-    constructor(object, input, params) {
-        params = params || {};
+export default class Player extends FiringUnit {
+    constructor(object, params = {}) {
+        super(object, {
+            speed: 0.9,
+            fireRate: 100,
+            damage: 50,
+            hp: 100,
+            score: 0,
+            ...params,
+        });
 
-        super(
-            object,
-            {
-                ...params,
-                speed: params.speed || 0.9,
-                fireRate: 100,
-                damage: params.damage || 50,
-                hp: params.hp || 100
-            }
-        );
-
-        this.input = input;
         this.kills = 0;
-        this.score = params.score || 0;
         this.update = this.update.bind(this);
     }
 

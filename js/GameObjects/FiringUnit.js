@@ -1,14 +1,14 @@
 import Unit from './Unit.js';
 
-class FiringUnit extends Unit {
-    constructor(object, params) {
-        params = params || {};
-        super(object, params);
+export default class FiringUnit extends Unit {
+    constructor(object, params = {}) {
+        super(object, {
+            fireRate: 40,
+            fireFlySpeed: 3,
+            ...params
+        });
 
-        this.fireRate = params.fireRate || 40;
-        this.fireFlySpeed = params.fireFlySpeed || 3;
         this.latestFire = Date.now();
-
         this.fire = this.fire.bind(this);
     }
 

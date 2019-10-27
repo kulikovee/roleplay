@@ -1,10 +1,8 @@
 import MovingGameObject from './MovingGameObject.js';
 
-class Fire extends MovingGameObject {
-    constructor(object, speed, damage, parent) {
-        super(object, speed, 1);
-        this.parent = parent;
-        this.damage = damage;
+export default class Fire extends MovingGameObject {
+    constructor(object, params = {}) {
+        super(object, params);
 
         this.acceleration.add(
             this.getForward().multiplyScalar(this.speed)

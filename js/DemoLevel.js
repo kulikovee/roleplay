@@ -26,8 +26,8 @@ export default class DemoLevel {
                     const badGuy = this.scene.gameLogicService.createGameObject(
                         AI,
                         object,
-                        this.scene.player.object,
                         {
+                            target: this.scene.player.object,
                             speed: 0.04 + level * 0.01 + this.scene.player.speed * 0.5,
                             damage: 5 + level * 5,
                             hp: 70 + level * 30

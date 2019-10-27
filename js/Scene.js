@@ -134,16 +134,20 @@ export default class Scene {
             distance = 1;
         }
 
-        const speed = 25 / distance + 1;
+        const speed = (25 / distance + 1) || 1;
 
-        MovingGameObject.prototype.moveObjectToPosition.call(
-            { object: this.camera },
-            cameraPosition,
-            speed
-        );
+        if (this.camera && this.camera.position && cameraPosition) {
+            this.camera.position.sub(
+                this.camera.position
+                    .clone()
+                    .sub(cameraPosition)
+                    .multiplyScalar(1 / speed)
+            );
+        }
 
         this.camera.lookAt(this.player.object.position);
     }
+
 
     loadObj(params) {
         params = params || {};
@@ -172,23 +176,19 @@ export default class Scene {
     }
 
     createPlayer({
-                     onCreate = () => {
-                     },
-                     onKill = () => {
-                     },
-                     onAttacked = () => {
-                     },
-                     onDead = () => {
-                     },
-                 }) {
+        onCreate = () => {},
+        onKill = () => {},
+        onAttacked = () => {},
+        onDead = () => {},
+    }) {
         this.loadObj({
             baseUrl: "https://gohtml.ru/assets/starship",
             callback: (object) => {
                 this.player = this.gameLogicService.createGameObject(
                     Player,
                     object,
-                    this.input,
                     {
+                        input: this.input,
                         speed: 0.09,
                         score: 500,
                         onAttacked: () => {

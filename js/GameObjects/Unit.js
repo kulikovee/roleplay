@@ -1,12 +1,12 @@
 import MovingGameObject from './MovingGameObject.js';
 
-class Unit extends MovingGameObject {
-    constructor(object, params) {
-        params = params || {};
-        super(object, params.speed, params.throttling);
-
-        this.hp = params.hp || 100;
-        this.damage = params.damage || 10;
+export default class Unit extends MovingGameObject {
+    constructor(object, params = {}) {
+        super(object, {
+            hp: 100,
+            damage: 10,
+            ...params,
+        });
 
         ["onAttacked", "onDead", "onKill", "onAttack"].forEach((eventName) => {
             if (typeof params[eventName] === "function") {

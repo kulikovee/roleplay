@@ -1,5 +1,11 @@
-class GameObject {
-    constructor(object) {
+export default class GameObject {
+    constructor(object, params = {}) {
+        for (let key in params) {
+            if (params.hasOwnProperty(key)) {
+                this[key] = params[key];
+            }
+        }
+
         this.object = object;
         this.position = object.position;
         this.rotation = object.rotation;

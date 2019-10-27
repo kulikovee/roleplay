@@ -1,10 +1,12 @@
 import GameObject from './GameObject.js';
 
-class MovingGameObject extends GameObject {
-    constructor(object, speed, throttling) {
-        super(object);
-        this.throttling = throttling || 0.95;
-        this.speed = speed || 0.01;
+export default class MovingGameObject extends GameObject {
+    constructor(object, params = {}) {
+        super(object, {
+            speed: 0.01,
+            throttling: 0.95,
+            ...params
+        });
         this.acceleration = new THREE.Vector3();
 
         this.update = this.update.bind(this);
@@ -12,7 +14,6 @@ class MovingGameObject extends GameObject {
         this.getLeft = this.getLeft.bind(this);
         this.getForward = this.getForward.bind(this);
         this.getDirection = this.getDirection.bind(this);
-        this.moveObjectToPosition = this.moveObjectToPosition.bind(this);
     }
 
     update() {
@@ -40,16 +41,5 @@ class MovingGameObject extends GameObject {
         direction.applyMatrix4(matrix);
 
         return direction;
-    }
-
-    moveObjectToPosition(position, speed) {
-        if (this.object && this.object.position && position) {
-            this.object.position.sub(
-                this.object.position
-                    .clone()
-                    .sub(position)
-                    .multiplyScalar(1 / (speed || 1))
-            );
-        }
     }
 }

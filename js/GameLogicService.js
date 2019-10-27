@@ -49,9 +49,11 @@ export default class GameLogicService {
                     .add(firingGameObject.getForward().multiplyScalar(3)),
                 rotation: firingGameObject.object.rotation
             }),
-            firingGameObject.fireFlySpeed,
-            firingGameObject.damage,
-            firingGameObject
+            {
+                speed: firingGameObject.fireFlySpeed,
+                damage: firingGameObject.damage,
+                parent: firingGameObject,
+            },
         );
 
         setTimeout(() => this.destroyGameObject(fireGameObject), 2000);

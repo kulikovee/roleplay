@@ -1,20 +1,15 @@
 import FiringUnit from './FiringUnit.js';
 
-class AI extends FiringUnit {
-    constructor(object, target, params) {
-        params = params || {};
-        super(
-            object,
-            {
-                ...params,
-                speed: params.speed || 0.05,
-                fireRate: 500,
-                damage: params.damage || 10,
-                hp: params.hp || 100,
-            }
-        );
+export default class AI extends FiringUnit {
+    constructor(object, params = {}) {
+        super(object, {
+            speed: 0.05,
+            damage: 10,
+            hp: 100,
+            fireRate: 500,
+            ...params,
+        });
 
-        this.target = target;
         this.bounty = this.hp / 4 + this.damage + this.speed * 300;
         this.update = this.update.bind(this);
     }
