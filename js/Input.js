@@ -19,7 +19,7 @@ export default class Input {
             this.mouseLeft = 0;
         };
 
-        var timeout;
+        let timeout;
         document.onmousemove = (e) => {
             this.look.horizontal = e.movementX || 0;
             this.look.vertical = e.movementY || 0;
