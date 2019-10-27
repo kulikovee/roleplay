@@ -1,0 +1,24 @@
+{
+  "name": "galaga-threejs",
+  "version": "1.0.0",
+  "description": "[demo](https://kulikovee.github.io/galaga-threejs/)",
+  "main": "main.js",
+  "scripts": {
+    "start": "webpack-dev-server"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kulikovee/galaga-threejs.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kulikovee/galaga-threejs/issues"
+  },
+  "homepage": "https://github.com/kulikovee/galaga-threejs#readme",
+  "devDependencies": {
+    "webpack": "^4.41.2",
+    "webpack-cli": "^3.3.9",
+    "webpack-dev-server": "^3.9.0"
+  }
+}

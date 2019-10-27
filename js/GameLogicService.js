@@ -50,6 +50,7 @@ export default class GameLogicService {
                 rotation: firingGameObject.object.rotation
             }),
             {
+                throttling: 1,
                 speed: firingGameObject.fireFlySpeed,
                 damage: firingGameObject.damage,
                 parent: firingGameObject,
