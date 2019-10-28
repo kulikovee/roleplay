@@ -1,40 +1,44 @@
 import MovingGameObject from './MovingGameObject.js';
 
 export default class Unit extends MovingGameObject {
-    constructor(object, params = {}) {
-        super(object, {
+    constructor(params = {}) {
+        super({
             hp: 100,
             damage: 10,
             ...params,
         });
 
-        ["onAttacked", "onDead", "onKill", "onAttack"].forEach((eventName) => {
-            if (typeof params[eventName] === "function") {
+        ['onDamageTaken', 'onDie', 'onKill', 'onTakeDamage'].forEach((eventName) => {
+            if (typeof params[eventName] === 'function') {
                 this.addEventListener(eventName, params[eventName]);
             }
         });
 
-        this.update = this.update.bind(this);
         this.attacked = this.attacked.bind(this);
     }
 
     attacked(fire) {
-        this.hp -= fire.damage;
-        const fireParent = fire && fire.parent;
+        if (fire) {
+            this.params.hp -= fire.params.damage;
+            const fireParent = fire.params.parent;
 
-        this.dispatchEvent("onAttacked", fireParent);
-        if (fireParent) {
-            fireParent.dispatchEvent("onAttack", this);
-        }
-
-        if (this.hp <= 0) {
-            this.dispatchEvent("onDead", fireParent);
+            this.dispatchEvent('onDamageTaken', fireParent);
 
             if (fireParent) {
-                fireParent.dispatchEvent("onKill", this);
+                fireParent.dispatchEvent('onTakeDamage', this);
             }
 
-            this.destroy();
+            if (this.params.hp <= 0) {
+                this.dispatchEvent('onDie', fireParent);
+
+                if (fireParent) {
+                    fireParent.dispatchEvent('onKill', this);
+                }
+
+                if (typeof this.params.destroy === 'function') {
+                    this.params.destroy();
+                }
+            }
         }
     }
 }

@@ -1,8 +1,8 @@
 import Unit from './Unit.js';
 
 export default class FiringUnit extends Unit {
-    constructor(object, params = {}) {
-        super(object, {
+    constructor(params = {}) {
+        super({
             fireRate: 40,
             fireFlySpeed: 3,
             ...params
@@ -13,12 +13,9 @@ export default class FiringUnit extends Unit {
     }
 
     fire() {
-        if (Date.now() - this.latestFire >= this.fireRate) {
+        if (this.params.fire && (Date.now() - this.latestFire >= this.params.fireRate)) {
             this.latestFire = Date.now();
-        } else {
-            return false;
+            this.params.fire();
         }
-
-        this.gameLogicService.fire(this);
     }
 }

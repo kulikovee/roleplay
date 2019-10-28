@@ -29,11 +29,11 @@ export default class Input {
             }
 
             timeout = window.setTimeout(function () {
-                document.dispatchEvent(new Event("onmousemoveend"));
+                document.dispatchEvent(new Event('onmousemoveend'));
             }, 100);
         };
 
-        document.addEventListener("onmousemoveend", (e) => {
+        document.addEventListener('onmousemoveend', (e) => {
             this.look.horizontal = 0;
             this.look.vertical = 0;
         });

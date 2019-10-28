@@ -1,7 +1,6 @@
 import Input from './Input.js';
-import GameLogicService from './GameLogicService.js';
 import UI from './UI.js';
-import { MovingGameObject, Player } from './GameObjects.js';
+import GameObjectsService, { Player } from './GameObjects.js';
 
 export default class Scene {
     constructor(renderer) {
@@ -9,7 +8,7 @@ export default class Scene {
         this.camera = this.createCamera();
         this.input = new Input();
         this.renderer = renderer;
-        this.gameLogicService = new GameLogicService(this);
+        this.gameObjectsService = new GameObjectsService(this);
         this.ui = new UI(this);
 
         this.scene.add(this.createSkybox());
@@ -28,7 +27,7 @@ export default class Scene {
 
     animate() {
         if (!this.ui.pause) {
-            this.gameLogicService.update();
+            this.gameObjectsService.update();
             this.updateCameraPosition();
         }
 
@@ -56,8 +55,8 @@ export default class Scene {
     }
 
     createSkybox() {
-        const materialArray = ["RT", "LF", "UP", "DN", "FT", "BK"].map(function (dir) {
-            const url = "https://gohtml.ru/assets/skybox" + dir + ".jpg";
+        const materialArray = ['RT', 'LF', 'UP', 'DN', 'FT', 'BK'].map(function (direction) {
+            const url = `/assets/skybox${direction}.jpg`;
             return new THREE.MeshBasicMaterial({
                 map: new THREE.TextureLoader().load(url),
                 side: THREE.BackSide
@@ -167,52 +166,55 @@ export default class Scene {
             return done(this.loadObj[baseUrl].clone());
         }
 
-        new THREE.MTLLoader().load(params.baseUrl + ".mtl", function (materials) {
+        return new THREE.MTLLoader().load(`${params.baseUrl}.mtl`, function (materials) {
             materials.preload();
             const loader = new THREE.OBJLoader();
             loader.setMaterials(materials);
-            loader.load(params.baseUrl + ".obj", done);
+            loader.load(`${params.baseUrl}.obj`, done);
         });
     }
 
     createPlayer({
         onCreate = () => {},
         onKill = () => {},
-        onAttacked = () => {},
-        onDead = () => {},
+        onDamageTaken = () => {},
+        onDie = () => {},
     }) {
-        this.loadObj({
-            baseUrl: "https://gohtml.ru/assets/starship",
-            callback: (object) => {
-                this.player = this.gameLogicService.createGameObject(
-                    Player,
-                    object,
-                    {
-                        input: this.input,
-                        speed: 0.09,
-                        score: 500,
-                        onAttacked: () => {
-                            this.ui.updatePlayerLabels();
-                            onAttacked();
-                        },
-                        onKill: (object) => {
-                            this.player.kills += 1;
-                            this.player.score += object.bounty;
-                            this.ui.updatePlayerLabels();
+        const gameObjectsService = this.gameObjectsService;
 
-                            if (this.player.kills % this.level.levelThreshold === 0) {
-                                this.ui.openShop();
-                            }
-                            onKill();
-                        },
-                        onDead: () => {
-                            this.ui.showRestart();
-                            this.renderer.exitPointerLock();
-                            this.ui.pause = true;
-                            onDead();
+        return this.loadObj({
+            baseUrl: '/assets/starship',
+            callback: (object) => {
+                const player = gameObjectsService.hookGameObject(new Player({
+                    object,
+                    input: this.input,
+                    speed: 0.09,
+                    score: 500,
+                    onDamageTaken: () => {
+                        this.ui.updatePlayerLabels();
+                        onDamageTaken();
+                    },
+                    onKill: (object) => {
+                        this.player.params.kills += 1;
+                        this.player.params.score += object.params.bounty;
+                        this.ui.updatePlayerLabels();
+
+                        if (this.player.params.kills % this.level.levelThreshold === 0) {
+                            this.ui.openShop();
                         }
-                    }
-                );
+                        onKill();
+                    },
+                    onDie: () => {
+                        this.ui.showRestart();
+                        this.renderer.exitPointerLock();
+                        this.ui.pause = true;
+                        onDie();
+                    },
+                    fire: () => gameObjectsService.fire(player),
+                    destroy: () => gameObjectsService.destroyGameObject(player),
+                }));
+
+                this.player = player;
 
                 onCreate();
             }

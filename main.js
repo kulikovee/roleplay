@@ -1,14 +1,12 @@
 import Renderer from './js/Renderer.js';
 import Scene from './js/Scene.js';
-import DemoLevel from './js/DemoLevel.js';
+import Level1 from './js/Levels/Level1.js';
 
 window.addEventListener("load", function () {
     const container = document.getElementById("container"),
-        blocker = document.getElementById("blocker"),
-        instructions = document.getElementById("instructions"),
-        renderer = new Renderer(container, blocker, instructions),
+        renderer = new Renderer(container),
         scene = new Scene(renderer),
-        level = new DemoLevel(scene),
+        level = new Level1(scene),
         onResize = () => {
             scene.camera.aspect = container.clientWidth / container.clientHeight;
             scene.camera.updateProjectionMatrix();

@@ -9,8 +9,6 @@ export default class Renderer {
         this.render = this.render.bind(this);
         this.requestPointerLock = this.requestPointerLock.bind(this);
         this.addPointerLockEvents = this.addPointerLockEvents.bind(this);
-
-        this.addPointerLockEvents(blocker, instructions);
     }
 
     setSize(width, height) {
@@ -25,9 +23,9 @@ export default class Renderer {
         const element = document.body;
 
         if (
-            "pointerLockElement" in document ||
-            "mozRequestPointerLock" in document ||
-            "webkitRequestPointerLock" in document
+            'pointerLockElement' in document ||
+            'mozRequestPointerLock' in document ||
+            'webkitRequestPointerLock' in document
         ) {
             element.requestPointerLock =
                 element.requestPointerLock ||
@@ -44,9 +42,9 @@ export default class Renderer {
         const element = document;
 
         if (
-            "pointerLockElement" in document ||
-            "mozRequestPointerLock" in document ||
-            "webkitRequestPointerLock" in document
+            'pointerLockElement' in document ||
+            'mozRequestPointerLock' in document ||
+            'webkitRequestPointerLock' in document
         ) {
             element.exitPointerLock =
                 element.exitPointerLock ||
@@ -63,9 +61,9 @@ export default class Renderer {
         const element = document.body;
 
         if (
-            "pointerLockElement" in document ||
-            "mozRequestPointerLock" in document ||
-            "webkitRequestPointerLock" in document
+            'pointerLockElement' in document ||
+            'mozRequestPointerLock' in document ||
+            'webkitRequestPointerLock' in document
         ) {
             const pointerlockchange = function (event) {
                 if (
@@ -73,56 +71,56 @@ export default class Renderer {
                     document.mozPointerLockElement === element ||
                     document.webkitPointerLockElement === element
                 ) {
-                    blocker.style.display = "none";
+                    blocker.style.display = 'none';
                 } else {
-                    blocker.style.display = "-webkit-box";
-                    blocker.style.display = "-moz-box";
-                    blocker.style.display = "box";
+                    blocker.style.display = '-webkit-box';
+                    blocker.style.display = '-moz-box';
+                    blocker.style.display = 'box';
 
-                    instructions.style.display = "";
+                    instructions.style.display = '';
                 }
             };
 
             const pointerlockerror = function (event) {
-                instructions.style.display = "";
+                instructions.style.display = '';
             };
 
-            document.addEventListener("pointerlockchange", pointerlockchange, false);
+            document.addEventListener('pointerlockchange', pointerlockchange, false);
             document.addEventListener(
-                "mozpointerlockchange",
+                'mozpointerlockchange',
                 pointerlockchange,
                 false
             );
             document.addEventListener(
-                "webkitpointerlockchange",
+                'webkitpointerlockchange',
                 pointerlockchange,
                 false
             );
         } else {
             instructions.innerHTML +=
-                "Your browser doesn't seem to support Pointer Lock API<br>";
+                'Your browser doesn\'t seem to support Pointer Lock API<br>';
         }
 
         if (
-            "fullscreenElement" in document ||
-            "mozRequestFullScreenElement" in document ||
-            "webkitFullscreenElement" in document
+            'fullscreenElement' in document ||
+            'mozRequestFullScreenElement' in document ||
+            'webkitFullscreenElement' in document
         ) {
             blocker.addEventListener(
-                "click",
+                'click',
                 function () {
                     document.addEventListener(
-                        "fullscreenchange",
+                        'fullscreenchange',
                         fullscreenchange,
                         false
                     );
                     document.addEventListener(
-                        "mozfullscreenchange",
+                        'mozfullscreenchange',
                         fullscreenchange,
                         false
                     );
                     document.addEventListener(
-                        "webkitfullscreenchange",
+                        'webkitfullscreenchange',
                         fullscreenchange,
                         false
                     );
@@ -143,12 +141,12 @@ export default class Renderer {
                     document.mozFullScreenElement === element ||
                     document.webkitFullscreenElement === element
                 ) {
-                    document.removeEventListener("fullscreenchange", fullscreenchange);
+                    document.removeEventListener('fullscreenchange', fullscreenchange);
                 }
             };
         } else {
             instructions.innerHTML +=
-                "Your browser doesn't seem to support Fullscreen API<br>";
+                'Your browser doesn\'t seem to support Fullscreen API<br>';
         }
     }
 }

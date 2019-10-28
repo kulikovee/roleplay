@@ -15,36 +15,38 @@ export default class UI {
         document.getElementById('buy-speed').onclick = () => this.buy('speed');
         document.getElementById('buy-damage').onclick = () => this.buy('damage');
         document.getElementById('restart-button').onclick = () => this.restart();
+
+        this.scene.renderer.addPointerLockEvents(
+            document.getElementById('blocker'),
+            document.getElementById('instructions'),
+        );
     }
 
     updatePlayerLabels() {
         if (this.scene.player) {
-            document.getElementById("kills").innerHTML =
-                "Убито: " + this.scene.player.kills + " Уровень: " + this.scene.level.getLevel();
+            document.getElementById('kills').innerHTML =
+                `Убито: ${this.scene.player.params.kills} Уровень: ${this.scene.level.getLevel()}`;
 
-            document.getElementById("score").innerHTML =
-                "$" + Math.round(this.scene.player.score);
+            document.getElementById('score').innerHTML = `$${Math.round(this.scene.player.params.score)}`;
 
-            document.getElementById("hp").innerHTML =
-                "HP +" +
-                Math.round(this.scene.player.hp) +
-                " | Скорость: " +
-                Math.round(this.scene.player.speed * 1000) +
-                "% | Урон: " +
-                this.scene.player.damage;
+            document.getElementById('hp').innerHTML =`
+                HP +${Math.round(this.scene.player.params.hp)} \
+                | Скорость: ${Math.round(this.scene.player.params.speed * 1000)}% \
+                | Урон: ${this.scene.player.params.damage}
+            `;
         }
     }
 
     openShop() {
         this.pause = true;
         this.scene.renderer.exitPointerLock();
-        document.getElementById("shop").style.display = "block";
+        document.getElementById('shop').style.display = 'block';
     }
 
     closeShop() {
         this.pause = false;
         this.scene.renderer.requestPointerLock();
-        document.getElementById("shop").style.display = "none";
+        document.getElementById('shop').style.display = 'none';
     }
 
     restart() {
@@ -54,24 +56,24 @@ export default class UI {
 
     buy(type) {
         switch (type) {
-            case "hp":
-                if (this.scene.player.score >= 100) {
-                    this.scene.player.score -= 100;
-                    this.scene.player.hp += 10;
+            case 'hp':
+                if (this.scene.player.params.score >= 100) {
+                    this.scene.player.params.score -= 100;
+                    this.scene.player.params.hp += 10;
                 }
 
                 break;
-            case "speed":
-                if (this.scene.player.score >= 200) {
-                    this.scene.player.score -= 200;
-                    this.scene.player.speed += 0.005;
+            case 'speed':
+                if (this.scene.player.params.score >= 200) {
+                    this.scene.player.params.score -= 200;
+                    this.scene.player.params.speed += 0.005;
                 }
 
                 break;
-            case "damage":
-                if (this.scene.player.score >= 250) {
-                    this.scene.player.score -= 250;
-                    this.scene.player.damage += 25;
+            case 'damage':
+                if (this.scene.player.params.score >= 250) {
+                    this.scene.player.params.score -= 250;
+                    this.scene.player.params.damage += 25;
                 }
 
                 break;
@@ -83,18 +85,18 @@ export default class UI {
     }
 
     showRestart() {
-        document.getElementById("restart").style.display = "block";
+        document.getElementById('restart').style.display = 'block';
     }
 
     startGame() {
-        this.scene.gameLogicService.removeAllGameObjects();
+        this.scene.gameObjectsService.removeAllGameObjects();
         this.scene.createPlayer({
             onCreate: () => {
                 this.updatePlayerLabels();
             }
         });
 
-        document.getElementById("restart").style.display = "none";
+        document.getElementById('restart').style.display = 'none';
         this.scene.ui.updatePlayerLabels();
     }
 }
