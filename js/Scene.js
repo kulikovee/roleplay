@@ -56,7 +56,7 @@ export default class Scene {
 
     createSkybox() {
         const materialArray = ['RT', 'LF', 'UP', 'DN', 'FT', 'BK'].map(function (direction) {
-            const url = `/assets/skybox${direction}.jpg`;
+            const url = `./assets/skybox${direction}.jpg`;
             return new THREE.MeshBasicMaterial({
                 map: new THREE.TextureLoader().load(url),
                 side: THREE.BackSide
@@ -183,7 +183,7 @@ export default class Scene {
         const gameObjectsService = this.gameObjectsService;
 
         return this.loadObj({
-            baseUrl: '/assets/starship',
+            baseUrl: './assets/starship',
             callback: (object) => {
                 const player = gameObjectsService.hookGameObject(new Player({
                     object,

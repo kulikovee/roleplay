@@ -23,7 +23,7 @@ export default class Level1 {
 
         if (player && !this.scene.ui.pause) {
             this.scene.loadObj({
-                baseUrl: '/assets/enemy',
+                baseUrl: './assets/enemy',
                 callback: (object) => {
                     const badGuy = gameObjectsService.hookGameObject(new AI({
                         object,
