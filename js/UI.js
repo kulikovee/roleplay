@@ -10,6 +10,7 @@ export default class UI {
         this.startGame = this.startGame.bind(this);
         this.restart = this.restart.bind(this);
 
+        this.cross = document.getElementById('cross');
         document.getElementById('close-shop').onclick = () => this.closeShop();
         document.getElementById('buy-hp').onclick = () => this.buy('hp');
         document.getElementById('buy-speed').onclick = () => this.buy('speed');
@@ -20,6 +21,15 @@ export default class UI {
             document.getElementById('blocker'),
             document.getElementById('instructions'),
         );
+    }
+
+    update() {
+        if (this.scene.player) {
+            const crossPivot = this.scene.player.object.getObjectByName('crossPivot');
+            const position = this.scene.camera.toScreenPosition(crossPivot);
+            this.cross.style.left = `${position.x}px`;
+            this.cross.style.top = `${position.y}px`;
+        }
     }
 
     updatePlayerLabels() {

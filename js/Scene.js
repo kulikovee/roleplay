@@ -1,11 +1,12 @@
 import Input from './Input.js';
 import UI from './UI.js';
+import Camera from './Camera.js';
 import GameObjectsService, { Player } from './GameObjects.js';
 
 export default class Scene {
     constructor(renderer) {
         this.scene = new THREE.Scene();
-        this.camera = this.createCamera();
+        this.camera = new Camera(this);
         this.input = new Input();
         this.renderer = renderer;
         this.gameObjectsService = new GameObjectsService(this);
@@ -16,10 +17,8 @@ export default class Scene {
 
         this.animate = this.animate.bind(this);
         this.createGlobalLight = this.createGlobalLight.bind(this);
-        this.createCamera = this.createCamera.bind(this);
         this.createSkybox = this.createSkybox.bind(this);
         this.createCube = this.createCube.bind(this);
-        this.updateCameraPosition = this.updateCameraPosition.bind(this);
         this.loadObj = this.loadObj.bind(this);
 
         this.animate();
@@ -28,10 +27,11 @@ export default class Scene {
     animate() {
         if (!this.ui.pause) {
             this.gameObjectsService.update();
-            this.updateCameraPosition();
+            this.camera.update();
+            this.ui.update();
         }
 
-        this.renderer.render(this.scene, this.camera);
+        this.renderer.render(this.scene, this.camera.camera);
         requestAnimationFrame(this.animate);
     }
 
@@ -40,18 +40,16 @@ export default class Scene {
     }
 
     createGlobalLight() {
-        const light = new THREE.PointLight(0xffffff);
-        light.position.set(100, 250, 250);
-        return light;
-    }
+        const pivot = new THREE.Object3D();
 
-    createCamera() {
-        const ratio = window.innerWidth / window.innerHeight,
-            camera = new THREE.PerspectiveCamera(45, ratio, 1, 100000);
+        const pointLight = new THREE.PointLight(0xffffff);
+        pointLight.position.set(100, 250, 250);
+        pivot.add(pointLight);
 
-        camera.position.set(5, 3, 15);
+        var ambientLight = new THREE.AmbientLight(0x303030);
+        pivot.add(ambientLight);
 
-        return camera;
+        return pivot;
     }
 
     createSkybox() {
@@ -110,43 +108,12 @@ export default class Scene {
             );
         }
 
-        this.scene.add(cube);
+        if (!params.noScene) {
+            this.scene.add(cube);
+        }
 
         return cube;
     }
-
-    updateCameraPosition() {
-        if (!this.player) return;
-
-        const cameraPosition = this.player.position.clone();
-
-        cameraPosition.sub(
-            this.player.getDirection(
-                new THREE.Vector3(0, 0, window.innerHeight / 20)
-            )
-        );
-
-        cameraPosition.y += 3;
-        let distance = this.camera.position.distanceTo(cameraPosition);
-
-        if (distance < 1) {
-            distance = 1;
-        }
-
-        const speed = (25 / distance + 1) || 1;
-
-        if (this.camera && this.camera.position && cameraPosition) {
-            this.camera.position.sub(
-                this.camera.position
-                    .clone()
-                    .sub(cameraPosition)
-                    .multiplyScalar(1 / speed)
-            );
-        }
-
-        this.camera.lookAt(this.player.object.position);
-    }
-
 
     loadObj(params) {
         params = params || {};
@@ -174,6 +141,15 @@ export default class Scene {
         });
     }
 
+    createCrossPivot() {
+        const crossPivot = new THREE.Object3D();
+
+        crossPivot.name = 'crossPivot';
+        crossPivot.position.set(0, 0, 500);
+
+        return crossPivot;
+    }
+
     createPlayer({
         onCreate = () => {},
         onKill = () => {},
@@ -185,6 +161,32 @@ export default class Scene {
         return this.loadObj({
             baseUrl: './assets/starship',
             callback: (object) => {
+                object.add(this.createCrossPivot());
+
+                var emissiveFireLeft = this.createCube({
+                    x: 0.4,
+                    y: 0.1,
+                    z: 0.1,
+                    emissive: '#55aaff',
+                    position: { x: 0.35, y: 1, z: -1.35 },
+                    rotation: {},
+                    noScene: true,
+                });
+
+                object.add(emissiveFireLeft);
+
+                var emissiveFireRight = this.createCube({
+                    x: 0.4,
+                    y: 0.1,
+                    z: 0.1,
+                    emissive: '#55aaff',
+                    position: { x: -0.35, y: 1, z: -1.35 },
+                    rotation: {},
+                    noScene: true,
+                });
+
+                object.add(emissiveFireRight);
+
                 const player = gameObjectsService.hookGameObject(new Player({
                     object,
                     input: this.input,
@@ -215,6 +217,7 @@ export default class Scene {
                 }));
 
                 this.player = player;
+                this.camera.player = player;
 
                 onCreate();
             }
