@@ -1,12 +1,14 @@
 export default class Camera {
     constructor(scene) {
         this.scene = scene;
-        const ratio = window.innerWidth / window.innerHeight;
+        const ratio = this.getWidth() / this.getHeight();
         this.camera = new THREE.PerspectiveCamera(45, ratio, 1, 100000);
         this.camera.position.set(5, 3, 15);
 
         this.toScreenPosition = this.toScreenPosition.bind(this);
         this.update = this.update.bind(this);
+        this.getWidth = this.getWidth.bind(this);
+        this.getHeight = this.getHeight.bind(this);
     }
 
     update() {
@@ -41,12 +43,21 @@ export default class Camera {
         this.camera.lookAt(this.player.object.position);
     }
 
-    toScreenPosition(obj) {
+    getWidth() {
         const renderer = this.scene.renderer.renderer;
+        return renderer.getContext().canvas.width;
+    }
+
+    getHeight() {
+        const renderer = this.scene.renderer.renderer;
+        return renderer.getContext().canvas.height;
+    }
+
+    toScreenPosition(obj) {
         const vector = new THREE.Vector3();
 
-        const widthHalf = 0.5 * renderer.getContext().canvas.width;
-        const heightHalf = 0.5 * renderer.getContext().canvas.height;
+        const widthHalf = 0.5 * this.getWidth();
+        const heightHalf = 0.5 * this.getHeight();
 
         obj.updateMatrixWorld();
         vector.setFromMatrixPosition(obj.matrixWorld);

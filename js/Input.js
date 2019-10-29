@@ -10,6 +10,11 @@ export default class Input {
         this.createInput();
     }
 
+    update() {
+        this.look.horizontal = 0;
+        this.look.vertical = 0;
+    }
+
     createInput() {
         document.onmousedown = (e) => {
             this.mouseLeft = 1;
@@ -21,8 +26,8 @@ export default class Input {
 
         let timeout;
         document.onmousemove = (e) => {
-            this.look.horizontal = e.movementX || 0;
-            this.look.vertical = e.movementY || 0;
+            this.look.horizontal += e.movementX || 0;
+            this.look.vertical += e.movementY || 0;
 
             if (timeout !== undefined) {
                 window.clearTimeout(timeout);
@@ -51,8 +56,6 @@ export default class Input {
                 case 32:
                     this.space = 1;
                     break;
-                default:
-                    break;
             }
 
             switch (e.which) {
@@ -63,7 +66,6 @@ export default class Input {
                 case 68:
                 case 39:
                     this.horizontal = 1;
-                default:
                     break;
             }
         };
@@ -72,13 +74,13 @@ export default class Input {
             switch (e.which) {
                 case 87:
                 case 38:
-                    if (this.vertical == 1) {
+                    if (this.vertical === 1) {
                         this.vertical = 0;
                     }
                     break;
                 case 83:
                 case 40:
-                    if (this.vertical == -1) {
+                    if (this.vertical === -1) {
                         this.vertical = 0;
                     }
                     break;
@@ -92,16 +94,15 @@ export default class Input {
             switch (e.which) {
                 case 65:
                 case 37:
-                    if (this.horizontal == -1) {
+                    if (this.horizontal === -1) {
                         this.horizontal = 0;
                     }
                     break;
                 case 68:
                 case 39:
-                    if (this.horizontal == 1) {
+                    if (this.horizontal === 1) {
                         this.horizontal = 0;
                     }
-                default:
                     break;
             }
         };

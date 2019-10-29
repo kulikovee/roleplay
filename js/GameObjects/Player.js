@@ -27,11 +27,11 @@ export default class Player extends FiringUnit {
         if (input.look.horizontal) {
             object.rotateOnWorldAxis(
                 new THREE.Vector3(0, 1, 0),
-                -input.look.horizontal / 1000
+                -input.look.horizontal / 5000
             );
         }
 
-        object.rotateX(input.look.vertical / 500);
+        object.rotateX(input.look.vertical / 2500);
         acceleration.add(this.getMovingDirection().multiplyScalar(speed));
     }
 

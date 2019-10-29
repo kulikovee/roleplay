@@ -8,8 +8,8 @@ window.addEventListener("load", function () {
         scene = new Scene(renderer),
         level = new Level1(scene),
         onResize = () => {
-            scene.camera.aspect = container.clientWidth / container.clientHeight;
-            scene.camera.updateProjectionMatrix();
+            scene.camera.camera.aspect = container.clientWidth / container.clientHeight;
+            scene.camera.camera.updateProjectionMatrix();
             renderer.setSize(container.clientWidth, container.clientHeight);
         },
         requestPointerLock = () => !scene.ui.pause && renderer.requestPointerLock();

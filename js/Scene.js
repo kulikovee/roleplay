@@ -5,10 +5,10 @@ import GameObjectsService, { Player } from './GameObjects.js';
 
 export default class Scene {
     constructor(renderer) {
+        this.renderer = renderer;
         this.scene = new THREE.Scene();
         this.camera = new Camera(this);
         this.input = new Input();
-        this.renderer = renderer;
         this.gameObjectsService = new GameObjectsService(this);
         this.ui = new UI(this);
 
@@ -29,6 +29,7 @@ export default class Scene {
             this.gameObjectsService.update();
             this.camera.update();
             this.ui.update();
+            this.input.update();
         }
 
         this.renderer.render(this.scene, this.camera.camera);
