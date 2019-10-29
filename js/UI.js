@@ -35,14 +35,14 @@ export default class UI {
     updatePlayerLabels() {
         if (this.scene.player) {
             document.getElementById('kills').innerHTML =
-                `Убито: ${this.scene.player.params.kills} Уровень: ${this.scene.level.getLevel()}`;
+                `Kills: ${this.scene.player.params.kills} | Level: ${this.scene.level.getLevel()}`;
 
             document.getElementById('score').innerHTML = `$${Math.round(this.scene.player.params.score)}`;
 
             document.getElementById('hp').innerHTML =`
                 HP +${Math.round(this.scene.player.params.hp)} \
-                | Скорость: ${Math.round(this.scene.player.params.speed * 1000)}% \
-                | Урон: ${this.scene.player.params.damage}
+                | Speed: ${Math.round(this.scene.player.params.speed * 1000)}% \
+                | Damage: ${this.scene.player.params.damage}
             `;
         }
     }
