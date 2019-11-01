@@ -12,6 +12,7 @@ export default class Player extends FiringUnit {
         });
 
         this.params.kills = 0;
+        this.params.isFire = false;
         this.update = this.update.bind(this);
     }
 

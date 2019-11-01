@@ -1,7 +1,7 @@
 var path = require('path');
 
 module.exports = {
-    entry: './',
+    entry: './public/main.js',
     devServer: {
         contentBase: path.join(__dirname, './'),
         compress: true,

@@ -39,7 +39,7 @@ export default class Level1 {
             gameObjectsService = this.scene.gameObjectsService;
 
         this.scene.loadObj({
-            baseUrl: './assets/enemy',
+            baseUrl: './public/assets/enemy',
             callback: (object) => {
                 const badGuy = gameObjectsService.hookGameObject(new AI({
                     object,

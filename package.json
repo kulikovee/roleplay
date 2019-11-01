@@ -2,7 +2,6 @@
   "name": "galaga-threejs",
   "version": "1.0.0",
   "description": "[demo](https://kulikovee.github.io/galaga-threejs/)",
-  "main": "main.js",
   "scripts": {
     "start": "webpack-dev-server"
   },
@@ -16,6 +15,9 @@
     "url": "https://github.com/kulikovee/galaga-threejs/issues"
   },
   "homepage": "https://github.com/kulikovee/galaga-threejs#readme",
+  "dependencies": {
+    "ws": "^7.2.0"
+  },
   "devDependencies": {
     "webpack": "^4.41.2",
     "webpack-cli": "^3.3.9",

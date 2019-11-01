@@ -2,6 +2,7 @@ import Input from './Input.js';
 import UI from './UI.js';
 import Camera from './Camera.js';
 import GameObjectsService, { Player } from './GameObjects.js';
+import Connection from "./Connection.js";
 
 export default class Scene {
     constructor(renderer) {
@@ -11,6 +12,8 @@ export default class Scene {
         this.input = new Input();
         this.gameObjectsService = new GameObjectsService(this);
         this.ui = new UI(this);
+        this.players = {};
+        this.connection = new Connection(this, 'gohtml.ru');
 
         this.scene.add(this.createSkybox());
         this.scene.add(this.createGlobalLight());
@@ -30,6 +33,7 @@ export default class Scene {
             this.camera.update();
             this.ui.update();
             this.input.update();
+            this.connection.send(this.player);
         }
 
         this.renderer.render(this.scene, this.camera.camera);
@@ -55,7 +59,7 @@ export default class Scene {
 
     createSkybox() {
         const materialArray = ['RT', 'LF', 'UP', 'DN', 'FT', 'BK'].map(function (direction) {
-            const url = `./assets/skybox${direction}.jpg`;
+            const url = `./public/assets/skybox${direction}.jpg`;
             return new THREE.MeshBasicMaterial({
                 map: new THREE.TextureLoader().load(url),
                 side: THREE.BackSide
@@ -151,16 +155,38 @@ export default class Scene {
         return crossPivot;
     }
 
+    createAnotherPlayer(id) {
+        this.players[id] = {
+            position: {
+                set: () => {
+                },
+            },
+            rotation: {
+                set: () => {
+                },
+            },
+        };
+
+        return this.loadObj({
+            baseUrl: './public/assets/starship',
+            callback: (object) => {
+                this.players[id] = object;
+                this.scene.add(object);
+            }
+        });
+    }
+
     createPlayer({
         onCreate = () => {},
         onKill = () => {},
         onDamageTaken = () => {},
         onDie = () => {},
+        onMove = () => {},
     }) {
         const gameObjectsService = this.gameObjectsService;
 
         return this.loadObj({
-            baseUrl: './assets/starship',
+            baseUrl: './public/assets/starship',
             callback: (object) => {
                 object.add(this.createCrossPivot());
 
