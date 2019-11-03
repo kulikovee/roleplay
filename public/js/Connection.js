@@ -1,5 +1,5 @@
 export default class Connection {
-    constructor(scene, ip = 'localhost', port = '1337') {
+    constructor(scene, ip = 'localhost', port = '1337', isSecure = true) {
         this.scene = scene;
         this.ip = ip;
         this.port = port;
@@ -7,7 +7,7 @@ export default class Connection {
         const WebSocket = window.WebSocket || window.MozWebSocket;
 
         this.id = Math.random().toString(36) + Math.random().toString(36);
-        this.connection = new WebSocket(`wss://${ip}:${port}`);
+        this.connection = new WebSocket(`${isSecure ? 'wss' : 'ws'}://${ip}:${port}`);
 
         this.connection.onopen = () => {
             console.log('open connection');
@@ -20,6 +20,10 @@ export default class Connection {
         this.connection.onmessage = (message) => {
             try {
                 const json = JSON.parse(message.data);
+
+                if (!json.id) {
+                    return;
+                }
 
                 if (!scene.players[json.id]) {
                     scene.createAnotherPlayer(json.id);
