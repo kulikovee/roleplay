@@ -18,6 +18,14 @@ export default class Scene {
         this.scene.add(this.createSkybox());
         this.scene.add(this.createGlobalLight());
 
+        this.loadObj({
+            baseUrl: './public/assets/shades',
+            callback: (object) => {
+                object.scale.set(10, 10, 10);
+                this.scene.add(object);
+            }
+        });
+
         this.animate = this.animate.bind(this);
         this.createGlobalLight = this.createGlobalLight.bind(this);
         this.createSkybox = this.createSkybox.bind(this);
