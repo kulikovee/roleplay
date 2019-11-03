@@ -46,5 +46,5 @@ wss.on('connection', function connection(ws) {
     ws.on('close', function(connection) {
     });
 
-    ws.send({ server: { version: 0.01 } });
+    ws.send(JSON.stringify({ server: { version: 0.01 } }));
 });
