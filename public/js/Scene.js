@@ -2,7 +2,7 @@ import Input from './Input.js';
 import UI from './UI.js';
 import Camera from './Camera.js';
 import GameObjectsService, { Player } from './GameObjects.js';
-import Connection from "./Connection.js";
+import Connection from './Connection.js';
 
 export default class Scene {
     constructor(renderer) {
