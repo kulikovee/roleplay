@@ -17,18 +17,12 @@ export default class Scene {
 
         this.scene.add(this.createSkybox());
         this.scene.add(this.createGlobalLight());
-
-        this.loadObj({
-            baseUrl: './public/assets/shades',
-            callback: (object) => {
-                object.scale.set(10, 10, 10);
-                this.scene.add(object);
-            }
-        });
+        this.createEnvironment();
 
         this.animate = this.animate.bind(this);
         this.createGlobalLight = this.createGlobalLight.bind(this);
         this.createSkybox = this.createSkybox.bind(this);
+        this.createEnvironment = this.createEnvironment.bind(this);
         this.createCube = this.createCube.bind(this);
         this.loadObj = this.loadObj.bind(this);
 
@@ -50,6 +44,16 @@ export default class Scene {
 
     setLevel(level) {
         this.level = level;
+    }
+
+    createEnvironment() {
+        return this.loadObj({
+            baseUrl: './public/assets/shades',
+            callback: (object) => {
+                object.scale.set(750, 750, 750);
+                this.scene.add(object);
+            }
+        });
     }
 
     createGlobalLight() {
@@ -74,7 +78,7 @@ export default class Scene {
             });
         });
 
-        const skyGeometry = new THREE.CubeGeometry(50000, 50000, 50000);
+        const skyGeometry = new THREE.CubeGeometry(75000, 75000, 75000);
         const skyMaterial = new THREE.MeshFaceMaterial(materialArray);
         const skyBox = new THREE.Mesh(skyGeometry, skyMaterial);
 
