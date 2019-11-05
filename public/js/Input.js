@@ -16,16 +16,16 @@ export default class Input {
     }
 
     createInput() {
-        document.onmousedown = (e) => {
+        document.addEventListener('mousedown', (e) => {
             this.mouseLeft = 1;
-        };
+        });
 
-        document.onmouseup = (e) => {
+        document.addEventListener('mouseup', (e) => {
             this.mouseLeft = 0;
-        };
+        });
 
         let timeout;
-        document.onmousemove = (e) => {
+        document.addEventListener('mousemove', (e) => {
             this.look.horizontal += e.movementX || 0;
             this.look.vertical += e.movementY || 0;
 
@@ -36,14 +36,14 @@ export default class Input {
             timeout = window.setTimeout(function () {
                 document.dispatchEvent(new Event('onmousemoveend'));
             }, 100);
-        };
+        });
 
         document.addEventListener('onmousemoveend', (e) => {
             this.look.horizontal = 0;
             this.look.vertical = 0;
         });
 
-        document.onkeydown = (e) => {
+        document.addEventListener('keydown', (e) => {
             switch (e.which) {
                 case 87:
                 case 38:
@@ -68,9 +68,9 @@ export default class Input {
                     this.horizontal = 1;
                     break;
             }
-        };
+        });
 
-        document.onkeyup = (e) => {
+        document.addEventListener('keyup', (e) => {
             switch (e.which) {
                 case 87:
                 case 38:
@@ -105,7 +105,7 @@ export default class Input {
                     }
                     break;
             }
-        };
+        });
 
         return this;
     }

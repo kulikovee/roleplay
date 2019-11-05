@@ -11,7 +11,7 @@ export default class Player extends FiringUnit {
             ...params,
         });
 
-        this.params.kills = 0;
+        this.params.experience = 0;
         this.params.isFire = false;
         this.update = this.update.bind(this);
     }
@@ -34,6 +34,14 @@ export default class Player extends FiringUnit {
 
         object.rotateX(input.look.vertical / 2500);
         acceleration.add(this.getMovingDirection().multiplyScalar(speed));
+    }
+
+    getExperience() {
+        return this.params.experience;
+    }
+
+    getLevel() {
+        return Math.floor(Math.sqrt(this.params.experience / 1000)) + 1;
     }
 
     getMovingDirection() {

@@ -9,7 +9,7 @@
     height: 100%;
 }
 
-#blocker, #hp, #kills, #score, #shop, #restart {
+#blocker, #hp, #exp, #score, #shop, #restart {
     position: absolute;
     background: rgba(0, 0, 0, 0.5);
     color: #fff;
@@ -26,7 +26,7 @@
     right: 8px;
 }
 
-#kills {
+#exp {
     bottom: 8px;
     right: 8px;
 }
@@ -60,26 +60,24 @@
 }
 
 #shop {
-    width: 500px;
+    width: 300px;
     top: 50%;
     left: 50%;
+    padding: 12px 24px;
     margin-left: -250px;
     margin-top: -102px;
-    padding-bottom: 16px;
-    font-size: 0;
-    background: rgba(0, 0, 0, 0.9);
+    background: rgba(0, 0, 75, 0.8);
+    z-index: 1;
 }
 
-#shop > div.row > div {
-    width: 45%;
-    display: inline-block;
-    font-size: 16px;
-    margin: 0.5% 2.5%;
+#shop .row {
+    margin: 4px 0;
 }
 
-#shop > div.row > div > * {
-    display: inline-block;
-    width: 100%;
+#shop input[type=button] {
     padding: 8px;
 }
 
+#shop .title {
+    margin-top: 12px;
+}

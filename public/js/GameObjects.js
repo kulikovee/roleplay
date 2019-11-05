@@ -77,7 +77,7 @@ export default class GameObjectsService {
             this.gameObjects.splice(index, 1);
         }
 
-        this.scene.scene.remove(gameObject.object);
+        this.scene.remove(gameObject.object);
     }
 }
 

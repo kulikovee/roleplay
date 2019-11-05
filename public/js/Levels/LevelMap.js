@@ -1,15 +1,22 @@
+import AbstractLevel from './AbstractLevel.js';
 import { AI } from '../GameObjects.js';
 
-export default class Level1 {
+export default class LevelMap extends AbstractLevel {
     constructor(scene) {
-        this.scene = scene;
-        this.lastBadGuyCreated = Date.now();
-        this.levelThreshold = 15;
+        super(scene);
 
-        this.getLevel = this.getLevel.bind(this);
         this.startLevel = this.startLevel.bind(this);
         this.createBadGuyByTimeout = this.createBadGuyByTimeout.bind(this);
         this.createBadGuy = this.createBadGuy.bind(this);
+        this.createEnvironment = this.createEnvironment.bind(this);
+        this.createSkybox = this.createSkybox.bind(this);
+
+        this.id = 'level1';
+        this.lastBadGuyCreated = Date.now();
+
+        this.scene.add(this.createEnvironment());
+        this.scene.add(this.createSkybox());
+        this.scene.add(this.createGlobalLight());
     }
 
     startLevel() {
@@ -22,10 +29,38 @@ export default class Level1 {
         this.scene.ui.openShop();
     }
 
+    createEnvironment() {
+        const pivot = new THREE.Object3D();
+
+        this.scene.loadObj({
+            baseUrl: './public/assets/shades',
+            callback: (object) => {
+                object.scale.set(750, 750, 750);
+                pivot.add(object);
+            }
+        });
+
+        return pivot;
+    }
+
+    createSkybox() {
+        const materialArray = ['RT', 'LF', 'UP', 'DN', 'FT', 'BK'].map(function (direction) {
+            const url = `./public/assets/skybox${direction}.jpg`;
+            return new THREE.MeshBasicMaterial({
+                map: new THREE.TextureLoader().load(url),
+                side: THREE.BackSide
+            });
+        });
+
+        const skyGeometry = new THREE.CubeGeometry(75000, 75000, 75000);
+        const skyMaterial = new THREE.MeshFaceMaterial(materialArray);
+
+        return new THREE.Mesh(skyGeometry, skyMaterial);
+    }
+
     createBadGuyByTimeout() {
-        const level = this.getLevel(),
-            player = this.scene.player,
-            badGuyTimeout = 5000 - level * 500;
+        const player = this.scene.player,
+            badGuyTimeout = 5000 - this.scene.player.getLevel() * 500;
 
         if (player && !this.scene.ui.pause && (Date.now() - this.lastBadGuyCreated >= badGuyTimeout)) {
             this.lastBadGuyCreated = Date.now();
@@ -34,7 +69,7 @@ export default class Level1 {
     }
 
     createBadGuy() {
-        const level = this.getLevel(),
+        const level = this.scene.player.getLevel(),
             player = this.scene.player,
             gameObjectsService = this.scene.gameObjectsService;
 
@@ -60,13 +95,5 @@ export default class Level1 {
                 badGuy.object.scale.set(2.5, 2.5, 2.5);
             }
         });
-    }
-
-    getLevel() {
-        return (
-            1 + Math.floor(
-                (this.scene.player ? this.scene.player.params.kills : 0) / this.levelThreshold
-            )
-        );
     }
 }

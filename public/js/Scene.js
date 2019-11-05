@@ -3,29 +3,27 @@ import UI from './UI.js';
 import Camera from './Camera.js';
 import GameObjectsService, { Player } from './GameObjects.js';
 import Connection from './Connection.js';
+import LevelMap from './Levels/LevelMap.js';
 
 export default class Scene {
     constructor(renderer) {
+        this.animate = this.animate.bind(this);
+        this.createCube = this.createCube.bind(this);
+        this.loadObj = this.loadObj.bind(this);
+        this.add = this.add.bind(this);
+        this.remove = this.remove.bind(this);
+
+        this.players = {};
         this.renderer = renderer;
         this.scene = new THREE.Scene();
         this.camera = new Camera(this);
         this.input = new Input();
         this.gameObjectsService = new GameObjectsService(this);
         this.ui = new UI(this);
-        this.players = {};
         this.connection = new Connection(this, 'gohtml.ru');
+        this.level = new LevelMap(this);
 
-        this.scene.add(this.createSkybox());
-        this.scene.add(this.createGlobalLight());
-        this.createEnvironment();
-
-        this.animate = this.animate.bind(this);
-        this.createGlobalLight = this.createGlobalLight.bind(this);
-        this.createSkybox = this.createSkybox.bind(this);
-        this.createEnvironment = this.createEnvironment.bind(this);
-        this.createCube = this.createCube.bind(this);
-        this.loadObj = this.loadObj.bind(this);
-
+        this.level.startLevel();
         this.animate();
     }
 
@@ -42,47 +40,12 @@ export default class Scene {
         requestAnimationFrame(this.animate);
     }
 
-    setLevel(level) {
-        this.level = level;
+    add(object) {
+        this.scene.add(object);
     }
 
-    createEnvironment() {
-        return this.loadObj({
-            baseUrl: './public/assets/shades',
-            callback: (object) => {
-                object.scale.set(750, 750, 750);
-                this.scene.add(object);
-            }
-        });
-    }
-
-    createGlobalLight() {
-        const pivot = new THREE.Object3D();
-
-        const pointLight = new THREE.PointLight(0xffffff);
-        pointLight.position.set(100, 250, 250);
-        pivot.add(pointLight);
-
-        var ambientLight = new THREE.AmbientLight(0x303030);
-        pivot.add(ambientLight);
-
-        return pivot;
-    }
-
-    createSkybox() {
-        const materialArray = ['RT', 'LF', 'UP', 'DN', 'FT', 'BK'].map(function (direction) {
-            const url = `./public/assets/skybox${direction}.jpg`;
-            return new THREE.MeshBasicMaterial({
-                map: new THREE.TextureLoader().load(url),
-                side: THREE.BackSide
-            });
-        });
-
-        const skyGeometry = new THREE.CubeGeometry(75000, 75000, 75000);
-        const skyMaterial = new THREE.MeshFaceMaterial(materialArray);
-        const skyBox = new THREE.Mesh(skyGeometry, skyMaterial);
-
-        return skyBox;
+    remove(object) {
+        this.scene.remove(object);
     }
 
     createCube(params) {
@@ -126,7 +89,7 @@ export default class Scene {
         }
 
         if (!params.noScene) {
-            this.scene.add(cube);
+            this.add(cube);
         }
 
         return cube;
@@ -142,7 +105,7 @@ export default class Scene {
                     this.loadObj[baseUrl] = object;
                 }
 
-                this.scene.add(object);
+                this.add(object);
                 callback(object);
             };
 
@@ -158,32 +121,17 @@ export default class Scene {
         });
     }
 
-    createCrossPivot() {
-        const crossPivot = new THREE.Object3D();
-
-        crossPivot.name = 'crossPivot';
-        crossPivot.position.set(0, 0, 500);
-
-        return crossPivot;
-    }
-
     createAnotherPlayer(id) {
         this.players[id] = {
-            position: {
-                set: () => {
-                },
-            },
-            rotation: {
-                set: () => {
-                },
-            },
+            position: { set: () => null },
+            rotation: { set: () => null },
         };
 
         return this.loadObj({
             baseUrl: './public/assets/starship',
             callback: (object) => {
                 this.players[id] = object;
-                this.scene.add(object);
+                this.add(object);
             }
         });
     }
@@ -200,31 +148,24 @@ export default class Scene {
         return this.loadObj({
             baseUrl: './public/assets/starship',
             callback: (object) => {
-                object.add(this.createCrossPivot());
+                const crossPivot = new THREE.Object3D();
 
-                var emissiveFireLeft = this.createCube({
-                    x: 0.4,
-                    y: 0.1,
-                    z: 0.1,
+                crossPivot.name = 'crossPivot';
+                crossPivot.position.set(0, 0, 500);
+
+                object.crossPivot = crossPivot;
+                object.add(crossPivot);
+
+                const createEmissiveLight = isRight => this.createCube({
+                    ...{ x: 0.4, y: 0.1, z: 0.1 },
                     emissive: '#55aaff',
-                    position: { x: 0.35, y: 1, z: -1.35 },
+                    position: { x: isRight ? 0.35 : -0.35, y: 1, z: -1.35 },
                     rotation: {},
                     noScene: true,
                 });
 
-                object.add(emissiveFireLeft);
-
-                var emissiveFireRight = this.createCube({
-                    x: 0.4,
-                    y: 0.1,
-                    z: 0.1,
-                    emissive: '#55aaff',
-                    position: { x: -0.35, y: 1, z: -1.35 },
-                    rotation: {},
-                    noScene: true,
-                });
-
-                object.add(emissiveFireRight);
+                object.add(createEmissiveLight(false));
+                object.add(createEmissiveLight(true));
 
                 const player = gameObjectsService.hookGameObject(new Player({
                     object,
@@ -236,18 +177,15 @@ export default class Scene {
                         onDamageTaken();
                     },
                     onKill: (object) => {
-                        this.player.params.kills += 1;
+                        this.player.params.experience += object.params.bounty;
                         this.player.params.score += object.params.bounty;
                         this.ui.updatePlayerLabels();
 
-                        if (this.player.params.kills % this.level.levelThreshold === 0) {
-                            this.ui.openShop();
-                        }
                         onKill();
                     },
                     onDie: () => {
                         this.ui.showRestart();
-                        this.renderer.exitPointerLock();
+                        this.ui.exitPointerLock();
                         this.ui.pause = true;
                         onDie();
                     },
