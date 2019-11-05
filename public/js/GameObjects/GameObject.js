@@ -18,12 +18,20 @@ export default class GameObject {
     update() {
     }
 
+    /**
+     * @param {string} eventName
+     * @param {object[]} args
+     */
     dispatchEvent(eventName, ...args) {
         if (this.events[eventName]) {
             this.events[eventName].forEach(callback => callback(...args));
         }
     }
 
+    /**
+     * @param {string} eventName
+     * @param {function} callback
+     */
     addEventListener(eventName, callback) {
         if (typeof callback === 'function') {
             if (this.events[eventName]) {

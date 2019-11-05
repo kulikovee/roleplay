@@ -1,4 +1,7 @@
 export default class UI {
+    /**
+     * @param {Scene} scene
+     */
     constructor(scene) {
         this.updatePlayerLabels = this.updatePlayerLabels.bind(this);
         this.openShop = this.openShop.bind(this);

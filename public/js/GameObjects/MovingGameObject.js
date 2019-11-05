@@ -36,6 +36,9 @@ export default class MovingGameObject extends GameObject {
         return vector;
     }
 
+    /**
+     * @param {THREE.Vector3} direction
+     */
     getDirection(direction) {
         const matrix = new THREE.Matrix4();
         matrix.extractRotation(this.params.object.matrix);

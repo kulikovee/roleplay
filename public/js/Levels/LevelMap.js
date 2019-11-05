@@ -2,6 +2,9 @@ import AbstractLevel from './AbstractLevel.js';
 import { AI } from '../GameObjects.js';
 
 export default class LevelMap extends AbstractLevel {
+    /**
+     * @param {Scene} scene
+     */
     constructor(scene) {
         super(scene);
 

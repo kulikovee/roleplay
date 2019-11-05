@@ -15,7 +15,7 @@ export default class Fire extends MovingGameObject {
         if (this.params.getCollisions) {
             const collisions = this.params.getCollisions(this);
 
-            collisions.forEach(collisionGameObject => collisionGameObject.attacked(this));
+            collisions.forEach(collisionGameObject => collisionGameObject.damageTaken(this));
 
             if (collisions.length && this.params.destroy) {
                 this.params.destroy(this);

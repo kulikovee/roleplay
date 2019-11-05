@@ -1,22 +1,17 @@
-import GameObject from './GameObjects/GameObject.js';
-import MovingGameObject from './GameObjects/MovingGameObject.js';
 import AI from './GameObjects/AI.js';
 import Player from './GameObjects/Player.js';
-import FiringUnit from './GameObjects/FiringUnit.js';
-import Unit from './GameObjects/Unit.js';
 import Fire from './GameObjects/Fire.js';
 
 export {
-    GameObject,
-    MovingGameObject,
     AI,
     Player,
-    FiringUnit,
-    Unit,
     Fire,
 };
 
 export default class GameObjectsService {
+    /**
+     * @param {Scene} scene
+     */
     constructor(scene) {
         this.gameObjects = [];
         this.scene = scene;
@@ -32,6 +27,9 @@ export default class GameObjectsService {
         this.gameObjects.forEach(gameObject => gameObject.update());
     }
 
+    /**
+     * @param {THREE.Object3D} firingGameObject
+     */
     fire(firingGameObject) {
         const fireGameObject = this.hookGameObject(new Fire({
             object: this.scene.createCube({
@@ -59,6 +57,9 @@ export default class GameObjectsService {
         setTimeout(() => this.destroyGameObject(fireGameObject), 2000);
     }
 
+    /**
+     * @param {THREE.Object3D} firingGameObject
+     */
     hookGameObject(gameObject) {
         this.gameObjects.push(gameObject);
         return gameObject;
@@ -70,6 +71,9 @@ export default class GameObjectsService {
         }
     }
 
+    /**
+     * @param {THREE.Object3D} firingGameObject
+     */
     destroyGameObject(gameObject) {
         const index = this.gameObjects.indexOf(gameObject);
 

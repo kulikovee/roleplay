@@ -1,4 +1,7 @@
 export default class AbstractLevel {
+    /**
+     * @param {Scene} scene
+     */
     constructor(scene) {
         this.createGlobalLight = this.createGlobalLight.bind(this);
         this.scene = scene;

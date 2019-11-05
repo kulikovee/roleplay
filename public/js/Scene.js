@@ -6,6 +6,9 @@ import Connection from './Connection.js';
 import LevelMap from './Levels/LevelMap.js';
 
 export default class Scene {
+    /**
+     * @param {Renderer} renderer
+     */
     constructor(renderer) {
         this.animate = this.animate.bind(this);
         this.createCube = this.createCube.bind(this);
@@ -40,10 +43,16 @@ export default class Scene {
         requestAnimationFrame(this.animate);
     }
 
+    /**
+     * @param {THREE.Object3D} object
+     */
     add(object) {
         this.scene.add(object);
     }
 
+    /**
+     * @param {THREE.Object3D} object
+     */
     remove(object) {
         this.scene.remove(object);
     }

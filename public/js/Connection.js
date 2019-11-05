@@ -1,4 +1,10 @@
 export default class Connection {
+    /**
+     * @param {Scene} scene
+     * @param {string|number} ip
+     * @param {string|number} port
+     * @param {boolean} isSecure
+     */
     constructor(scene, ip = 'localhost', port = '1337', isSecure = true) {
         this.send = this.send.bind(this);
         this.onMessage = this.onMessage.bind(this);

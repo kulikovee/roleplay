@@ -8,16 +8,19 @@ export default class Unit extends MovingGameObject {
             ...params,
         });
 
-        ['onDamageTaken', 'onDie', 'onKill', 'onTakeDamage'].forEach((eventName) => {
+        ['onDamageTaken', 'onDamageDeal', 'onKill', 'onDie'].forEach((eventName) => {
             if (typeof params[eventName] === 'function') {
                 this.addEventListener(eventName, params[eventName]);
             }
         });
 
-        this.attacked = this.attacked.bind(this);
+        this.damageTaken = this.damageTaken.bind(this);
     }
 
-    attacked(fire) {
+    /**
+     * @param {Fire} fire
+     */
+    damageTaken(fire) {
         if (fire) {
             this.params.hp -= fire.params.damage;
             const fireParent = fire.params.parent;
@@ -25,7 +28,7 @@ export default class Unit extends MovingGameObject {
             this.dispatchEvent('onDamageTaken', fireParent);
 
             if (fireParent) {
-                fireParent.dispatchEvent('onTakeDamage', this);
+                fireParent.dispatchEvent('onDamageDeal', this);
             }
 
             if (this.params.hp <= 0) {

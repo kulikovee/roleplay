@@ -1,4 +1,7 @@
 export default class Camera {
+    /**
+     * @param {Scene} scene
+     */
     constructor(scene) {
         this.scene = scene;
         const ratio = this.getWidth() / this.getHeight();
