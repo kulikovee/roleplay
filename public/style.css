@@ -59,6 +59,15 @@
     height: 95%;
 }
 
+#action {
+    position: absolute;
+    top: 150px;
+    left: 0;
+    width: 100%;
+    color: #ffffff;
+    text-align: center;
+}
+
 #shop {
     width: 300px;
     top: 50%;

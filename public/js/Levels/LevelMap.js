@@ -1,4 +1,5 @@
 import AbstractLevel from './AbstractLevel.js';
+import LevelEarth from './LevelEarth.js';
 import { AI } from '../GameObjects.js';
 
 export default class LevelMap extends AbstractLevel {
@@ -9,17 +10,36 @@ export default class LevelMap extends AbstractLevel {
         super(scene);
 
         this.startLevel = this.startLevel.bind(this);
+        this.stopLevel = this.stopLevel.bind(this);
+        this.restartLevel = this.restartLevel.bind(this);
+        this.onAction = this.onAction.bind(this);
+        this.showAction = this.showAction.bind(this);
+        this.update = this.update.bind(this);
         this.createBadGuyByTimeout = this.createBadGuyByTimeout.bind(this);
         this.createBadGuy = this.createBadGuy.bind(this);
         this.createEnvironment = this.createEnvironment.bind(this);
         this.createSkybox = this.createSkybox.bind(this);
 
-        this.id = 'level1';
+        this.id = 'map';
         this.lastBadGuyCreated = Date.now();
+        this.enviroment = this.createEnvironment();
+        this.skybox = this.createSkybox();
+        this.globalLight = this.createGlobalLight();
+        this.earthPosition = new THREE.Vector3(-3600, 1500, -3500);
 
-        this.scene.add(this.createEnvironment());
-        this.scene.add(this.createSkybox());
-        this.scene.add(this.createGlobalLight());
+        this.scene.add(this.enviroment);
+        this.scene.add(this.skybox);
+        this.scene.add(this.globalLight);
+
+        this.startLevel();
+    }
+
+    update() {
+        if (this.scene.player && this.scene.player.position.distanceTo(this.earthPosition) < 3000) {
+            this.showAction('moveToEarth');
+        } else {
+            this.actionElement.innerHTML = '';
+        }
     }
 
     startLevel() {
@@ -30,6 +50,38 @@ export default class LevelMap extends AbstractLevel {
         this.interval = setInterval(this.createBadGuyByTimeout, 500);
         this.scene.ui.startGame();
         this.scene.ui.openShop();
+    }
+
+    restartLevel() {
+        this.scene.clearScene();
+    }
+
+    stopLevel() {
+        this.scene.remove(this.enviroment);
+        this.scene.remove(this.skybox);
+        this.scene.remove(this.globalLight);
+        this.scene.gameObjectsService.removeAllGameObjectsExceptPlayer();
+        if (this.interval) {
+            clearInterval(this.interval);
+        }
+    }
+
+    onAction() {
+        switch(this.actionElement.getAttribute('action-type')) {
+            case 'moveToEarth':
+                this.stopLevel();
+                this.scene.level = new LevelEarth(this.scene);
+        }
+    }
+
+    showAction(type) {
+        this.actionElement.setAttribute('action-type', type);
+
+        switch(type) {
+            case 'moveToEarth':
+                this.actionElement.innerHTML = 'Press "Enter" to move on "Earth"';
+                break
+        }
     }
 
     createEnvironment() {
@@ -62,6 +114,10 @@ export default class LevelMap extends AbstractLevel {
     }
 
     createBadGuyByTimeout() {
+        if (!this.scene.player) {
+            return;
+        }
+
         const player = this.scene.player,
             badGuyTimeout = 5000 - this.scene.player.getLevel() * 500;
 

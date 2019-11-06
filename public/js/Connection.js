@@ -61,12 +61,18 @@ export default class Connection {
         }
 
         if (player) {
+            const playerRotation = player.object.rotation.toVector3();
+
             this.connection.send(JSON.stringify({
                 id: this.id,
                 levelId: this.scene.level.getLevelId(),
                 position: player.position,
-                rotation: player.object.rotation.toVector3(),
-                fire: player.isFire,
+                rotation: {
+                    x: Math.round(playerRotation.x),
+                    y: Math.round(playerRotation.y),
+                    z: Math.round(playerRotation.z),
+                },
+                fire: Number(player.isFire),
             }));
         }
     }

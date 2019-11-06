@@ -58,7 +58,7 @@ export default class GameObjectsService {
     }
 
     /**
-     * @param {THREE.Object3D} firingGameObject
+     * @param {THREE.Object3D} gameObject
      */
     hookGameObject(gameObject) {
         this.gameObjects.push(gameObject);
@@ -71,8 +71,15 @@ export default class GameObjectsService {
         }
     }
 
+    removeAllGameObjectsExceptPlayer() {
+        while (this.gameObjects.length > 1) {
+            const removeIdx = Number(this.gameObjects[0] instanceof Player);
+            this.destroyGameObject(this.gameObjects[removeIdx]);
+        }
+    }
+
     /**
-     * @param {THREE.Object3D} firingGameObject
+     * @param {THREE.Object3D} gameObject
      */
     destroyGameObject(gameObject) {
         const index = this.gameObjects.indexOf(gameObject);

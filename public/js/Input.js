@@ -1,5 +1,6 @@
 export default class Input {
-    constructor() {
+    constructor(params) {
+        this.params = params;
         this.vertical = 0;
         this.horizontal = 0;
         this.look = {
@@ -45,6 +46,8 @@ export default class Input {
 
         document.addEventListener('keydown', (e) => {
             switch (e.which) {
+                case 13:
+                    this.params.onAction && this.params.onAction();
                 case 87:
                 case 38:
                     this.vertical = 1;

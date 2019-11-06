@@ -8,6 +8,7 @@ export default class UI {
         this.closeShop = this.closeShop.bind(this);
         this.buy = this.buy.bind(this);
         this.startGame = this.startGame.bind(this);
+        this.restartGame = this.restartGame.bind(this);
         this.restart = this.restart.bind(this);
         this.requestPointerLock = this.requestPointerLock.bind(this);
         this.addPointerLockEvents = this.addPointerLockEvents.bind(this);
@@ -76,7 +77,7 @@ export default class UI {
     }
 
     restart() {
-        this.startGame();
+        this.restartGame();
         this.openShop();
     }
 
@@ -107,7 +108,7 @@ export default class UI {
                 break;
         }
 
-        this.scene.ui.updatePlayerLabels();
+        this.updatePlayerLabels();
     }
 
     showRestart() {
@@ -115,15 +116,14 @@ export default class UI {
     }
 
     startGame() {
-        this.scene.gameObjectsService.removeAllGameObjects();
-        this.scene.createPlayer({
-            onCreate: () => {
-                this.updatePlayerLabels();
-            }
-        });
-
         document.getElementById('restart').style.display = 'none';
-        this.scene.ui.updatePlayerLabels();
+        this.updatePlayerLabels();
+    }
+
+    restartGame() {
+        this.scene.level.restartLevel();
+        document.getElementById('restart').style.display = 'none';
+        this.updatePlayerLabels();
     }
 
     openShopOnExitPointerLock() {

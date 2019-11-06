@@ -3,10 +3,17 @@ export default class AbstractLevel {
      * @param {Scene} scene
      */
     constructor(scene) {
-        this.createGlobalLight = this.createGlobalLight.bind(this);
+        this.getLevelId = this.getLevelId.bind(this);
         this.scene = scene;
         this.id = 'unknown-level';
+        this.actionElement = document.getElementById('action');
     }
+
+    update() {}
+    startLevel() {}
+    restartLevel() {}
+    stopLevel() {}
+    onAction() {}
 
     getLevelId() {
         return this.id;

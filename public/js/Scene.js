@@ -15,19 +15,29 @@ export default class Scene {
         this.loadObj = this.loadObj.bind(this);
         this.add = this.add.bind(this);
         this.remove = this.remove.bind(this);
+        this.clearScene = this.clearScene.bind(this);
 
         this.players = {};
         this.renderer = renderer;
         this.scene = new THREE.Scene();
         this.camera = new Camera(this);
-        this.input = new Input();
+        this.input = new Input({ onAction: () => this.level.onAction() });
         this.gameObjectsService = new GameObjectsService(this);
         this.ui = new UI(this);
         this.connection = new Connection(this, 'gohtml.ru');
         this.level = new LevelMap(this);
 
-        this.level.startLevel();
+        this.clearScene();
         this.animate();
+    }
+
+    clearScene() {
+        this.gameObjectsService.removeAllGameObjects();
+        this.createPlayer({
+            onCreate: () => {
+                this.ui.updatePlayerLabels();
+            }
+        });
     }
 
     animate() {
@@ -36,6 +46,7 @@ export default class Scene {
             this.camera.update();
             this.ui.update();
             this.input.update();
+            this.level.update();
             this.connection.send(this.player);
         }
 

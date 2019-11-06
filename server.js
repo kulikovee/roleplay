@@ -49,9 +49,10 @@ wss.on('connection', function connection(ws) {
             console.log('No id set for the connection', ws);
         }
 
+        const backMessage = JSON.stringify({ ...json, messageType: 'updatePlayer' });
         connections
             .filter(c => c && c.__id && c.__id !== json.id && c.__levelId === json.levelId)
-            .forEach(c => c.send({ messageType: 'updatePlayer',...message }));
+            .forEach(c => c.send(backMessage));
     });
 
     ws.on('close', function(connection) {
