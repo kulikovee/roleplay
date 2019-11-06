@@ -28,6 +28,7 @@ if (cfg.ssl) {
 
 const wss = new WebSocketServer({ server: server });
 const connections = [];
+let idSeq = 0;
 
 wss.on('connection', function connection(ws) {
     console.log('New connection');
@@ -35,19 +36,26 @@ wss.on('connection', function connection(ws) {
 
     ws.on('message', function(message) {
         const json = JSON.parse(message);
-        ws.__id = json.id;
+
+        if (json.id) {
+            ws.__id = json.id;
+        }
+
+        if (json.levelId) {
+            ws.__levelId = json.levelId;
+        }
 
         if (!ws.__id) {
-            console.log('Not id for ws', ws);
+            console.log('No id set for the connection', ws);
         }
 
         connections
-            .filter(function (c) { return c && c.__id && c.__id !== json.id; })
-            .forEach(function (c) { return c.send(message); } );
+            .filter(c => c && c.__id && c.__id !== json.id && c.__levelId === json.levelId)
+            .forEach(c => c.send({ messageType: 'updatePlayer',...message }));
     });
 
     ws.on('close', function(connection) {
     });
 
-    ws.send(JSON.stringify({ server: { version: 0.01 } }));
+    ws.send(JSON.stringify({ messageType: 'setId', server: { version: 0.01 }, id: ++idSeq }));
 });
