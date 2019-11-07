@@ -12,7 +12,8 @@ export default class UI {
         this.restart = this.restart.bind(this);
         this.requestPointerLock = this.requestPointerLock.bind(this);
         this.addPointerLockEvents = this.addPointerLockEvents.bind(this);
-        this.openShopOnExitPointerLock = this.openShopOnExitPointerLock.bind(this);
+        this.onPointerLockChange = this.onPointerLockChange.bind(this);
+        this.onFullscreenChange = this.onFullscreenChange.bind(this);
 
         this.scene = scene;
         this.pause = false;
@@ -28,12 +29,6 @@ export default class UI {
             document.getElementById('blocker'),
             document.getElementById('instructions'),
         );
-
-        if ("onpointerlockchange" in document) {
-            document.addEventListener('pointerlockchange', this.openShopOnExitPointerLock, false);
-        } else if ("onmozpointerlockchange" in document) {
-            document.addEventListener('mozpointerlockchange', this.openShopOnExitPointerLock, false);
-        }
     }
 
     update() {
@@ -126,17 +121,6 @@ export default class UI {
         this.updatePlayerLabels();
     }
 
-    openShopOnExitPointerLock() {
-        setTimeout(() => {
-            if(
-                document.pointerLockElement !== document.body
-                && document.mozPointerLockElement !== document.body
-            ) {
-                !this.pause && this.openShop();
-            }
-        }, 100);
-    }
-
     requestPointerLock() {
         const element = document.body;
 
@@ -175,96 +159,73 @@ export default class UI {
         }
     }
 
-    addPointerLockEvents(blocker, instructions) {
-        const element = document.body;
+    onPointerLockChange() {
+        setTimeout(() => {
+            const isPointerLocked = (
+                document.pointerLockElement === document.body
+                || document.mozPointerLockElement === document.body
+                || document.webkitPointerLockElement === document.body
+            );
 
-        if (
-            'pointerLockElement' in document ||
-            'mozRequestPointerLock' in document ||
-            'webkitRequestPointerLock' in document
-        ) {
-            const pointerlockchange = function (event) {
-                if (
-                    document.pointerLockElement === element ||
-                    document.mozPointerLockElement === element ||
-                    document.webkitPointerLockElement === element
-                ) {
-                    blocker.style.display = 'none';
-                } else {
-                    blocker.style.display = '-webkit-box';
-                    blocker.style.display = '-moz-box';
-                    blocker.style.display = 'box';
-
-                    instructions.style.display = '';
-                }
-            };
-
-            const pointerlockerror = function (event) {
+            if (isPointerLocked) {
+                blocker.style.display = 'none';
+            } else {
+                blocker.style.display = 'inline-block';
                 instructions.style.display = '';
-            };
 
-            document.addEventListener('pointerlockchange', pointerlockchange, false);
-            document.addEventListener(
-                'mozpointerlockchange',
-                pointerlockchange,
-                false
-            );
-            document.addEventListener(
-                'webkitpointerlockchange',
-                pointerlockchange,
-                false
-            );
+                this.openShop();
+            }
+        }, 100);
+    }
+
+    onFullscreenChange(event) {
+        if (
+            document.fullscreenElement === document.body
+            || document.mozFullScreenElement === document.body
+            || document.webkitFullscreenElement === document.body
+        ) {
+            document.removeEventListener('fullscreenchange', this.onFullscreenChange);
+        }
+    }
+
+    addPointerLockEvents(blocker, instructions) {
+        if (
+            'pointerLockElement' in document
+            || 'onpointerlockchange' in document
+            || 'mozRequestPointerLock' in document
+            || 'webkitRequestPointerLock' in document
+        ) {
+            document.addEventListener('pointerlockchange', this.onPointerLockChange, false);
+            document.addEventListener('mozpointerlockchange', this.onPointerLockChange, false );
+            document.addEventListener('webkitpointerlockchange', this.onPointerLockChange, false );
         } else {
             instructions.innerHTML +=
                 'Your browser doesn\'t seem to support Pointer Lock API<br>';
         }
 
         if (
-            'fullscreenElement' in document ||
-            'mozRequestFullScreenElement' in document ||
-            'webkitFullscreenElement' in document
+            'fullscreenElement' in document
+            || 'mozRequestFullScreenElement' in document
+            || 'webkitFullscreenElement' in document
         ) {
             blocker.addEventListener(
                 'click',
-                function () {
-                    document.addEventListener(
-                        'fullscreenchange',
-                        fullscreenchange,
-                        false
-                    );
-                    document.addEventListener(
-                        'mozfullscreenchange',
-                        fullscreenchange,
-                        false
-                    );
-                    document.addEventListener(
-                        'webkitfullscreenchange',
-                        fullscreenchange,
-                        false
-                    );
+                () => {
+                    document.addEventListener('fullscreenchange', this.onFullscreenChange, false);
+                    document.addEventListener('mozfullscreenchange', this.onFullscreenChange, false);
+                    document.addEventListener('webkitfullscreenchange', this.onFullscreenChange, false);
 
-                    element.requestFullscreen =
-                        element.requestFullscreen ||
-                        element.webkitRequestFullscreen ||
-                        element.mozRequestFullScreen;
+                    document.body.requestFullscreen =
+                        document.body.requestFullscreen ||
+                        document.body.webkitRequestFullscreen ||
+                        document.body.mozRequestFullScreen;
 
-                    element.requestFullscreen();
+                    document.body.requestFullscreen();
                 },
                 false
             );
-
-            const fullscreenchange = function (event) {
-                if (
-                    document.fullscreenElement === element ||
-                    document.mozFullScreenElement === element ||
-                    document.webkitFullscreenElement === element
-                ) {
-                    document.removeEventListener('fullscreenchange', fullscreenchange);
-                }
-            };
         } else {
-            instructions.innerHTML +=
-                'Your browser doesn\'t seem to support Fullscreen API<br>';
+            instructions.innerHTML += 'Your browser doesn\'t seem to support Fullscreen API<br>';
         }
     }
 }

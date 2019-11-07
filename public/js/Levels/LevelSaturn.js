@@ -19,7 +19,7 @@ export default class LevelEarth extends AbstractLevel {
         this.scene.add(this.globalLight);
         this.scene.add(this.enviroment);
 
-        this.id = 'earth';
+        this.id = 'saturn';
         this.showAction();
         this.startLevel();
     }
@@ -31,7 +31,7 @@ export default class LevelEarth extends AbstractLevel {
         const pivot = new THREE.Object3D();
 
         this.scene.loadObj({
-            baseUrl: './public/assets/earth',
+            baseUrl: './public/assets/saturn',
             callback: (object) => {
                 object.scale.set(500, 500, 500);
                 pivot.add(object);
@@ -42,14 +42,14 @@ export default class LevelEarth extends AbstractLevel {
     }
 
     startLevel() {
-        this.scene.player.position.set(0, 300, 0)
+        this.scene.player.position.set(0, 1800, 0)
     }
 
     stopLevel() {
         this.scene.remove(this.globalLight);
         this.scene.remove(this.enviroment);
-        this.scene.player.position.set(-3000, 1500, -3500);
-        this.scene.player.rotation.set(0, -90, 0);
+        this.scene.player.position.set(3800, 480, 2500);
+        this.scene.player.rotation.set(0, 0, 0);
     }
 
     onAction() {
@@ -64,7 +64,7 @@ export default class LevelEarth extends AbstractLevel {
         pointLight.position.set(100, 1250, 250);
         pivot.add(pointLight);
 
-        var ambientLight = new THREE.AmbientLight(0x808080);
+        var ambientLight = new THREE.AmbientLight(0x303030);
         pivot.add(ambientLight);
 
         return pivot;

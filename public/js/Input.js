@@ -48,6 +48,7 @@ export default class Input {
             switch (e.which) {
                 case 13:
                     this.params.onAction && this.params.onAction();
+                    break;
                 case 87:
                 case 38:
                     this.vertical = 1;

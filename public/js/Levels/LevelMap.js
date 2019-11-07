@@ -1,5 +1,7 @@
 import AbstractLevel from './AbstractLevel.js';
 import LevelEarth from './LevelEarth.js';
+import LevelSaturn from './LevelSaturn.js';
+import LevelMars from './LevelMars.js';
 import { AI } from '../GameObjects.js';
 
 export default class LevelMap extends AbstractLevel {
@@ -26,6 +28,8 @@ export default class LevelMap extends AbstractLevel {
         this.skybox = this.createSkybox();
         this.globalLight = this.createGlobalLight();
         this.earthPosition = new THREE.Vector3(-3600, 1500, -3500);
+        this.saturnPosition = new THREE.Vector3(3900, 400, 3600);
+        this.marsPosition = new THREE.Vector3(4000, 1200, -3800);
 
         this.scene.add(this.enviroment);
         this.scene.add(this.skybox);
@@ -35,10 +39,16 @@ export default class LevelMap extends AbstractLevel {
     }
 
     update() {
-        if (this.scene.player && this.scene.player.position.distanceTo(this.earthPosition) < 1500) {
-            this.showAction('moveToEarth');
-        } else {
-            this.actionElement.innerHTML = '';
+        if (this.scene.player) {
+            if (this.scene.player.position.distanceTo(this.earthPosition) < 1500) {
+                this.showAction('moveToEarth');
+            } else if (this.scene.player.position.distanceTo(this.saturnPosition) < 1500) {
+                this.showAction('moveToSaturn');
+            } else if (this.scene.player.position.distanceTo(this.marsPosition) < 1500) {
+                this.showAction('moveToMars');
+            } else {
+                this.actionElement.innerHTML = '';
+            }
         }
     }
 
@@ -71,6 +81,17 @@ export default class LevelMap extends AbstractLevel {
             case 'moveToEarth':
                 this.stopLevel();
                 this.scene.level = new LevelEarth(this.scene);
+                break;
+
+            case 'moveToSaturn':
+                this.stopLevel();
+                this.scene.level = new LevelSaturn(this.scene);
+                break;
+
+            case 'moveToMars':
+                this.stopLevel();
+                this.scene.level = new LevelMars(this.scene);
+                break;
         }
     }
 
@@ -79,8 +100,14 @@ export default class LevelMap extends AbstractLevel {
 
         switch(type) {
             case 'moveToEarth':
-                this.actionElement.innerHTML = 'Press "Enter" to move on "Earth"';
-                break
+                this.actionElement.innerHTML = 'Press "Enter" to visit "Earth"';
+                break;
+            case 'moveToSaturn':
+                this.actionElement.innerHTML = 'Press "Enter" to visit "Saturn"';
+                break;
+            case 'moveToMars':
+                this.actionElement.innerHTML = 'Press "Enter" to visit "Mars"';
+                break;
         }
     }
 

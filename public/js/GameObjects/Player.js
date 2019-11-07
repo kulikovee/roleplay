@@ -41,7 +41,7 @@ export default class Player extends FiringUnit {
     }
 
     getLevel() {
-        return Math.floor(Math.sqrt(this.params.experience / 1000)) + 1;
+        return Math.floor(Math.sqrt(this.params.experience / 100)) + 1;
     }
 
     getMovingDirection() {
