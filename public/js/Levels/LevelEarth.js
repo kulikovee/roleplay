@@ -12,9 +12,13 @@ export default class LevelEarth extends AbstractLevel {
         this.stopLevel = this.stopLevel.bind(this);
         this.startLevel = this.startLevel.bind(this);
         this.onAction = this.onAction.bind(this);
+        this.createEnvironment = this.createEnvironment.bind(this);
 
         this.globalLight = this.createGlobalLight();
+        this.enviroment = this.createEnvironment();
+
         this.scene.add(this.globalLight);
+        this.scene.add(this.enviroment);
 
         this.id = 'earth';
         this.showAction();
@@ -23,18 +27,48 @@ export default class LevelEarth extends AbstractLevel {
     update() {
     }
 
-    stopLevel() {
-        this.scene.remove(this.globalLight);
+    createEnvironment() {
+        const pivot = new THREE.Object3D();
+
+        this.scene.loadObj({
+            baseUrl: './public/assets/earth',
+            callback: (object) => {
+                object.scale.set(750, 750, 750);
+                pivot.add(object);
+            }
+        });
+
+        return pivot;
     }
 
     startLevel() {
         this.scene.ui.restartGame();
+        this.scene.player.position.set(0, 0, 0)
+    }
+
+    stopLevel() {
+        this.scene.remove(this.globalLight);
+        this.scene.remove(this.enviroment);
+        this.scene.player.position.set(-3000, 1500, -3500);
+        this.scene.player.rotation.set(0, -90, 0);
     }
 
     onAction() {
-        console.log('onAction Earth');
         this.stopLevel();
         this.scene.level = new LevelMap(this.scene);
+    }
+
+    createGlobalLight() {
+        const pivot = new THREE.Object3D();
+
+        const pointLight = new THREE.PointLight(0xffffff);
+        pointLight.position.set(100, 1250, 250);
+        pivot.add(pointLight);
+
+        var ambientLight = new THREE.AmbientLight(0x808080);
+        pivot.add(ambientLight);
+
+        return pivot;
     }
 
     showAction() {

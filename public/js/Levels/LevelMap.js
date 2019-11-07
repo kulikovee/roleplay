@@ -35,7 +35,7 @@ export default class LevelMap extends AbstractLevel {
     }
 
     update() {
-        if (this.scene.player && this.scene.player.position.distanceTo(this.earthPosition) < 3000) {
+        if (this.scene.player && this.scene.player.position.distanceTo(this.earthPosition) < 1500) {
             this.showAction('moveToEarth');
         } else {
             this.actionElement.innerHTML = '';
