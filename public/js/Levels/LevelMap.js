@@ -1,7 +1,4 @@
 import AbstractLevel from './AbstractLevel.js';
-import LevelEarth from './LevelEarth.js';
-import LevelSaturn from './LevelSaturn.js';
-import LevelMars from './LevelMars.js';
 import { AI } from '../GameObjects.js';
 
 export default class LevelMap extends AbstractLevel {
@@ -14,9 +11,6 @@ export default class LevelMap extends AbstractLevel {
         this.startLevel = this.startLevel.bind(this);
         this.stopLevel = this.stopLevel.bind(this);
         this.restartLevel = this.restartLevel.bind(this);
-        this.onAction = this.onAction.bind(this);
-        this.showAction = this.showAction.bind(this);
-        this.update = this.update.bind(this);
         this.createBadGuyByTimeout = this.createBadGuyByTimeout.bind(this);
         this.createBadGuy = this.createBadGuy.bind(this);
         this.createEnvironment = this.createEnvironment.bind(this);
@@ -27,29 +21,13 @@ export default class LevelMap extends AbstractLevel {
         this.enviroment = this.createEnvironment();
         this.skybox = this.createSkybox();
         this.globalLight = this.createGlobalLight();
-        this.earthPosition = new THREE.Vector3(-3600, 1500, -3500);
-        this.saturnPosition = new THREE.Vector3(3900, 400, 3600);
-        this.marsPosition = new THREE.Vector3(4000, 1200, -3800);
 
         this.scene.add(this.enviroment);
         this.scene.add(this.skybox);
         this.scene.add(this.globalLight);
+        this.badGuys = [];
 
         this.startLevel();
-    }
-
-    update() {
-        if (this.scene.player) {
-            if (this.scene.player.position.distanceTo(this.earthPosition) < 1500) {
-                this.showAction('moveToEarth');
-            } else if (this.scene.player.position.distanceTo(this.saturnPosition) < 1500) {
-                this.showAction('moveToSaturn');
-            } else if (this.scene.player.position.distanceTo(this.marsPosition) < 1500) {
-                this.showAction('moveToMars');
-            } else {
-                this.actionElement.innerHTML = '';
-            }
-        }
     }
 
     startLevel() {
@@ -76,50 +54,12 @@ export default class LevelMap extends AbstractLevel {
         }
     }
 
-    onAction() {
-        switch(this.actionElement.getAttribute('action-type')) {
-            case 'moveToEarth':
-                this.stopLevel();
-                this.scene.level = new LevelEarth(this.scene);
-                break;
-
-            case 'moveToSaturn':
-                this.stopLevel();
-                this.scene.level = new LevelSaturn(this.scene);
-                break;
-
-            case 'moveToMars':
-                this.stopLevel();
-                this.scene.level = new LevelMars(this.scene);
-                break;
-        }
-    }
-
-    showAction(type) {
-        this.actionElement.setAttribute('action-type', type);
-
-        switch(type) {
-            case 'moveToEarth':
-                this.actionElement.innerHTML = 'Press "Enter" to visit "Earth"';
-                break;
-            case 'moveToSaturn':
-                this.actionElement.innerHTML = 'Press "Enter" to visit "Saturn"';
-                break;
-            case 'moveToMars':
-                this.actionElement.innerHTML = 'Press "Enter" to visit "Mars"';
-                break;
-        }
-    }
-
     createEnvironment() {
         const pivot = new THREE.Object3D();
 
         this.scene.loadObj({
-            baseUrl: './public/assets/shades',
-            callback: (object) => {
-                object.scale.set(750, 750, 750);
-                pivot.add(object);
-            }
+            baseUrl: './public/assets/hall',
+            callback: (object) => pivot.add(object)
         });
 
         return pivot;
@@ -148,7 +88,7 @@ export default class LevelMap extends AbstractLevel {
         const player = this.scene.player,
             badGuyTimeout = 5000 - this.scene.player.getLevel() * 500;
 
-        if (player && !this.scene.ui.pause && (Date.now() - this.lastBadGuyCreated >= badGuyTimeout)) {
+        if (player && !this.scene.ui.pause && this.badGuys.length < 5 && (Date.now() - this.lastBadGuyCreated >= badGuyTimeout)) {
             this.lastBadGuyCreated = Date.now();
             this.createBadGuy();
         }
@@ -168,17 +108,17 @@ export default class LevelMap extends AbstractLevel {
                     speed: 0.04 + level * 0.01 + player.params.speed * 0.5,
                     damage: 5 + level * 5,
                     hp: 140 + level * 30,
-                    fire: () => gameObjectsService.fire(badGuy),
+                    fire: () => null, // gameObjectsService.fire(badGuy),
                     destroy: () => gameObjectsService.destroyGameObject(badGuy),
                 }));
 
                 badGuy.position.set(
-                    player.position.x + 1000 * (Math.random() - 0.5),
-                    player.position.y + 1000 * (Math.random() - 0.5),
-                    player.position.z + 1000 * (Math.random() - 0.5)
+                    player.position.x + 100 * (Math.random() - 0.5),
+                    player.position.y,
+                    player.position.z + 100 * (Math.random() - 0.5)
                 );
 
-                badGuy.object.scale.set(2.5, 2.5, 2.5);
+                this.badGuys.push(badGuy);
             }
         });
     }

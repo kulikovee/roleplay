@@ -41,18 +41,6 @@ input[type=button] {
     right: 8px;
 }
 
-#cross {
-    position: absolute;
-    background: rgba(155, 15, 0, 0.5);
-    left: -10px;
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    overflow: hidden;
-    margin-left: -5px;
-    margin-top: -5px;
-}
-
 #restart {
     left: 50%;
     top: 50%;

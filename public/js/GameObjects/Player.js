@@ -32,7 +32,6 @@ export default class Player extends FiringUnit {
             );
         }
 
-        object.rotateX(input.look.vertical / 2500);
         acceleration.add(this.getMovingDirection().multiplyScalar(speed));
     }
 

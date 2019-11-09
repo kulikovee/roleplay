@@ -148,7 +148,7 @@ export default class Scene {
         };
 
         return this.loadObj({
-            baseUrl: './public/assets/starship',
+            baseUrl: './public/assets/player',
             callback: (object) => {
                 this.players[id] = object;
                 this.add(object);
@@ -166,31 +166,12 @@ export default class Scene {
         const gameObjectsService = this.gameObjectsService;
 
         return this.loadObj({
-            baseUrl: './public/assets/starship',
+            baseUrl: './public/assets/player',
             callback: (object) => {
-                const crossPivot = new THREE.Object3D();
-
-                crossPivot.name = 'crossPivot';
-                crossPivot.position.set(0, 0, 500);
-
-                object.crossPivot = crossPivot;
-                object.add(crossPivot);
-
-                const createEmissiveLight = isRight => this.createCube({
-                    ...{ x: 0.4, y: 0.1, z: 0.1 },
-                    emissive: '#55aaff',
-                    position: { x: isRight ? 0.35 : -0.35, y: 1, z: -1.35 },
-                    rotation: {},
-                    noScene: true,
-                });
-
-                object.add(createEmissiveLight(false));
-                object.add(createEmissiveLight(true));
-
                 const player = gameObjectsService.hookGameObject(new Player({
                     object,
                     input: this.input,
-                    speed: 0.09,
+                    speed: 0.003,
                     score: 500,
                     onDamageTaken: () => {
                         this.ui.updatePlayerLabels();

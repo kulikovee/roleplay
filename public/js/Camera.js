@@ -17,32 +17,7 @@ export default class Camera {
     update() {
         if (!this.player) return;
 
-        const cameraPosition = this.player.position.clone();
-
-        cameraPosition.sub(
-            this.player.getDirection(
-                new THREE.Vector3(0, 0, window.innerHeight / 20)
-            )
-        );
-
-        cameraPosition.y += 3;
-        let distance = this.camera.position.distanceTo(cameraPosition);
-
-        if (distance < 1) {
-            distance = 1;
-        }
-
-        const speed = (25 / distance + 1) || 1;
-
-        if (this.camera && this.camera.position && cameraPosition) {
-            this.camera.position.sub(
-                this.camera.position
-                    .clone()
-                    .sub(cameraPosition)
-                    .multiplyScalar(1 / speed)
-            );
-        }
-
+        this.camera.position.set(this.player.position.x + 5, this.player.position.y + 10, this.player.position.z + 5);
         this.camera.lookAt(this.player.object.position);
     }
 

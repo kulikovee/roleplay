@@ -18,7 +18,6 @@ export default class UI {
         this.scene = scene;
         this.pause = false;
 
-        this.cross = document.getElementById('cross');
         document.getElementById('close-shop').onclick = () => this.closeShop();
         document.getElementById('buy-hp').onclick = () => this.buy('hp');
         document.getElementById('buy-speed').onclick = () => this.buy('speed');
@@ -32,15 +31,6 @@ export default class UI {
     }
 
     update() {
-        if (this.scene.player) {
-            const crossPivot = this.scene.player.object.crossPivot;
-
-            if (crossPivot) {
-                const position = this.scene.camera.toScreenPosition(crossPivot);
-                this.cross.style.left = `${position.x}px`;
-                this.cross.style.top = `${position.y}px`;
-            }
-        }
     }
 
     updatePlayerLabels() {
