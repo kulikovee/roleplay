@@ -26,8 +26,6 @@ export default class Scene {
         this.ui = new UI(this);
         this.connection = new Connection(this, 'gohtml.ru');
         this.level = new LevelMap(this);
-        this.clock = new THREE.Clock();
-        this.mixer = null;
 
         this.clearScene();
         this.animate();
@@ -50,8 +48,6 @@ export default class Scene {
             this.input.update();
             this.level.update();
             this.connection.send(this.player);
-
-            if (this.mixer) this.mixer.update(this.clock.getDelta());
         }
 
         this.renderer.render(this.scene, this.camera.camera);
@@ -145,7 +141,7 @@ export default class Scene {
         });
     }
 
-    loadObjGltf(params) {
+    loadGLTF(params) {
         const loader = new THREE.GLTFLoader();
 
         loader.load(params.baseUrl, (gltf) => {
@@ -178,17 +174,18 @@ export default class Scene {
     }) {
         const gameObjectsService = this.gameObjectsService;
 
-        return this.loadObjGltf({
+        return this.loadGLTF({
             baseUrl: './public/assets/gltf/player.glb',
             callback: (gltf) => {
-                this.mixer = new THREE.AnimationMixer(gltf.scene);
-                var action = this.mixer.clipAction(gltf.animations[0]);
-                action.play();
+                // var helper = new THREE.SkeletonHelper(gltf.scene);
+                // helper.material.linewidth = 3;
+                // this.add(helper);
 
                 const player = gameObjectsService.hookGameObject(new Player({
+                    gltf,
                     object: gltf.scene,
                     input: this.input,
-                    speed: 0.003,
+                    speed: 0.05,
                     score: 500,
                     onDamageTaken: () => {
                         this.ui.updatePlayerLabels();

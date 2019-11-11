@@ -4,7 +4,7 @@ export default class MovingGameObject extends GameObject {
     constructor(params = {}) {
         super({
             speed: 0.01,
-            throttling: 0.95,
+            throttling: 0.5,
             acceleration: new THREE.Vector3(),
             ...params
         });
