@@ -22,12 +22,12 @@ export default class MovingGameObject extends GameObject {
         this.position.add(acceleration.multiplyScalar(throttling));
     }
 
-    getUp() {
-        return this.getDirection(new THREE.Vector3(0, 1, 0));
-    }
-
     getLeft() {
         return this.getDirection(new THREE.Vector3(1, 0, 0));
+    }
+
+    getUp() {
+        return this.getDirection(new THREE.Vector3(0, 1, 0));
     }
 
     getForward() {

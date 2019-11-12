@@ -4,7 +4,7 @@ export default class FiringUnit extends Unit {
     constructor(params = {}) {
         super({
             fireRate: 40,
-            fireFlySpeed: 3,
+            fireFlySpeed: 0.3,
             ...params
         });
 
@@ -13,6 +13,15 @@ export default class FiringUnit extends Unit {
 
         this.fire = this.fire.bind(this);
         this.update = this.update.bind(this);
+        this.getFireInitialPosition = this.getFireInitialPosition.bind(this);
+    }
+
+    getFireInitialPosition() {
+        return this.position.clone().add(
+            this.getUp()
+                .multiplyScalar(1.5)
+                .add(this.getForward().multiplyScalar(0.3))
+        );
     }
 
     update() {

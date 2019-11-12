@@ -31,17 +31,31 @@ export default class GameObjectsService {
      * @param {THREE.Object3D} firingGameObject
      */
     fire(firingGameObject) {
+        const createLightCube = left => this.scene.createCube({
+            x: 0.02,
+            y: 0.02,
+            z: 0.3,
+            emissive: '#ff0000',
+            position: new THREE.Vector3(0.05 - Number(left) * 0.1, 0, 0),
+            noScene: true,
+        });
+
+        const object = new THREE.Object3D();
+
+        object.position.copy(firingGameObject.getFireInitialPosition());
+        object.rotation.set(
+            firingGameObject.rotation.x,
+            firingGameObject.rotation.y,
+            firingGameObject.rotation.z,
+        );
+
+        object.add(createLightCube(true));
+        object.add(createLightCube(false));
+
+        this.scene.add(object);
+
         const fireGameObject = this.hookGameObject(new Fire({
-            object: this.scene.createCube({
-                x: 0.2,
-                y: 0.2,
-                z: 3,
-                emissive: '#aaffaa',
-                position: firingGameObject.object.position
-                    .clone()
-                    .add(firingGameObject.getForward().multiplyScalar(3)),
-                rotation: firingGameObject.object.rotation
-            }),
+            object,
             throttling: 1,
             speed: firingGameObject.params.fireFlySpeed,
             damage: firingGameObject.params.damage,
