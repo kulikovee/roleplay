@@ -3,15 +3,13 @@ import FiringUnit from './FiringUnit.js';
 export default class Player extends FiringUnit {
     constructor(params = {}) {
         super({
-            speed: 1,
+            speed: 0.05,
             fireRate: 30,
             damage: 50,
             hp: 100,
-            score: 0,
+            score: 500,
             ...params,
         });
-
-        console.log('Player object', params.gltf);
 
         const findAnimation = name => this.params.gltf.animations.find(animation => animation.name === name);
         this.clock = new THREE.Clock();

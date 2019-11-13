@@ -185,8 +185,6 @@ export default class Scene {
                     gltf,
                     object: gltf.scene,
                     input: this.input,
-                    speed: 0.05,
-                    score: 500,
                     onDamageTaken: () => {
                         this.ui.updatePlayerLabels();
                         onDamageTaken();
