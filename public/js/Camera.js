@@ -7,13 +7,14 @@ export default class Camera {
         const ratio = this.getWidth() / this.getHeight();
         this.camera = new THREE.PerspectiveCamera(45, ratio, 1, 100000);
         this.camera.position.set(5, 3, 15);
-
+        this.deltaY = 10;
         // this.controls = new THREE.OrbitControls(this.camera, this.scene.renderer.renderer.domElement);
 
         this.toScreenPosition = this.toScreenPosition.bind(this);
         this.update = this.update.bind(this);
         this.getWidth = this.getWidth.bind(this);
         this.getHeight = this.getHeight.bind(this);
+        this.addY = this.addY.bind(this);
     }
 
     update() {
@@ -21,8 +22,14 @@ export default class Camera {
 
         if (!player) return;
 
-        this.camera.position.set(player.position.x + 5, player.position.y + 10, player.position.z + 5);
+        this.camera.position.set(player.position.x + 5, player.position.y + this.deltaY, player.position.z + 5);
         this.camera.lookAt(player.position);
+    }
+
+    addY(y) {
+        if (this.deltaY + y > 1 && this.deltaY + y < 10) {
+            this.deltaY += y;
+        }
     }
 
     getWidth() {

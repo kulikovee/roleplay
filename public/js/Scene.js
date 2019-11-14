@@ -21,7 +21,10 @@ export default class Scene {
         this.renderer = renderer;
         this.scene = new THREE.Scene();
         this.camera = new Camera(this);
-        this.input = new Input({ onAction: () => this.level.onAction() });
+        this.input = new Input({
+            onAction: () => this.level.onAction(),
+            onZoom: zoom => this.camera.addY(zoom),
+        });
         this.gameObjectsService = new GameObjectsService(this);
         this.ui = new UI(this);
         this.connection = new Connection(this, 'gohtml.ru');
@@ -182,7 +185,7 @@ export default class Scene {
                 // this.add(helper);
 
                 const player = gameObjectsService.hookGameObject(new Player({
-                    gltf,
+                    animations: gltf.animations,
                     object: gltf.scene,
                     input: this.input,
                     onDamageTaken: () => {
@@ -202,6 +205,7 @@ export default class Scene {
                         this.ui.pause = true;
                         onDie();
                     },
+                    attack: () => null,
                     fire: () => gameObjectsService.fire(player),
                     destroy: () => gameObjectsService.destroyGameObject(player),
                 }));

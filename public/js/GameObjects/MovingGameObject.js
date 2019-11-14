@@ -1,6 +1,6 @@
-import GameObject from './GameObject.js';
+import AnimatedGameObject from './AnimatedGameObject.js';
 
-export default class MovingGameObject extends GameObject {
+export default class MovingGameObject extends AnimatedGameObject {
     constructor(params = {}) {
         super({
             speed: 0.01,
@@ -14,10 +14,11 @@ export default class MovingGameObject extends GameObject {
         this.getLeft = this.getLeft.bind(this);
         this.getForward = this.getForward.bind(this);
         this.getDirection = this.getDirection.bind(this);
+        this.getScalarAcceleration = this.getScalarAcceleration.bind(this);
     }
 
     update() {
-        GameObject.prototype.update.call(this);
+        AnimatedGameObject.prototype.update.call(this);
         const { acceleration, throttling } = this.params;
         this.position.add(acceleration.multiplyScalar(throttling));
     }
@@ -45,5 +46,11 @@ export default class MovingGameObject extends GameObject {
         direction.applyMatrix4(matrix);
 
         return direction;
+    }
+
+    getScalarAcceleration() {
+        return this.params.acceleration.toArray()
+            .map(Math.abs)
+            .reduce((r, v) => r + v, 0)
     }
 }

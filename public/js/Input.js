@@ -3,6 +3,8 @@ export default class Input {
         this.params = params;
         this.vertical = 0;
         this.horizontal = 0;
+        this.attack1 = false;
+        this.attack2 = false;
         this.look = {
             vertical: 0,
             horizontal: 0
@@ -18,11 +20,13 @@ export default class Input {
 
     createInput() {
         document.addEventListener('mousedown', (e) => {
-            this.mouseLeft = 1;
+            if (e.which === 1) { this.attack1 = true; }
+            if (e.which === 3) { this.attack2 = true; }
         });
 
         document.addEventListener('mouseup', (e) => {
-            this.mouseLeft = 0;
+            if (e.which === 1) { this.attack1 = false; }
+            if (e.which === 3) { this.attack2 = false; }
         });
 
         let timeout;
@@ -110,6 +114,8 @@ export default class Input {
                     break;
             }
         });
+
+        window.addEventListener('wheel', e => this.params.onZoom && this.params.onZoom(e.deltaY / 100));
 
         return this;
     }
