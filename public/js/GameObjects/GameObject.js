@@ -13,6 +13,9 @@ export default class GameObject {
         this.update = this.update.bind(this);
         this.dispatchEvent = this.dispatchEvent.bind(this);
         this.addEventListener = this.addEventListener.bind(this);
+        this.getChildByName = this.getChildByName.bind(this);
+        this.getChildPosition = this.getChildPosition.bind(this);
+        this.getChildRotation = this.getChildRotation.bind(this);
     }
 
     update() {
@@ -40,5 +43,26 @@ export default class GameObject {
                 this.events[eventName] = [callback];
             }
         }
+    }
+
+    getChildByName(name) {
+        return this.object.getObjectByName(name, true);
+    }
+
+    getChildPosition(name) {
+        const child = this.getChildByName(name);
+        child.updateMatrixWorld(true);
+
+        return new THREE.Vector3().setFromMatrixPosition(child.matrixWorld);
+    }
+
+    getChildRotation(name) {
+        const child = this.getChildByName(name);
+        child.updateMatrixWorld(true);
+
+        let target = new THREE.Quaternion();
+        child.getWorldQuaternion(target);
+
+        return target;
     }
 }

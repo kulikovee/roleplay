@@ -4,8 +4,9 @@ export default class MovingGameObject extends AnimatedGameObject {
     constructor(params = {}) {
         super({
             speed: 0.01,
-            throttling: 0.5,
+            throttling: new THREE.Vector3(0.5, 0.95, 0.5),
             acceleration: new THREE.Vector3(),
+            mas: 0,
             ...params
         });
 
@@ -20,7 +21,21 @@ export default class MovingGameObject extends AnimatedGameObject {
     update() {
         AnimatedGameObject.prototype.update.call(this);
         const { acceleration, throttling } = this.params;
-        this.position.add(acceleration.multiplyScalar(throttling));
+
+        if (this.params.mas) {
+            if (this.position.y > 0) {
+                acceleration.y -= 0.01;
+            } else if (acceleration.y < 0) {
+                acceleration.y = 0;
+                this.position.y = 0;
+            }
+        }
+
+        acceleration.x *= throttling.x;
+        acceleration.y *= throttling.y;
+        acceleration.z *= throttling.z;
+
+        this.position.add(acceleration);
     }
 
     getLeft() {

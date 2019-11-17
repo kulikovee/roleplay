@@ -43,11 +43,7 @@ export default class GameObjectsService {
         const object = new THREE.Object3D();
 
         object.position.copy(firingGameObject.getFireInitialPosition());
-        object.rotation.set(
-            firingGameObject.rotation.x,
-            firingGameObject.rotation.y,
-            firingGameObject.rotation.z,
-        );
+        object.quaternion.copy(firingGameObject.getFireInitialRotation());
 
         object.add(createLightCube(true));
         object.add(createLightCube(false));
@@ -56,7 +52,7 @@ export default class GameObjectsService {
 
         const fireGameObject = this.hookGameObject(new Fire({
             object,
-            throttling: 1,
+            throttling: new THREE.Vector3(1,1,1),
             speed: firingGameObject.params.fireFlySpeed,
             damage: firingGameObject.params.damage,
             parent: firingGameObject,
