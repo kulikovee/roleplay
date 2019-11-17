@@ -27,7 +27,7 @@ export default class Camera {
     }
 
     addY(y) {
-        if (this.deltaY + y > 1 && this.deltaY + y < 10) {
+        if (this.deltaY + y > 1 && this.deltaY + y < 15) {
             this.deltaY += y;
         }
     }

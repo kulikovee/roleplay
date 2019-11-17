@@ -25,9 +25,11 @@ export default class MovingGameObject extends AnimatedGameObject {
         if (this.params.mas) {
             if (this.position.y > 0) {
                 acceleration.y -= 0.01;
-            } else if (acceleration.y < 0) {
+                this.animationState.isJump = true;
+            } else if (acceleration.y <= 0) {
                 acceleration.y = 0;
                 this.position.y = 0;
+                this.animationState.isJump = false;
             }
         }
 

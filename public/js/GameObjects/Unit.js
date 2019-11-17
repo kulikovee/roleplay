@@ -30,7 +30,7 @@ export default class Unit extends MovingGameObject {
 
         if (this.shouldAttack && this.params.attack && this.isAttackReleased()) {
             if (this.animations.attack) {
-                this.playAnimation(this.animations.attack);
+                this.animationState.isAttack = true;
             }
 
             this.isAttack = true;
@@ -40,10 +40,12 @@ export default class Unit extends MovingGameObject {
         }
 
         if (this.isAttackReleased()) {
+            this.animationState.isAttack = false;
+
             if (this.getScalarAcceleration() > 0.02) {
-                this.animations.run && this.playAnimation(this.animations.run);
+                this.animationState.isRun = true;
             } else {
-                this.animations.stand && this.playAnimation(this.animations.stand);
+                this.animationState.isRun = false;
             }
         }
     }

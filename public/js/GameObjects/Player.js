@@ -14,19 +14,21 @@ export default class Player extends FiringUnit {
             ...params,
         });
 
+        console.log('Player', this);
+
         this.update = this.update.bind(this);
         this.getExperience = this.getExperience.bind(this);
         this.getLevel = this.getLevel.bind(this);
-        this.getMovingDirection = this.getMovingDirection.bind(this);
+        this.getMovingAcceleration = this.getMovingAcceleration.bind(this);
         this.getFireInitialPosition = this.getFireInitialPosition.bind(this);
         this.getFireInitialRotation = this.getFireInitialRotation.bind(this);
+        this.isGrounded = this.isGrounded.bind(this);
     }
 
     update() {
         FiringUnit.prototype.update.call(this);
 
         const { input, object, acceleration, speed } = this.params;
-
 
         if (input.attack1) {
             this.attack();
@@ -36,6 +38,12 @@ export default class Player extends FiringUnit {
             this.fire();
         }
 
+        this.animationState.isRotateLeft = input.look.horizontal < 0;
+        this.animationState.isRotateRight = input.look.horizontal > 0;
+        this.animationState.isWalkLeft = this.params.input.horizontal === -1;
+        this.animationState.isWalkRight = this.params.input.horizontal === 1;
+        this.animationState.isWalkBack = this.params.input.vertical === -1;
+
         if (input.look.horizontal) {
             object.rotateOnWorldAxis(
                 new THREE.Vector3(0, 1, 0),
@@ -43,7 +51,7 @@ export default class Player extends FiringUnit {
             );
         }
 
-        acceleration.add(this.getMovingDirection().multiplyScalar(speed));
+        acceleration.add(this.getMovingAcceleration());
     }
 
     getFireInitialPosition() {
@@ -68,13 +76,22 @@ export default class Player extends FiringUnit {
         return Math.floor(Math.sqrt(this.params.experience / 100)) + 1;
     }
 
-    getMovingDirection() {
-        return this.getDirection(
-            new THREE.Vector3(
-                -this.params.input.horizontal,
-                Number(this.params.input.space && this.position.y === 0) * 4,
-                this.params.input.vertical
-            )
+    isGrounded() {
+        return this.position.y === 0;
+    }
+
+    getMovingAcceleration() {
+        const { speed, input: { horizontal, vertical, space } } = this.params;
+
+        const addForward = (
+            vertical > 0
+                ? speed
+                : (vertical < 0 ? -speed * 0.65 : 0)
         );
+
+        const addSide = -horizontal * speed * 0.65;
+        const addUp = Number(space && this.isGrounded()) * 0.25;
+
+        return this.getDirection(new THREE.Vector3(addSide, addUp, addForward));
     }
 }

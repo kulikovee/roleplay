@@ -1,69 +1,83 @@
 import GameObject from './GameObject.js';
 
+const animationNames = {
+    stand: 'Stand',
+    run: 'Run',
+    jump: 'Jump',
+    attack: 'Attack',
+    rotateLeft: 'Rotate Left',
+    rotateRight: 'Rotate Right',
+    walkLeft: 'Walk Left',
+    walkRight: 'Walk Right',
+    walkBack: 'Walk Back',
+};
+
 export default class AnimatedGameObject extends GameObject {
     constructor(params = {}) {
-        super({
-            animationKeys: {
-                stand: 'Stand',
-                run: 'Run',
-                jump: 'Jump',
-                attack: 'Attack',
-            },
-            ...params
-        });
+        super({ animationNames: { ...animationNames }, ...params });
+
+        this.animationState = {
+            isRun: false,
+            isRotateLeft: false,
+            isRotateRight: false,
+            isAttack: false,
+            isJump: false,
+            isWalkRight: false,
+            isWalkLeft: false,
+        };
 
         this.clock = new THREE.Clock();
         this.mixer = new THREE.AnimationMixer(this.params.object);
 
-        this.animations = Object.keys(this.params.animationKeys).reduce(
+        this.animations = Object.keys(this.params.animationNames).reduce(
             (result, key) => ({
                 ...result,
                 [key]: this.createClipAction(
-                    this.findModelAnimation(this.params.animationKeys[key])
+                    this.findModelAnimation(this.params.animationNames[key])
                 ),
             }),
             {}
         );
 
-        this.animations.stand && this.playAnimation(this.animations.stand);
+        Object.values(this.animations).forEach(
+            animation => animation && animation.setEffectiveWeight(1)
+        );
 
-        /*
-          TODO:
-          action.idle.setEffectiveWeight( 1 ).play();
-          action.run.setEffectiveWeight( 1 ).stop();
-          action.jump.setEffectiveWeight( 1 ).stop();
-          action.slide.setEffectiveWeight( 1 ).stop();
-
-          action.jump.setLoop( THREE.LoopOnce, 0 );
-          action.slide.setLoop( THREE.LoopOnce, 0 );
-          action.jump.clampWhenFinished = true;
-          action.slide.clampWhenFinished = true;
-        */
+        if (this.animations.jump) {
+            this.animations.jump.setLoop(THREE.LoopOnce, 0);
+            this.animations.jump.clampWhenFinished = true;
+        }
 
         this.update = this.update.bind(this);
         this.createClipAction = this.createClipAction.bind(this);
         this.findModelAnimation = this.findModelAnimation.bind(this);
         this.playAnimation = this.playAnimation.bind(this);
+        this.getCurrentAnimation = this.getCurrentAnimation.bind(this);
     }
 
     update() {
         GameObject.prototype.update.call(this);
+
         if (this.mixer) this.mixer.update(this.clock.getDelta());
+
+        const animation = this.getCurrentAnimation();
+
+        animation && this.playAnimation(animation);
     }
 
     playAnimation(animation, { force } = {}) {
         if (!animation || !animation._clip) return;
 
         const animationName = animation._clip.name;
-        const shouldUpdate = this.playingAnimation !== animationName || force;
+        const shouldUpdate = this.playingAnimationName !== animationName || force;
 
         if (shouldUpdate) {
-            this.playingAnimation = animationName;
-            animation.time = 0;
+            this.playingAnimationName = animationName;
+            animation.reset();
             animation.play();
 
-            if (this.animation) {
-                var from = this.animation.play();
+            if (this.playingAnimation) {
+                var from = this.playingAnimation;
 
                 from.enabled = true;
                 animation.enabled = true;
@@ -71,7 +85,7 @@ export default class AnimatedGameObject extends GameObject {
                 from.crossFadeTo(animation, 0.3);
             }
 
-            this.animation = animation;
+            this.playingAnimation = animation;
         }
     }
 
@@ -81,6 +95,66 @@ export default class AnimatedGameObject extends GameObject {
 
     findModelAnimation(name) {
         const { animations = [] } = this.params;
+
         return animations.find(animation => animation.name === name);
+    }
+
+    getCurrentAnimation() {
+        const {
+            animations: {
+                stand,
+                attack,
+                walkBack,
+                walkLeft,
+                walkRight,
+                run,
+                jump,
+                rotateLeft,
+                rotateRight,
+            } = {}
+        } = this;
+
+        const {
+            isAttack,
+            isRun,
+            isJump,
+            isWalkLeft,
+            isWalkRight,
+            isWalkBack,
+            isRotateLeft,
+            isRotateRight,
+        } = this.animationState;
+
+        let animation = stand;
+
+        if (isAttack && attack) {
+            animation = attack;
+        }
+
+        if (!isAttack && isJump) {
+            animation = jump;
+        }
+
+        if (!isJump && !isAttack && isRun) {
+            if (isWalkBack && walkBack) {
+                animation = walkBack;
+            } else if (isWalkLeft && walkLeft) {
+                animation = walkLeft;
+            } else if (isWalkRight && walkRight) {
+                animation = walkRight;
+            } else if (run) {
+                animation = run;
+            }
+        }
+
+        if (!isJump && !isAttack && !isRun) {
+            if (isRotateLeft && rotateLeft) {
+                animation = rotateLeft;
+            } else if (isRotateRight && rotateRight) {
+                animation = rotateRight;
+            }
+        }
+
+        return animation;
     }
 }
