@@ -180,10 +180,6 @@ export default class Scene {
         return this.loadGLTF({
             baseUrl: './public/assets/gltf/player.glb',
             callback: (gltf) => {
-                // var helper = new THREE.SkeletonHelper(gltf.scene);
-                // helper.material.linewidth = 3;
-                // this.add(helper);
-
                 const player = gameObjectsService.hookGameObject(new Player({
                     animations: gltf.animations,
                     object: gltf.scene,
@@ -205,7 +201,16 @@ export default class Scene {
                         this.ui.pause = true;
                         onDie();
                     },
-                    attack: () => null,
+                    attack: () => {
+                        this.gameObjectsService.gameObjects
+                            .filter(gameObject => gameObject !== player && gameObject.position.distanceTo(player.position) < 1.3)
+                            .forEach(collisionGameObject => collisionGameObject.damageTaken({
+                                params: {
+                                    damage: player.params.damage,
+                                    parent: player
+                                }
+                            }));
+                    },
                     fire: () => gameObjectsService.fire(player),
                     destroy: () => gameObjectsService.destroyGameObject(player),
                 }));

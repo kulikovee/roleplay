@@ -3,7 +3,7 @@ import FiringUnit from './FiringUnit.js';
 export default class Player extends FiringUnit {
     constructor(params = {}) {
         super({
-            speed: 0.05,
+            speed: 0.055,
             fireRate: 30,
             damage: 50,
             hp: 100,
@@ -88,10 +88,10 @@ export default class Player extends FiringUnit {
         const addForward = (
             vertical > 0
                 ? speed
-                : (vertical < 0 ? -speed * 0.65 : 0)
+                : (vertical < 0 ? -speed * 0.6 : 0)
         );
 
-        const addSide = -horizontal * speed * 0.65;
+        const addSide = -horizontal * speed * 0.5;
         const addUp = Number(jump && this.isGrounded()) * 0.25;
 
         return this.getDirection(new THREE.Vector3(addSide, addUp, addForward));
