@@ -16,6 +16,13 @@ export default class AnimatedGameObject extends GameObject {
     constructor(params = {}) {
         super({ animationNames: { ...animationNames }, ...params });
 
+        this.update = this.update.bind(this);
+        this.createClipAction = this.createClipAction.bind(this);
+        this.findModelAnimation = this.findModelAnimation.bind(this);
+        this.playAnimation = this.playAnimation.bind(this);
+        this.getCurrentAnimation = this.getCurrentAnimation.bind(this);
+        this.initAnimations = this.initAnimations.bind(this);
+
         this.animationState = {
             isRun: false,
             isRotateLeft: false,
@@ -29,30 +36,7 @@ export default class AnimatedGameObject extends GameObject {
         this.clock = new THREE.Clock();
         this.mixer = new THREE.AnimationMixer(this.params.object);
 
-        this.animations = Object.keys(this.params.animationNames).reduce(
-            (result, key) => ({
-                ...result,
-                [key]: this.createClipAction(
-                    this.findModelAnimation(this.params.animationNames[key])
-                ),
-            }),
-            {}
-        );
-
-        Object.values(this.animations).forEach(
-            animation => animation && animation.setEffectiveWeight(1)
-        );
-
-        if (this.animations.jump) {
-            this.animations.jump.setLoop(THREE.LoopOnce, 0);
-            this.animations.jump.clampWhenFinished = true;
-        }
-
-        this.update = this.update.bind(this);
-        this.createClipAction = this.createClipAction.bind(this);
-        this.findModelAnimation = this.findModelAnimation.bind(this);
-        this.playAnimation = this.playAnimation.bind(this);
-        this.getCurrentAnimation = this.getCurrentAnimation.bind(this);
+        this.initAnimations(this.params.animationNames);
     }
 
     update() {
@@ -86,6 +70,32 @@ export default class AnimatedGameObject extends GameObject {
             }
 
             this.playingAnimation = animation;
+        }
+    }
+
+    initAnimations(animationNames) {
+        this.animations = Object.keys(animationNames).reduce(
+            (result, key) => {
+                const modelAnimation = this.findModelAnimation(animationNames[key]);
+                const initedAnimation = this.createClipAction(modelAnimation);
+
+                if (initedAnimation) { initedAnimation.setEffectiveWeight(1); }
+
+                return { ...result, [key]: initedAnimation };
+            },
+            {}
+        );
+
+        const { animations: { jump, attack } = {} } = this;
+
+        if (jump) {
+            jump.setLoop(THREE.LoopOnce, 0);
+            jump.clampWhenFinished = true;
+        }
+
+
+        if (attack) {
+            attack.setDuration(this.params.attackRate);
         }
     }
 

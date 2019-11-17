@@ -5,12 +5,12 @@ export default class Unit extends MovingGameObject {
         super({
             hp: 100,
             damage: 10,
-            attackRate: 240,
+            attackRate: 0.9,
             ...params,
         });
 
         this.shouldAttack = false;
-        this.latestAttack = Date.now();
+        this.latestAttackTimestamp = Date.now() - this.params.attackRate;
 
         ['onDamageTaken', 'onDamageDeal', 'onKill', 'onDie'].forEach((eventName) => {
             if (typeof params[eventName] === 'function') {
@@ -26,32 +26,24 @@ export default class Unit extends MovingGameObject {
 
     update() {
         MovingGameObject.prototype.update.call(this);
-        this.isAttack = false;
 
-        if (this.shouldAttack && this.params.attack && this.isAttackReleased()) {
-            if (this.animations.attack) {
-                this.animationState.isAttack = true;
-            }
-
-            this.isAttack = true;
-            this.shouldAttack = false;
-            this.latestAttack = Date.now();
-            this.params.attack();
-        }
+        this.animationState.isRun = this.getScalarAcceleration() > 0.02;
 
         if (this.isAttackReleased()) {
             this.animationState.isAttack = false;
 
-            if (this.getScalarAcceleration() > 0.02) {
-                this.animationState.isRun = true;
-            } else {
-                this.animationState.isRun = false;
+            if (this.shouldAttack) {
+                this.animationState.isAttack = true;
+                this.latestAttackTimestamp = Date.now();
+                this.params.attack && this.params.attack();
             }
+        } else {
+            this.shouldAttack = false;
         }
     }
 
     isAttackReleased() {
-        return (Date.now() - this.latestAttack >= this.params.attackRate);
+        return (Date.now() - this.latestAttackTimestamp >= this.params.attackRate * 1000);
     }
 
     attack() {

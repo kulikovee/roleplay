@@ -1,3 +1,18 @@
+const KEYS = {
+  MOUSE_LEFT: 1,
+  MOUSE_RIGHT: 3,
+  SPACE: 32,
+  ENTER: 13,
+  W: 87,
+  A: 65,
+  S: 83,
+  D: 68,
+  ARROW_LEFT: 37,
+  ARROW_RIGHT: 39,
+  ARROW_UP: 38,
+  ARROW_DOWN: 40,
+};
+
 export default class Input {
     constructor(params) {
         this.params = params;
@@ -20,13 +35,13 @@ export default class Input {
 
     createInput() {
         document.addEventListener('mousedown', (e) => {
-            if (e.which === 1) { this.attack1 = true; }
-            if (e.which === 3) { this.attack2 = true; }
+            if (e.which === KEYS.MOUSE_LEFT) { this.attack1 = true; }
+            if (e.which === KEYS.MOUSE_RIGHT) { this.attack2 = true; }
         });
 
         document.addEventListener('mouseup', (e) => {
-            if (e.which === 1) { this.attack1 = false; }
-            if (e.which === 3) { this.attack2 = false; }
+            if (e.which === KEYS.MOUSE_LEFT) { this.attack1 = false; }
+            if (e.which === KEYS.MOUSE_RIGHT) { this.attack2 = false; }
         });
 
         let timeout;
@@ -50,67 +65,35 @@ export default class Input {
 
         document.addEventListener('keydown', (e) => {
             switch (e.which) {
-                case 13:
-                    this.params.onAction && this.params.onAction();
-                    break;
-                case 87:
-                case 38:
-                    this.vertical = 1;
-                    break;
-                case 83:
-                case 40:
-                    this.vertical = -1;
-                    break;
-                case 32:
-                    this.space = 1;
-                    break;
-            }
-
-            switch (e.which) {
-                case 65:
-                case 37:
-                    this.horizontal = -1;
-                    break;
-                case 68:
-                case 39:
-                    this.horizontal = 1;
-                    break;
+                case KEYS.ENTER: this.params.onAction && this.params.onAction(); break;
+                case KEYS.W: case KEYS.ARROW_UP: this.vertical = 1; break;
+                case KEYS.S: case KEYS.ARROW_DOWN: this.vertical = -1; break;
+                case KEYS.A: case KEYS.ARROW_LEFT: this.horizontal = -1; break;
+                case KEYS.D: case KEYS.ARROW_RIGHT: this.horizontal = 1; break;
+                case KEYS.SPACE: this.jump = 1; break;
             }
         });
 
         document.addEventListener('keyup', (e) => {
             switch (e.which) {
-                case 87:
-                case 38:
-                    if (this.vertical === 1) {
-                        this.vertical = 0;
-                    }
+                case KEYS.W:
+                case KEYS.ARROW_UP:
+                    if (this.vertical === 1) { this.vertical = 0; }
                     break;
-                case 83:
-                case 40:
-                    if (this.vertical === -1) {
-                        this.vertical = 0;
-                    }
+                case KEYS.S:
+                case KEYS.ARROW_DOWN:
+                    if (this.vertical === -1) { this.vertical = 0; }
                     break;
-                case 32:
-                    this.space = 0;
+                case KEYS.A:
+                case KEYS.ARROW_LEFT:
+                    if (this.horizontal === -1) { this.horizontal = 0; }
                     break;
-                default:
+                case KEYS.D:
+                case KEYS.ARROW_RIGHT:
+                    if (this.horizontal === 1) { this.horizontal = 0; }
                     break;
-            }
-
-            switch (e.which) {
-                case 65:
-                case 37:
-                    if (this.horizontal === -1) {
-                        this.horizontal = 0;
-                    }
-                    break;
-                case 68:
-                case 39:
-                    if (this.horizontal === 1) {
-                        this.horizontal = 0;
-                    }
+                case KEYS.SPACE:
+                    this.jump = 0;
                     break;
             }
         });

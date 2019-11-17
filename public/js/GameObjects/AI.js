@@ -22,9 +22,9 @@ export default class AI extends FiringUnit {
         const { object, target, acceleration, speed } = this.params;
 
         object.lookAt(target.position);
-        this.fire();
+        // this.fire();
 
-        if (object.position.distanceTo(target.position) > 50) {
+        if (object.position.distanceTo(target.position) > 25) {
             acceleration.add(this.getForward().multiplyScalar(speed));
         }
     }

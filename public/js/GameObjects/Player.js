@@ -38,20 +38,22 @@ export default class Player extends FiringUnit {
             this.fire();
         }
 
-        this.animationState.isRotateLeft = input.look.horizontal < 0;
-        this.animationState.isRotateRight = input.look.horizontal > 0;
-        this.animationState.isWalkLeft = this.params.input.horizontal === -1;
-        this.animationState.isWalkRight = this.params.input.horizontal === 1;
-        this.animationState.isWalkBack = this.params.input.vertical === -1;
+        if (this.isAttackReleased()) {
+            this.animationState.isRotateLeft = input.look.horizontal < 0;
+            this.animationState.isRotateRight = input.look.horizontal > 0;
+            this.animationState.isWalkLeft = this.params.input.horizontal === -1;
+            this.animationState.isWalkRight = this.params.input.horizontal === 1;
+            this.animationState.isWalkBack = this.params.input.vertical === -1;
 
-        if (input.look.horizontal) {
-            object.rotateOnWorldAxis(
-                new THREE.Vector3(0, 1, 0),
-                -input.look.horizontal / 5000
-            );
+            if (input.look.horizontal) {
+                object.rotateOnWorldAxis(
+                    new THREE.Vector3(0, 1, 0),
+                    -input.look.horizontal / 5000
+                );
+            }
+
+            acceleration.add(this.getMovingAcceleration());
         }
-
-        acceleration.add(this.getMovingAcceleration());
     }
 
     getFireInitialPosition() {
@@ -81,7 +83,7 @@ export default class Player extends FiringUnit {
     }
 
     getMovingAcceleration() {
-        const { speed, input: { horizontal, vertical, space } } = this.params;
+        const { speed, input: { horizontal, vertical, jump } } = this.params;
 
         const addForward = (
             vertical > 0
@@ -90,7 +92,7 @@ export default class Player extends FiringUnit {
         );
 
         const addSide = -horizontal * speed * 0.65;
-        const addUp = Number(space && this.isGrounded()) * 0.25;
+        const addUp = Number(jump && this.isGrounded()) * 0.25;
 
         return this.getDirection(new THREE.Vector3(addSide, addUp, addForward));
     }
