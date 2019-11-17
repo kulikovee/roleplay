@@ -3,6 +3,7 @@ import UI from './UI.js';
 import Camera from './Camera.js';
 import GameObjectsService, { Player } from './GameObjects.js';
 import Connection from './Connection.js';
+import Particles from './Particles.js';
 import LevelMap from './Levels/LevelMap.js';
 
 export default class Scene {
@@ -27,6 +28,7 @@ export default class Scene {
         });
         this.gameObjectsService = new GameObjectsService(this);
         this.ui = new UI(this);
+        this.particles = new Particles(this);
         this.connection = new Connection(this, 'gohtml.ru');
         this.level = new LevelMap(this);
 
@@ -50,6 +52,7 @@ export default class Scene {
             this.ui.update();
             this.input.update();
             this.level.update();
+            this.particles.update();
             this.connection.send(this.player);
         }
 
@@ -204,12 +207,14 @@ export default class Scene {
                     attack: () => {
                         this.gameObjectsService.gameObjects
                             .filter(gameObject => gameObject !== player && gameObject.position.distanceTo(player.position) < 1.3)
-                            .forEach(collisionGameObject => collisionGameObject.damageTaken({
-                                params: {
-                                    damage: player.params.damage,
-                                    parent: player
-                                }
-                            }));
+                            .forEach((collisionGameObject) => {
+                                collisionGameObject.damageTaken({
+                                    params: {
+                                        damage: player.params.damage,
+                                        parent: player
+                                    }
+                                })
+                            });
                     },
                     fire: () => gameObjectsService.fire(player),
                     destroy: () => gameObjectsService.destroyGameObject(player),
