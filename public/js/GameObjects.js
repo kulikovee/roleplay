@@ -1,11 +1,13 @@
 import AI from './GameObjects/AI.js';
 import Player from './GameObjects/Player.js';
 import Fire from './GameObjects/Fire.js';
+import Unit from './GameObjects/Unit.js';
 
 export {
     AI,
     Player,
     Fire,
+    Unit,
 };
 
 export default class GameObjectsService {
@@ -52,12 +54,12 @@ export default class GameObjectsService {
 
         const fireGameObject = this.hookGameObject(new Fire({
             object,
-            throttling: new THREE.Vector3(1,1,1),
+            throttling: new THREE.Vector3(1, 1, 1),
             speed: firingGameObject.params.fireFlySpeed,
             damage: firingGameObject.params.damage,
             parent: firingGameObject,
             getCollisions: () => this.gameObjects.filter(gameObject => (
-                !(gameObject instanceof Fire)
+                gameObject instanceof Unit
                 && fireGameObject.params.parent !== gameObject
                 && fireGameObject.position.distanceTo(gameObject.position) < 3
             )),

@@ -1,7 +1,7 @@
 import Input from './Input.js';
 import UI from './UI.js';
 import Camera from './Camera.js';
-import GameObjectsService, { Player } from './GameObjects.js';
+import GameObjectsService, { Player, Unit } from './GameObjects.js';
 import Connection from './Connection.js';
 import Particles from './Particles.js';
 import LevelMap from './Levels/LevelMap.js';
@@ -206,8 +206,13 @@ export default class Scene {
                     },
                     attack: () => {
                         this.gameObjectsService.gameObjects
-                            .filter(gameObject => gameObject !== player && gameObject.position.distanceTo(player.position) < 1.3)
+                            .filter(gameObject => (
+                                gameObject !== player
+                                && gameObject instanceof Unit
+                                && gameObject.position.distanceTo(player.position) < 1.3
+                            ))
                             .forEach((collisionGameObject) => {
+                                console.log({collisionGameObject});
                                 collisionGameObject.damageTaken({
                                     params: {
                                         damage: player.params.damage,

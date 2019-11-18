@@ -39,20 +39,20 @@ export default class Player extends FiringUnit {
         }
 
         if (this.isAttackReleased()) {
-            this.animationState.isRotateLeft = input.look.horizontal < 0;
-            this.animationState.isRotateRight = input.look.horizontal > 0;
-            this.animationState.isWalkLeft = this.params.input.horizontal === -1;
-            this.animationState.isWalkRight = this.params.input.horizontal === 1;
-            this.animationState.isWalkBack = this.params.input.vertical === -1;
-
-            if (input.look.horizontal) {
-                object.rotateOnWorldAxis(
-                    new THREE.Vector3(0, 1, 0),
-                    -input.look.horizontal / 5000
-                );
-            }
+            this.animationState.isWalkLeft = input.horizontal === -1;
+            this.animationState.isWalkRight = input.horizontal === 1;
+            this.animationState.isWalkBack = input.vertical === -1;
 
             acceleration.add(this.getMovingAcceleration());
+        }
+
+        const horizontalLook = input.look.horizontal;
+
+        this.animationState.isRotateLeft = horizontalLook < 0;
+        this.animationState.isRotateRight = horizontalLook > 0;
+
+        if (horizontalLook) {
+            object.rotateOnWorldAxis(new THREE.Vector3(0, 1, 0), -horizontalLook / 5000);
         }
     }
 
