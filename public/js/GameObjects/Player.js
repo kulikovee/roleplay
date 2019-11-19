@@ -38,21 +38,30 @@ export default class Player extends FiringUnit {
             this.fire();
         }
 
-        if (this.isAttackReleased()) {
-            this.animationState.isRunLeft = input.horizontal === -1;
-            this.animationState.isRunRight = input.horizontal === 1;
-            this.animationState.isWalkBack = input.vertical === -1;
+        this.animationState.isRunLeft = input.horizontal === -1;
+        this.animationState.isRunRight = input.horizontal === 1;
+        this.animationState.isWalkBack = input.vertical === -1;
 
-            acceleration.add(this.getMovingAcceleration());
-        }
+        acceleration.add(this.getMovingAcceleration());
 
-        const horizontalLook = input.look.horizontal;
+        if (input.isThirdPerson) {
+            const horizontalLook = input.look.horizontal;
 
-        this.animationState.isRotateLeft = horizontalLook < 0;
-        this.animationState.isRotateRight = horizontalLook > 0;
+            this.animationState.isRotateLeft = horizontalLook < 0;
+            this.animationState.isRotateRight = horizontalLook > 0;
 
-        if (horizontalLook) {
-            object.rotateOnWorldAxis(new THREE.Vector3(0, 1, 0), -horizontalLook / 5000);
+            if (horizontalLook) {
+                object.rotateOnWorldAxis(new THREE.Vector3(0, 1, 0), -horizontalLook / 5000);
+            }
+        } else {
+            const deltaX = window.innerWidth / 2 - input.cursor.x;
+            const deltaY = input.cursor.y - window.innerHeight / 2;
+            const rotationY = Math.atan2(deltaY, deltaX);
+
+            this.animationState.isRotateLeft = rotationY > object.rotation.y;
+            this.animationState.isRotateRight = rotationY < object.rotation.y;
+
+            object.rotation.set(0, rotationY, 0);
         }
     }
 

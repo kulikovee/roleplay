@@ -25,7 +25,6 @@ export default class LevelMap extends AbstractLevel {
         this.scene.add(this.enviroment);
         this.scene.add(this.skybox);
         this.scene.add(this.globalLight);
-        this.badGuys = [];
 
         this.startLevel();
     }
@@ -81,14 +80,17 @@ export default class LevelMap extends AbstractLevel {
     }
 
     createBadGuyByTimeout() {
-        if (!this.scene.player) {
+        const { player, ui: { pause }, gameObjectsService: { gameObjects } } = this.scene;
+
+        if (!player || pause) {
             return;
         }
 
-        const player = this.scene.player,
-            badGuyTimeout = 5000 - this.scene.player.getLevel() * 500;
+        const badGuyTimeout = 5000 - player.getLevel() * 500;
+        const isBadGuyReleased = Date.now() - this.lastBadGuyCreated >= badGuyTimeout;
+        const badGuysCount = gameObjects.filter(gameObject => gameObject instanceof AI).length;
 
-        if (player && !this.scene.ui.pause && this.badGuys.length < 5 && (Date.now() - this.lastBadGuyCreated >= badGuyTimeout)) {
+        if (badGuysCount < 5 && isBadGuyReleased) {
             this.lastBadGuyCreated = Date.now();
             this.createBadGuy();
         }
@@ -121,8 +123,6 @@ export default class LevelMap extends AbstractLevel {
                     player.position.y,
                     player.position.z + 100 * (Math.random() - 0.5)
                 );
-
-                this.badGuys.push(badGuy);
             }
         });
     }

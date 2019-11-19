@@ -24,6 +24,17 @@ export default class Input {
             vertical: 0,
             horizontal: 0
         };
+        this.isThirdPerson = true;
+
+        this.cursor = {
+            x: 0,
+            y: 0,
+        };
+
+        this.mouse = {
+            x: 0,
+            y: 0,
+        };
 
         this.createInput();
     }
@@ -48,6 +59,20 @@ export default class Input {
         document.addEventListener('mousemove', (e) => {
             this.look.horizontal += e.movementX || 0;
             this.look.vertical += e.movementY || 0;
+
+            this.mouse.x = e.x;
+            this.mouse.y = e.y;
+
+            const cursorX = this.cursor.x + (e.movementX || 0);
+            const cursorY = this.cursor.y + (e.movementY || 0);
+
+            if (cursorX > 0 && cursorX < window.innerWidth) {
+                this.cursor.x = cursorX;
+            }
+
+            if (cursorY > 0 && cursorY < window.innerHeight) {
+                this.cursor.y = cursorY;
+            }
 
             if (timeout !== undefined) {
                 window.clearTimeout(timeout);

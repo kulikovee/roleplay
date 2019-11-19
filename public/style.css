@@ -67,6 +67,16 @@ input[type=button] {
     font-size: 2em;
 }
 
+#cursor {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    border: 1px solid #ffffff;
+}
+
 #shop {
     width: 300px;
     top: 50%;

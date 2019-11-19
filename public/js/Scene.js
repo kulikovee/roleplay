@@ -34,6 +34,8 @@ export default class Scene {
 
         this.clearScene();
         this.animate();
+
+        console.log('Scene', this);
     }
 
     clearScene() {
@@ -212,7 +214,6 @@ export default class Scene {
                                 && gameObject.position.distanceTo(player.position) < 1.3
                             ))
                             .forEach((collisionGameObject) => {
-                                console.log({collisionGameObject});
                                 collisionGameObject.damageTaken({
                                     params: {
                                         damage: player.params.damage,

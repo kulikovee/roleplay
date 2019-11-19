@@ -17,12 +17,15 @@ export default class UI {
 
         this.scene = scene;
         this.pause = false;
+        this.isPointerLocked = false;
+        this.cursor = document.getElementById('cursor');
 
         document.getElementById('close-shop').onclick = () => this.closeShop();
         document.getElementById('buy-hp').onclick = () => this.buy('hp');
         document.getElementById('buy-speed').onclick = () => this.buy('speed');
         document.getElementById('buy-damage').onclick = () => this.buy('damage');
         document.getElementById('restart-button').onclick = () => this.restart();
+        document.getElementById('switch-third-person').onclick = () => this.switchCamera();
 
         this.addPointerLockEvents(
             document.getElementById('blocker'),
@@ -31,6 +34,13 @@ export default class UI {
     }
 
     update() {
+        if (this.scene.input.isThirdPerson) {
+            this.cursor.style.left = '0';
+            this.cursor.style.top = '0';
+        } else {
+            this.cursor.style.left = `${this.scene.input.cursor.x}px`;
+            this.cursor.style.top = `${this.scene.input.cursor.y}px`;
+        }
     }
 
     updatePlayerLabels() {
@@ -59,6 +69,10 @@ export default class UI {
         this.pause = false;
         this.requestPointerLock();
         document.getElementById('shop').style.display = 'none';
+    }
+
+    switchCamera() {
+        this.scene.input.isThirdPerson = !this.scene.input.isThirdPerson;
     }
 
     restart() {
@@ -157,11 +171,19 @@ export default class UI {
                 || document.webkitPointerLockElement === document.body
             );
 
+            if (this.isPointerLocked === isPointerLocked) {
+                return;
+            }
+
             if (isPointerLocked) {
+                this.scene.input.cursor.x = this.scene.input.mouse.x;
+                this.scene.input.cursor.y = this.scene.input.mouse.y;
                 blocker.style.display = 'none';
+                this.isPointerLocked = true;
             } else {
                 blocker.style.display = 'inline-block';
                 instructions.style.display = '';
+                this.isPointerLocked = false;
 
                 this.openShop();
             }

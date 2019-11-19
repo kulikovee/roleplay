@@ -16,7 +16,7 @@
     <div id="instructions">
         <span style="font-size:40px">Click here to fullscreen</span>
         <br />
-        (Press W,A,S,D to move; Press Space to move up; Use mouse to rotate; Click mouse buttons to fire)
+        (Press W,A,S,D to move; Press Space to move up; Use mouse to rotate; Left Mouse Button to attack, Right to fire)
     </div>
 </div>
 <div id="hp"></div>
@@ -41,30 +41,14 @@
     <div class="row">
         <div><input id="buy-damage" type="button" value="Buy: Damage +25 ($250)" /></div>
     </div>
+    <div class="row">
+        <div><input id="switch-third-person" type="button" value="Switch camera mode" /></div>
+    </div>
 </div>
 <div id="restart">
     <input id="restart-button" type="button" value="Restart" />
 </div>
 <div id="action"></div>
-
-<script type="x-shader/x-vertex" id="vertexshader">
-    attribute float size;
-    varying vec3 vColor;
-    void main() {
-        vColor = color;
-        vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
-        gl_PointSize = size * ( 300.0 / -mvPosition.z );
-        gl_Position = projectionMatrix * mvPosition;
-    }
-</script>
-
-<script type="x-shader/x-fragment" id="fragmentshader">
-    uniform sampler2D pointTexture;
-    varying vec3 vColor;
-    void main() {
-        gl_FragColor = vec4( vColor, 1.0 );
-        gl_FragColor = gl_FragColor * texture2D( pointTexture, gl_PointCoord );
-    }
-</script>
+<div id="cursor"></div>
 </body>
 </html>
