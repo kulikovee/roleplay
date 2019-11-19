@@ -111,8 +111,8 @@ export default class LevelMap extends AbstractLevel {
                     fire: () => null, // gameObjectsService.fire(badGuy),
                     destroy: () => gameObjectsService.destroyGameObject(badGuy),
                     onDamageTaken: () => this.scene.particles.createParticles({
-                        position: object.position,
-                        scale: new THREE.Vector3(1.5, 1.5, 1.5)
+                        position: object.position
+                            .clone().add(new THREE.Vector3(0, 0.75, 0))
                     }),
                 }));
 
