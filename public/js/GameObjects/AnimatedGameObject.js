@@ -7,8 +7,8 @@ const animationNames = {
     attack: 'Attack',
     rotateLeft: 'Rotate Left',
     rotateRight: 'Rotate Right',
-    walkLeft: 'Walk Left',
-    walkRight: 'Walk Right',
+    runLeft: 'Run Left',
+    runRight: 'Run Right',
     walkBack: 'Walk Back',
 };
 
@@ -29,8 +29,8 @@ export default class AnimatedGameObject extends GameObject {
             isRotateRight: false,
             isAttack: false,
             isJump: false,
-            isWalkRight: false,
-            isWalkLeft: false,
+            isRunRight: false,
+            isRunLeft: false,
         };
 
         this.clock = new THREE.Clock();
@@ -115,8 +115,8 @@ export default class AnimatedGameObject extends GameObject {
                 stand,
                 attack,
                 walkBack,
-                walkLeft,
-                walkRight,
+                runLeft,
+                runRight,
                 run,
                 jump,
                 rotateLeft,
@@ -128,8 +128,8 @@ export default class AnimatedGameObject extends GameObject {
             isAttack,
             isRun,
             isJump,
-            isWalkLeft,
-            isWalkRight,
+            isRunLeft,
+            isRunRight,
             isWalkBack,
             isRotateLeft,
             isRotateRight,
@@ -148,10 +148,10 @@ export default class AnimatedGameObject extends GameObject {
         if (!isJump && !isAttack && isRun) {
             if (isWalkBack && walkBack) {
                 animation = walkBack;
-            } else if (isWalkLeft && walkLeft) {
-                animation = walkLeft;
-            } else if (isWalkRight && walkRight) {
-                animation = walkRight;
+            } else if (isRunLeft && runLeft) {
+                animation = runLeft;
+            } else if (isRunRight && runRight) {
+                animation = runRight;
             } else if (run) {
                 animation = run;
             }

@@ -39,8 +39,8 @@ export default class Player extends FiringUnit {
         }
 
         if (this.isAttackReleased()) {
-            this.animationState.isWalkLeft = input.horizontal === -1;
-            this.animationState.isWalkRight = input.horizontal === 1;
+            this.animationState.isRunLeft = input.horizontal === -1;
+            this.animationState.isRunRight = input.horizontal === 1;
             this.animationState.isWalkBack = input.vertical === -1;
 
             acceleration.add(this.getMovingAcceleration());
@@ -91,7 +91,7 @@ export default class Player extends FiringUnit {
                 : (vertical < 0 ? -speed * 0.6 : 0)
         );
 
-        const addSide = -horizontal * speed * 0.5;
+        const addSide = -horizontal * speed;
         const addUp = Number(jump && this.isGrounded()) * 0.25;
 
         return this.getDirection(new THREE.Vector3(addSide, addUp, addForward));
