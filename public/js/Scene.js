@@ -152,7 +152,7 @@ export default class Scene {
     loadGLTF(params) {
         const loader = new THREE.GLTFLoader();
 
-        loader.load(params.baseUrl, (gltf) => {
+        loader.load(`${params.baseUrl}.glb`, (gltf) => {
             params.callback && params.callback(gltf);
             this.add(gltf.scene);
         });
@@ -183,7 +183,7 @@ export default class Scene {
         const gameObjectsService = this.gameObjectsService;
 
         return this.loadGLTF({
-            baseUrl: './public/assets/gltf/player.glb',
+            baseUrl: './public/assets/gltf/player',
             callback: (gltf) => {
                 const player = gameObjectsService.hookGameObject(new Player({
                     animations: gltf.animations,

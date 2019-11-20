@@ -101,11 +101,12 @@ export default class LevelMap extends AbstractLevel {
             player = this.scene.player,
             gameObjectsService = this.scene.gameObjectsService;
 
-        this.scene.loadObj({
-            baseUrl: './public/assets/enemy',
-            callback: (object) => {
+        this.scene.loadGLTF({
+            baseUrl: './public/assets/gltf/enemy',
+            callback: (gltf) => {
                 const badGuy = gameObjectsService.hookGameObject(new AI({
-                    object,
+                    animations: gltf.animations,
+                    object: gltf.scene,
                     target: this.scene.player,
                     speed: 0.04 + level * 0.01 + player.params.speed * 0.5,
                     damage: 5 + level * 5,
@@ -113,14 +114,13 @@ export default class LevelMap extends AbstractLevel {
                     fire: () => null, // gameObjectsService.fire(badGuy),
                     destroy: () => gameObjectsService.destroyGameObject(badGuy),
                     onDamageTaken: () => this.scene.particles.createParticles({
-                        position: object.position
-                            .clone().add(new THREE.Vector3(0, 0.75, 0))
+                        position: badGuy.position.clone().add(new THREE.Vector3(0, 0.75, 0))
                     }),
                 }));
 
                 badGuy.position.set(
                     player.position.x + 100 * (Math.random() - 0.5),
-                    player.position.y,
+                    0,
                     player.position.z + 100 * (Math.random() - 0.5)
                 );
             }
