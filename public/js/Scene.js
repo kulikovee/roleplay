@@ -189,6 +189,7 @@ export default class Scene {
                     animations: gltf.animations,
                     object: gltf.scene,
                     input: this.input,
+                    complexAnimations: true,
                     onDamageTaken: () => {
                         this.ui.updatePlayerLabels();
                         onDamageTaken();

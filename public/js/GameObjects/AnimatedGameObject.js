@@ -10,6 +10,16 @@ const animationNames = {
     runLeft: 'Run Left',
     runRight: 'Run Right',
     walkBack: 'Walk Back',
+
+    // Complex animimations
+    topRun: 'Top Run',
+    bottomRun: 'Bottom Run',
+    topWalkBack: 'Top Walk Back',
+    bottomWalkBack: 'Bottom Walk Back',
+    topAttack: 'Top Attack',
+    bottomAttack: 'Bottom Attack',
+    topStand: 'Top Stand',
+    bottomStand: 'Bottom Stand',
 };
 
 export default class AnimatedGameObject extends GameObject {
@@ -22,6 +32,8 @@ export default class AnimatedGameObject extends GameObject {
         this.playAnimation = this.playAnimation.bind(this);
         this.getCurrentAnimation = this.getCurrentAnimation.bind(this);
         this.initAnimations = this.initAnimations.bind(this);
+        this.updateComplexAnimations = this.updateComplexAnimations.bind(this);
+        this.blendAnimations = this.blendAnimations.bind(this);
 
         this.animationState = {
             isRun: false,
@@ -32,6 +44,8 @@ export default class AnimatedGameObject extends GameObject {
             isRunRight: false,
             isRunLeft: false,
         };
+
+        this.playingAnimations = {};
 
         this.clock = new THREE.Clock();
         this.mixer = new THREE.AnimationMixer(this.params.object);
@@ -44,9 +58,12 @@ export default class AnimatedGameObject extends GameObject {
 
         if (this.mixer) this.mixer.update(this.clock.getDelta());
 
-        const animation = this.getCurrentAnimation();
-
-        animation && this.playAnimation(animation);
+        if (this.params.complexAnimations) {
+            this.updateComplexAnimations();
+        } else {
+            const animation = this.getCurrentAnimation();
+            animation && this.playAnimation(animation);
+        }
     }
 
     playAnimation(animation, { force } = {}) {
@@ -79,7 +96,10 @@ export default class AnimatedGameObject extends GameObject {
                 const modelAnimation = this.findModelAnimation(animationNames[key]);
                 const initedAnimation = this.createClipAction(modelAnimation);
 
-                if (initedAnimation) { initedAnimation.setEffectiveWeight(1); }
+                if (initedAnimation) {
+                    initedAnimation.setEffectiveWeight(1);
+                    // initedAnimation.enabled = true;
+                }
 
                 return { ...result, [key]: initedAnimation };
             },
@@ -107,6 +127,74 @@ export default class AnimatedGameObject extends GameObject {
         const { animations = [] } = this.params;
 
         return animations.find(animation => animation.name === name);
+    }
+
+    updateComplexAnimations() {
+        const {
+            animations: {
+                topAttack, bottomAttack,
+                topWalkBack, bottomWalkBack,
+                topRun, bottomRun,
+                topStand, bottomStand,
+            } = {}
+        } = this;
+
+        const {
+            isAttack,
+            isRun,
+            isWalkBack,
+        } = this.animationState;
+
+        const playingAnimations = {
+            top: (
+                (isAttack && topAttack)
+                || (isWalkBack && !isAttack && topWalkBack)
+                || (isRun && !isWalkBack && !isAttack && topRun)
+                || ((!isAttack && !isRun && topStand))
+            ),
+            bottom: (
+                (isAttack  && !isRun && bottomAttack)
+                || (isWalkBack && bottomWalkBack)
+                || (isRun && !isWalkBack && bottomRun)
+                || (!isAttack && !isRun && bottomStand)
+            ),
+        };
+
+        // console.log(
+        //     playingAnimations && playingAnimations.top && playingAnimations.top._clip.name,
+        //     ';',
+        //     playingAnimations && playingAnimations.bottom && playingAnimations.bottom._clip.name,
+        //     ';',
+        //     `isRun: ${isRun}, isAttack: ${isAttack}, isWalkBack: ${isWalkBack}`
+        // );
+
+        this.blendAnimations(playingAnimations);
+    }
+
+    blendAnimations({ top, bottom }) {
+        if (!top || !bottom || !top._clip || !bottom._clip) return;
+
+        const playAnimation = (fromAnimation, animation) => {
+            const animationName = animation._clip.name;
+            const fromAnimationName = fromAnimation && fromAnimation._clip.name;
+
+            if (fromAnimationName !== animationName) {
+                console.log('Play animation', animationName, 'coming from', fromAnimationName);
+
+                animation.reset();
+                animation.play();
+
+                if (fromAnimation) {
+                    fromAnimation.crossFadeTo(animation, 0.3);
+                }
+            }
+        };
+
+        playAnimation(this.playingAnimations.top, top);
+        playAnimation(this.playingAnimations.bottom, bottom);
+
+        this.playingAnimations.top = top;
+        this.playingAnimations.bottom = bottom;
     }
 
     getCurrentAnimation() {
