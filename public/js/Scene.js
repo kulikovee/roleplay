@@ -6,6 +6,8 @@ import Connection from './Connection.js';
 import Particles from './Particles.js';
 import LevelMap from './Levels/LevelMap.js';
 
+const isPlayerHelperNeeded = false;
+
 export default class Scene {
     /**
      * @param {Renderer} renderer
@@ -152,9 +154,19 @@ export default class Scene {
     loadGLTF(params) {
         const loader = new THREE.GLTFLoader();
 
-        loader.load(`${params.baseUrl}.glb`, (gltf) => {
+        loader.load(`${params.baseUrl}.glb${params.isGLTF ? '.gltf' : ''}`, (gltf) => {
             params.callback && params.callback(gltf);
             this.add(gltf.scene);
+        });
+    }
+
+    loadFBX(params) {
+        const loader = new THREE.FBXLoader();
+
+        loader.load(`${params.baseUrl}.fbx`, (fbx) => {
+            params.callback && params.callback(fbx);
+            fbx.scale.set(0.01, 0.01, 0.01);
+            this.add(fbx);
         });
     }
 
@@ -165,7 +177,7 @@ export default class Scene {
         };
 
         return this.loadObj({
-            baseUrl: './public/assets/player',
+            baseUrl: './public/assets/models/units/player',
             callback: (object) => {
                 this.players[id] = object;
                 this.add(object);
@@ -182,12 +194,18 @@ export default class Scene {
     }) {
         const gameObjectsService = this.gameObjectsService;
 
-        return this.loadGLTF({
-            baseUrl: './public/assets/gltf/player',
+        return this.loadFBX({
+            baseUrl: './public/assets/models/units/player',
             callback: (gltf) => {
+                if (isPlayerHelperNeeded) {
+                    var helper = new THREE.SkeletonHelper(gltf);
+                    helper.material.linewidth = 4;
+                    this.add(helper);
+                }
+
                 const player = gameObjectsService.hookGameObject(new Player({
                     animations: gltf.animations,
-                    object: gltf.scene,
+                    object: gltf,
                     input: this.input,
                     onDamageTaken: () => {
                         this.ui.updatePlayerLabels();

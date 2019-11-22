@@ -57,7 +57,7 @@ export default class LevelMap extends AbstractLevel {
         const pivot = new THREE.Object3D();
 
         this.scene.loadObj({
-            baseUrl: './public/assets/hall',
+            baseUrl: './public/assets/models/enviroment/hall/hall',
             callback: (object) => pivot.add(object)
         });
 
@@ -66,7 +66,7 @@ export default class LevelMap extends AbstractLevel {
 
     createSkybox() {
         const materialArray = ['RT', 'LF', 'UP', 'DN', 'FT', 'BK'].map(function (direction) {
-            const url = `./public/assets/skybox${direction}.jpg`;
+            const url = `./public/assets/textures/sky/skybox${direction}.jpg`;
             return new THREE.MeshBasicMaterial({
                 map: new THREE.TextureLoader().load(url),
                 side: THREE.BackSide
@@ -102,7 +102,7 @@ export default class LevelMap extends AbstractLevel {
             gameObjectsService = this.scene.gameObjectsService;
 
         this.scene.loadGLTF({
-            baseUrl: './public/assets/gltf/enemy',
+            baseUrl: './public/assets/models/units/enemy',
             callback: (gltf) => {
                 const badGuy = gameObjectsService.hookGameObject(new AI({
                     animations: gltf.animations,
