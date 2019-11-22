@@ -18,7 +18,7 @@ export default class Particles {
         const gameObjectsService = this.scene.gameObjectsService;
 
         return this.scene.loadGLTF({
-            baseUrl: `./public/assets/gltf/${particleName}`,
+            baseUrl: `./public/assets/models/effects/${particleName}`,
             callback: (gltf) => {
                 gltf.scene.position.copy(position);
                 gltf.scene.scale.copy(scale);

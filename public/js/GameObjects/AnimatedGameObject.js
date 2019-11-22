@@ -22,6 +22,33 @@ const animationNames = {
     bottomStand: 'Bottom Stand',
 };
 
+const topBones = [
+    'Right_Forearm',
+    'Right_Arm',
+    'Right_Hand',
+    'Right_Hand_end',
+    'Left_Shoulder',
+    'Left_Forearm',
+    'Left_Arm',
+    'Left_Hand',
+    'Left_Hand_end',
+    'Neck',
+    'Head',
+    'Head_end'
+];
+
+const bottomBones = [
+    'Main_Bone',
+    'Right_Leg',
+    'Right_Middle_Foot',
+    'Right_Foot',
+    'Right_Foot_end',
+    'Left_Leg',
+    'Left_Middle_Foot',
+    'Left_Foot',
+    'Left_Foot_end',
+];
+
 export default class AnimatedGameObject extends GameObject {
     constructor(params = {}) {
         super({ animationNames: { ...animationNames }, ...params });
@@ -97,7 +124,7 @@ export default class AnimatedGameObject extends GameObject {
                 const initedAnimation = this.createClipAction(modelAnimation);
 
                 if (initedAnimation) {
-                    initedAnimation.setEffectiveWeight(1);
+                    // initedAnimation.setEffectiveWeight(0);
                     // initedAnimation.enabled = true;
                 }
 
@@ -125,8 +152,22 @@ export default class AnimatedGameObject extends GameObject {
 
     findModelAnimation(name) {
         const { animations = [] } = this.params;
+        const animation = animations.find(animation => animation.name === name);
 
-        return animations.find(animation => animation.name === name);
+        if (animation) {
+            // FIXME: Exclude top/bottom animated bones from the animation
+            const animationType = animation.name.split(' ')[0],
+                isBottomBonesTrack = track => !topBones.includes(track.name.split('.')[0]),
+                isTopBonesTrack = track => !bottomBones.includes(track.name.split('.')[0]);
+
+            if (animationType === 'Bottom') {
+                animation.tracks = animation.tracks.filter(isBottomBonesTrack);
+            } else if (animationType === 'Top') {
+                animation.tracks = animation.tracks.filter(isTopBonesTrack);
+            }
+        }
+
+        return animation;
     }
 
     updateComplexAnimations() {
@@ -173,8 +214,10 @@ export default class AnimatedGameObject extends GameObject {
             if (fromAnimationName !== animationName) {
                 animation.reset();
                 animation.play();
+                // animation.setEffectiveWeight(1);
 
                 if (fromAnimation) {
+                    // fromAnimation.setEffectiveWeight(0);
                     fromAnimation.crossFadeTo(animation, 0.3);
                 }
             }

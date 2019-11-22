@@ -90,7 +90,7 @@ export default class LevelMap extends AbstractLevel {
         const isBadGuyReleased = Date.now() - this.lastBadGuyCreated >= badGuyTimeout;
         const badGuysCount = gameObjects.filter(gameObject => gameObject instanceof AI).length;
 
-        if (badGuysCount < 0 && isBadGuyReleased) {
+        if (badGuysCount < 5 && isBadGuyReleased) {
             this.lastBadGuyCreated = Date.now();
             this.createBadGuy();
         }
