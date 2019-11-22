@@ -160,14 +160,6 @@ export default class AnimatedGameObject extends GameObject {
             ),
         };
 
-        // console.log(
-        //     playingAnimations && playingAnimations.top && playingAnimations.top._clip.name,
-        //     ';',
-        //     playingAnimations && playingAnimations.bottom && playingAnimations.bottom._clip.name,
-        //     ';',
-        //     `isRun: ${isRun}, isAttack: ${isAttack}, isWalkBack: ${isWalkBack}`
-        // );
-
         this.blendAnimations(playingAnimations);
     }
 
@@ -179,8 +171,6 @@ export default class AnimatedGameObject extends GameObject {
             const fromAnimationName = fromAnimation && fromAnimation._clip.name;
 
             if (fromAnimationName !== animationName) {
-                console.log('Play animation', animationName, 'coming from', fromAnimationName);
-
                 animation.reset();
                 animation.play();
 

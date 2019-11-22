@@ -17,6 +17,8 @@ export default class Scene {
         this.add = this.add.bind(this);
         this.remove = this.remove.bind(this);
         this.clearScene = this.clearScene.bind(this);
+        this.loadGLTF = this.loadGLTF.bind(this);
+        this.loadDae = this.loadDae.bind(this);
 
         this.players = {};
         this.renderer = renderer;
@@ -158,6 +160,16 @@ export default class Scene {
         });
     }
 
+    loadDae(params) {
+        const daeLoader = new THREE.ColladaLoader();
+        // daeLoader.options.convertUpAxis = true;
+        daeLoader.load(params.baseUrl + '.dae', (collada) => {
+            params.callback && params.callback(collada);
+            this.add(collada.scene);
+        });
+
+    }
+
     createAnotherPlayer(id) {
         this.players[id] = {
             position: { set: () => null },
@@ -182,12 +194,12 @@ export default class Scene {
     }) {
         const gameObjectsService = this.gameObjectsService;
 
-        return this.loadGLTF({
-            baseUrl: './public/assets/gltf/player',
-            callback: (gltf) => {
+        return this.loadDae({
+            baseUrl: './public/assets/collada/player',
+            callback: (collada) => {
                 const player = gameObjectsService.hookGameObject(new Player({
-                    animations: gltf.animations,
-                    object: gltf.scene,
+                    animations: collada.animations,
+                    object: collada.scene,
                     input: this.input,
                     complexAnimations: true,
                     onDamageTaken: () => {
