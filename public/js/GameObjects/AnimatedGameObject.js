@@ -20,18 +20,46 @@ const animationNames = {
     bottomAttack: 'Bottom Attack',
     topStand: 'Top Stand',
     bottomStand: 'Bottom Stand',
+    topRunRight: 'Top Run Right',
+    topRunLeft: 'Top Run Left',
+    topJump: 'Top Jump',
+    bottomRunRight: 'Bottom Run Right',
+    bottomRunLeft: 'Bottom Run Left',
+    bottomJump: 'Bottom Jump',
 };
+
+const topAnimations = [
+    'topRun',
+    'topWalkBack',
+    'topAttack',
+    'topStand',
+    'topRunRight',
+    'topRunLeft',
+    'topJump',
+];
+
+const bottomAnimations = [
+    'bottomRun',
+    'bottomWalkBack',
+    'bottomAttack',
+    'bottomStand',
+    'bottomRunRight',
+    'bottomRunLeft',
+    'bottomJump',
+];
 
 const topBones = [
     'Right_Forearm',
     'Right_Arm',
     'Right_Hand',
     'Right_Hand_end',
+    'Right_Shoulder',
     'Left_Shoulder',
     'Left_Forearm',
     'Left_Arm',
     'Left_Hand',
     'Left_Hand_end',
+    'Chest',
     'Neck',
     'Head',
     'Head_end'
@@ -51,7 +79,14 @@ const bottomBones = [
 
 export default class AnimatedGameObject extends GameObject {
     constructor(params = {}) {
-        super({ animationNames: { ...animationNames }, ...params });
+        super({
+            animationNames: { ...animationNames },
+            topBones: [...topBones],
+            bottomBones: [...bottomBones],
+            topAnimations: [...topAnimations],
+            bottomAnimations: [...bottomAnimations],
+            ...params
+        });
 
         this.update = this.update.bind(this);
         this.createClipAction = this.createClipAction.bind(this);
@@ -118,15 +153,28 @@ export default class AnimatedGameObject extends GameObject {
     }
 
     initAnimations(animationNames) {
+        const {
+            topAnimations,
+            bottomAnimations,
+            topBones,
+            bottomBones,
+            complexAnimations,
+        } = this.params;
+
         this.animations = Object.keys(animationNames).reduce(
             (result, key) => {
-                const modelAnimation = this.findModelAnimation(animationNames[key]);
-                const initedAnimation = this.createClipAction(modelAnimation);
+                let excludedBones = [];
 
-                if (initedAnimation) {
-                    // initedAnimation.setEffectiveWeight(0);
-                    // initedAnimation.enabled = true;
+                if (complexAnimations) {
+                    if (topAnimations.includes(key)) {
+                        excludedBones = bottomBones;
+                    } else if (bottomAnimations.includes(key)) {
+                        excludedBones = topBones;
+                    }
                 }
+
+                const modelAnimation = this.findModelAnimation(animationNames[key], { excludedBones });
+                let initedAnimation = this.createClipAction(modelAnimation);
 
                 return { ...result, [key]: initedAnimation };
             },
@@ -150,24 +198,27 @@ export default class AnimatedGameObject extends GameObject {
         return action && this.mixer.clipAction(action).stop();
     }
 
-    findModelAnimation(name) {
+    findModelAnimation(name, { excludedBones = [] } = {}) {
         const { animations = [] } = this.params;
-        const animation = animations.find(animation => animation.name === name);
 
-        if (animation) {
-            // FIXME: Exclude top/bottom animated bones from the animation
-            const animationType = animation.name.split(' ')[0],
-                isBottomBonesTrack = track => !topBones.includes(track.name.split('.')[0]),
-                isTopBonesTrack = track => !bottomBones.includes(track.name.split('.')[0]);
+        let animation = animations.find(animation => animation.name === name);
 
-            if (animationType === 'Bottom') {
-                animation.tracks = animation.tracks.filter(isBottomBonesTrack);
-            } else if (animationType === 'Top') {
-                animation.tracks = animation.tracks.filter(isTopBonesTrack);
-            }
+        if (animation && excludedBones.length) {
+            return this.clearAnimationBones(animation, excludedBones);
         }
 
         return animation;
+    }
+
+    clearAnimationBones(animation, bones) {
+        if (animation) {
+            const getBoneName = item => item.name.split('.')[0],
+                isNotExcluded = item => !bones.includes(getBoneName(item));
+
+            animation.tracks = animation.tracks.filter(isNotExcluded);
+
+            return animation;
+        }
     }
 
     updateComplexAnimations() {
@@ -176,25 +227,37 @@ export default class AnimatedGameObject extends GameObject {
                 topAttack, bottomAttack,
                 topWalkBack, bottomWalkBack,
                 topRun, bottomRun,
+                topRunRight, bottomRunRight,
+                topRunLeft, bottomRunLeft,
                 topStand, bottomStand,
+                topJump, bottomJump,
             } = {}
         } = this;
 
         const {
             isAttack,
             isRun,
+            isRunRight,
+            isRunLeft,
+            isJump,
             isWalkBack,
         } = this.animationState;
 
         const playingAnimations = {
             top: (
                 (isAttack && topAttack)
-                || (isWalkBack && !isAttack && topWalkBack)
-                || (isRun && !isWalkBack && !isAttack && topRun)
+                || (isJump && topJump)
+                || (isRunRight && topRunRight)
+                || (isRunLeft && topRunLeft)
+                || (isWalkBack && topWalkBack)
+                || (isRun && topRun)
                 || ((!isAttack && !isRun && topStand))
             ),
             bottom: (
                 (isAttack  && !isRun && bottomAttack)
+                || (isJump && bottomJump)
+                || (isRunRight && bottomRunRight)
+                || (isRunLeft && bottomRunLeft)
                 || (isWalkBack && bottomWalkBack)
                 || (isRun && !isWalkBack && bottomRun)
                 || (!isAttack && !isRun && bottomStand)
@@ -206,22 +269,22 @@ export default class AnimatedGameObject extends GameObject {
 
     blendAnimations({ top, bottom }) {
         if (!top || !bottom || !top._clip || !bottom._clip) return;
+        const getAnimationName = a => a._clip.name,
+            playAnimation = (fromAnimation, animation) => {
+                const animationName = getAnimationName(animation);
+                const fromAnimationName = fromAnimation && getAnimationName(fromAnimation);
 
-        const playAnimation = (fromAnimation, animation) => {
-            const animationName = animation._clip.name;
-            const fromAnimationName = fromAnimation && fromAnimation._clip.name;
+                if (fromAnimationName !== animationName) {
+                    animation.reset();
+                    animation.play();
+                    // animation.setEffectiveWeight(1);
 
-            if (fromAnimationName !== animationName) {
-                animation.reset();
-                animation.play();
-                // animation.setEffectiveWeight(1);
-
-                if (fromAnimation) {
-                    // fromAnimation.setEffectiveWeight(0);
-                    fromAnimation.crossFadeTo(animation, 0.3);
+                    if (fromAnimation) {
+                        // fromAnimation.setEffectiveWeight(0);
+                        fromAnimation.crossFadeTo(animation, 0.3);
+                    }
                 }
-            }
-        };
+            };
 
         playAnimation(this.playingAnimations.top, top);
         playAnimation(this.playingAnimations.bottom, bottom);

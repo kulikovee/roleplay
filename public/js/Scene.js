@@ -206,7 +206,7 @@ export default class Scene {
     }) {
         const gameObjectsService = this.gameObjectsService;
 
-        return this.loadFBX({
+        return this.loadGLTF({
             baseUrl: './public/assets/models/units/player',
             callback: (loadedModel) => {
                 if (isPlayerHelperNeeded) {
@@ -217,7 +217,7 @@ export default class Scene {
 
                 const player = gameObjectsService.hookGameObject(new Player({
                     animations: loadedModel.animations,
-                    object: loadedModel,
+                    object: loadedModel.scene,
                     input: this.input,
                     complexAnimations: true,
                     onDamageTaken: () => {
@@ -242,7 +242,7 @@ export default class Scene {
                             .filter(gameObject => (
                                 gameObject !== player
                                 && gameObject instanceof Unit
-                                && gameObject.position.distanceTo(player.position) < 1.3
+                                && gameObject.position.distanceTo(player.position) < 2
                             ))
                             .forEach((collisionGameObject) => {
                                 collisionGameObject.damageTaken({
