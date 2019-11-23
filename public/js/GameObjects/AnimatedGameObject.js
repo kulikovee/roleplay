@@ -99,12 +99,13 @@ export default class AnimatedGameObject extends GameObject {
 
         this.animationState = {
             isRun: false,
+            isRunRight: false,
+            isRunLeft: false,
+            isWalkBack: false,
             isRotateLeft: false,
             isRotateRight: false,
             isAttack: false,
             isJump: false,
-            isRunRight: false,
-            isRunLeft: false,
         };
 
         this.playingAnimations = {};
@@ -181,7 +182,7 @@ export default class AnimatedGameObject extends GameObject {
             {}
         );
 
-        const { animations: { jump, attack } = {} } = this;
+        const { animations: { jump, attack, topAttack } = {} } = this;
 
         if (jump) {
             jump.setLoop(THREE.LoopOnce, 0);
@@ -191,6 +192,10 @@ export default class AnimatedGameObject extends GameObject {
 
         if (attack) {
             attack.setDuration(this.params.attackRate);
+        }
+
+        if (topAttack) {
+            topAttack.setDuration(this.params.attackRate);
         }
     }
 
@@ -227,8 +232,8 @@ export default class AnimatedGameObject extends GameObject {
                 topAttack, bottomAttack,
                 topWalkBack, bottomWalkBack,
                 topRun, bottomRun,
-                topRunRight, bottomRunRight,
-                topRunLeft, bottomRunLeft,
+                topRunRight,
+                topRunLeft,
                 topStand, bottomStand,
                 topJump, bottomJump,
             } = {}
@@ -241,28 +246,46 @@ export default class AnimatedGameObject extends GameObject {
             isRunLeft,
             isJump,
             isWalkBack,
+            isRunForward,
         } = this.animationState;
 
         const playingAnimations = {
             top: (
                 (isAttack && topAttack)
                 || (isJump && topJump)
-                || (isRunRight && topRunRight)
-                || (isRunLeft && topRunLeft)
+                || (isRunRight && topRunLeft)
+                || (isRunLeft && topRunRight)
                 || (isWalkBack && topWalkBack)
                 || (isRun && topRun)
-                || ((!isAttack && !isRun && topStand))
+                || (topStand)
             ),
             bottom: (
-                (isAttack  && !isRun && bottomAttack)
-                || (isJump && bottomJump)
-                || (isRunRight && bottomRunRight)
-                || (isRunLeft && bottomRunLeft)
+                (isJump && bottomJump)
+                || (isRun && bottomRun)
                 || (isWalkBack && bottomWalkBack)
-                || (isRun && !isWalkBack && bottomRun)
-                || (!isAttack && !isRun && bottomStand)
+                || (isAttack && bottomAttack)
+                || (bottomStand)
             ),
         };
+
+        const legsRotationBone = this.object.getChildByName('Legs_Rotation');
+        if (legsRotationBone) {
+            const { rotation } = legsRotationBone;
+            let y = -0.3;
+
+            if (isRunLeft) {
+                y = isRunForward
+                    ? 0.5
+                    : isWalkBack ? 1.5 : 1;
+            } else if (isRunRight) {
+                y = isRunForward
+                    ? -1.2
+                    : isWalkBack ? -2.2 : -1.7;
+            }
+
+            rotation.set(0, rotation.y - (rotation.y - y) / 10, 0);
+        }
+
 
         this.blendAnimations(playingAnimations);
     }
@@ -329,14 +352,14 @@ export default class AnimatedGameObject extends GameObject {
             animation = jump;
         }
 
-        if (!isJump && !isAttack && isRun) {
+        if (!isJump && !isAttack) {
             if (isWalkBack && walkBack) {
                 animation = walkBack;
             } else if (isRunLeft && runLeft) {
                 animation = runLeft;
             } else if (isRunRight && runRight) {
                 animation = runRight;
-            } else if (run) {
+            } else if (isRun && run) {
                 animation = run;
             }
         }

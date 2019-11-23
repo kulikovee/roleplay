@@ -27,8 +27,6 @@ export default class Unit extends MovingGameObject {
     update() {
         MovingGameObject.prototype.update.call(this);
 
-        this.animationState.isRun = this.getScalarAcceleration() > 0.02;
-
         if (this.isAttackReleased()) {
             this.animationState.isAttack = false;
 

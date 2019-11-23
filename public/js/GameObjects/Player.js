@@ -40,7 +40,13 @@ export default class Player extends FiringUnit {
 
         this.animationState.isRunLeft = input.horizontal === -1;
         this.animationState.isRunRight = input.horizontal === 1;
+        this.animationState.isRunForward = input.vertical === 1;
         this.animationState.isWalkBack = input.vertical === -1;
+        this.animationState.isRun = (
+            input.vertical === 1
+            || this.animationState.isRunLeft
+            || this.animationState.isRunRight
+        );
 
         acceleration.add(this.getMovingAcceleration());
 

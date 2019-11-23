@@ -45,6 +45,8 @@ export default class AI extends FiringUnit {
             this.isRunning = false;
         }
 
+        this.animationState.isRun = this.isRunning;
+
         if (this.isRunning) {
             this.lastRun = Date.now();
             acceleration.add(this.getForward().multiplyScalar(speed));
