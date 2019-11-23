@@ -19,6 +19,8 @@ export default class Scene {
         this.add = this.add.bind(this);
         this.remove = this.remove.bind(this);
         this.clearScene = this.clearScene.bind(this);
+        this.loadGLTF = this.loadGLTF.bind(this);
+        this.loadDae = this.loadDae.bind(this);
 
         this.players = {};
         this.renderer = renderer;
@@ -160,6 +162,16 @@ export default class Scene {
         });
     }
 
+    loadDae(params) {
+        const daeLoader = new THREE.ColladaLoader();
+        // daeLoader.options.convertUpAxis = true;
+        daeLoader.load(params.baseUrl + '.dae', (collada) => {
+            params.callback && params.callback(collada);
+            this.add(collada.scene);
+        });
+
+    }
+
     loadFBX(params) {
         const loader = new THREE.FBXLoader();
 
@@ -194,9 +206,9 @@ export default class Scene {
     }) {
         const gameObjectsService = this.gameObjectsService;
 
-        return this.loadFBX({
+        return this.loadGLTF({
             baseUrl: './public/assets/models/units/player',
-            callback: (gltf) => {
+            callback: (loadedModel) => {
                 if (isPlayerHelperNeeded) {
                     var helper = new THREE.SkeletonHelper(gltf);
                     helper.material.linewidth = 4;
@@ -204,9 +216,10 @@ export default class Scene {
                 }
 
                 const player = gameObjectsService.hookGameObject(new Player({
-                    animations: gltf.animations,
-                    object: gltf,
+                    animations: loadedModel.animations,
+                    object: loadedModel.scene,
                     input: this.input,
+                    complexAnimations: true,
                     onDamageTaken: () => {
                         this.ui.updatePlayerLabels();
                         onDamageTaken();
@@ -229,7 +242,7 @@ export default class Scene {
                             .filter(gameObject => (
                                 gameObject !== player
                                 && gameObject instanceof Unit
-                                && gameObject.position.distanceTo(player.position) < 1.3
+                                && gameObject.position.distanceTo(player.position) < 2
                             ))
                             .forEach((collisionGameObject) => {
                                 collisionGameObject.damageTaken({

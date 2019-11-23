@@ -10,11 +10,83 @@ const animationNames = {
     runLeft: 'Run Left',
     runRight: 'Run Right',
     walkBack: 'Walk Back',
+
+    // Complex animimations
+    topRun: 'Top Run',
+    bottomRun: 'Bottom Run',
+    topWalkBack: 'Top Walk Back',
+    bottomWalkBack: 'Bottom Walk Back',
+    topAttack: 'Top Attack',
+    bottomAttack: 'Bottom Attack',
+    topStand: 'Top Stand',
+    bottomStand: 'Bottom Stand',
+    topRunRight: 'Top Run Right',
+    topRunLeft: 'Top Run Left',
+    topJump: 'Top Jump',
+    bottomRunRight: 'Bottom Run Right',
+    bottomRunLeft: 'Bottom Run Left',
+    bottomJump: 'Bottom Jump',
 };
+
+const topAnimations = [
+    'topRun',
+    'topWalkBack',
+    'topAttack',
+    'topStand',
+    'topRunRight',
+    'topRunLeft',
+    'topJump',
+];
+
+const bottomAnimations = [
+    'bottomRun',
+    'bottomWalkBack',
+    'bottomAttack',
+    'bottomStand',
+    'bottomRunRight',
+    'bottomRunLeft',
+    'bottomJump',
+];
+
+const topBones = [
+    'Right_Forearm',
+    'Right_Arm',
+    'Right_Hand',
+    'Right_Hand_end',
+    'Right_Shoulder',
+    'Left_Shoulder',
+    'Left_Forearm',
+    'Left_Arm',
+    'Left_Hand',
+    'Left_Hand_end',
+    'Chest',
+    'Neck',
+    'Head',
+    'Head_end'
+];
+
+const bottomBones = [
+    'Main_Bone',
+    'Right_Leg',
+    'Right_Middle_Foot',
+    'Right_Foot',
+    'Right_Foot_end',
+    'Left_Leg',
+    'Left_Middle_Foot',
+    'Left_Foot',
+    'Left_Foot_end',
+];
 
 export default class AnimatedGameObject extends GameObject {
     constructor(params = {}) {
-        super({ animationNames: { ...animationNames }, ...params });
+        super({
+            animationNames: { ...animationNames },
+            topBones: [...topBones],
+            bottomBones: [...bottomBones],
+            topAnimations: [...topAnimations],
+            bottomAnimations: [...bottomAnimations],
+            ...params
+        });
 
         this.update = this.update.bind(this);
         this.createClipAction = this.createClipAction.bind(this);
@@ -22,6 +94,8 @@ export default class AnimatedGameObject extends GameObject {
         this.playAnimation = this.playAnimation.bind(this);
         this.getCurrentAnimation = this.getCurrentAnimation.bind(this);
         this.initAnimations = this.initAnimations.bind(this);
+        this.updateComplexAnimations = this.updateComplexAnimations.bind(this);
+        this.blendAnimations = this.blendAnimations.bind(this);
 
         this.animationState = {
             isRun: false,
@@ -32,6 +106,8 @@ export default class AnimatedGameObject extends GameObject {
             isRunRight: false,
             isRunLeft: false,
         };
+
+        this.playingAnimations = {};
 
         this.clock = new THREE.Clock();
         this.mixer = new THREE.AnimationMixer(this.params.object);
@@ -44,9 +120,12 @@ export default class AnimatedGameObject extends GameObject {
 
         if (this.mixer) this.mixer.update(this.clock.getDelta());
 
-        const animation = this.getCurrentAnimation();
-
-        animation && this.playAnimation(animation);
+        if (this.params.complexAnimations) {
+            this.updateComplexAnimations();
+        } else {
+            const animation = this.getCurrentAnimation();
+            animation && this.playAnimation(animation);
+        }
     }
 
     playAnimation(animation, { force } = {}) {
@@ -74,12 +153,28 @@ export default class AnimatedGameObject extends GameObject {
     }
 
     initAnimations(animationNames) {
+        const {
+            topAnimations,
+            bottomAnimations,
+            topBones,
+            bottomBones,
+            complexAnimations,
+        } = this.params;
+
         this.animations = Object.keys(animationNames).reduce(
             (result, key) => {
-                const modelAnimation = this.findModelAnimation(animationNames[key]);
-                const initedAnimation = this.createClipAction(modelAnimation);
+                let excludedBones = [];
 
-                if (initedAnimation) { initedAnimation.setEffectiveWeight(1); }
+                if (complexAnimations) {
+                    if (topAnimations.includes(key)) {
+                        excludedBones = bottomBones;
+                    } else if (bottomAnimations.includes(key)) {
+                        excludedBones = topBones;
+                    }
+                }
+
+                const modelAnimation = this.findModelAnimation(animationNames[key], { excludedBones });
+                let initedAnimation = this.createClipAction(modelAnimation);
 
                 return { ...result, [key]: initedAnimation };
             },
@@ -103,10 +198,99 @@ export default class AnimatedGameObject extends GameObject {
         return action && this.mixer.clipAction(action).stop();
     }
 
-    findModelAnimation(name) {
+    findModelAnimation(name, { excludedBones = [] } = {}) {
         const { animations = [] } = this.params;
 
-        return animations.find(animation => animation.name === name);
+        let animation = animations.find(animation => animation.name === name);
+
+        if (animation && excludedBones.length) {
+            return this.clearAnimationBones(animation, excludedBones);
+        }
+
+        return animation;
+    }
+
+    clearAnimationBones(animation, bones) {
+        if (animation) {
+            const getBoneName = item => item.name.split('.')[0],
+                isNotExcluded = item => !bones.includes(getBoneName(item));
+
+            animation.tracks = animation.tracks.filter(isNotExcluded);
+
+            return animation;
+        }
+    }
+
+    updateComplexAnimations() {
+        const {
+            animations: {
+                topAttack, bottomAttack,
+                topWalkBack, bottomWalkBack,
+                topRun, bottomRun,
+                topRunRight, bottomRunRight,
+                topRunLeft, bottomRunLeft,
+                topStand, bottomStand,
+                topJump, bottomJump,
+            } = {}
+        } = this;
+
+        const {
+            isAttack,
+            isRun,
+            isRunRight,
+            isRunLeft,
+            isJump,
+            isWalkBack,
+        } = this.animationState;
+
+        const playingAnimations = {
+            top: (
+                (isAttack && topAttack)
+                || (isJump && topJump)
+                || (isRunRight && topRunRight)
+                || (isRunLeft && topRunLeft)
+                || (isWalkBack && topWalkBack)
+                || (isRun && topRun)
+                || ((!isAttack && !isRun && topStand))
+            ),
+            bottom: (
+                (isAttack  && !isRun && bottomAttack)
+                || (isJump && bottomJump)
+                || (isRunRight && bottomRunRight)
+                || (isRunLeft && bottomRunLeft)
+                || (isWalkBack && bottomWalkBack)
+                || (isRun && !isWalkBack && bottomRun)
+                || (!isAttack && !isRun && bottomStand)
+            ),
+        };
+
+        this.blendAnimations(playingAnimations);
+    }
+
+    blendAnimations({ top, bottom }) {
+        if (!top || !bottom || !top._clip || !bottom._clip) return;
+        const getAnimationName = a => a._clip.name,
+            playAnimation = (fromAnimation, animation) => {
+                const animationName = getAnimationName(animation);
+                const fromAnimationName = fromAnimation && getAnimationName(fromAnimation);
+
+                if (fromAnimationName !== animationName) {
+                    animation.reset();
+                    animation.play();
+                    // animation.setEffectiveWeight(1);
+
+                    if (fromAnimation) {
+                        // fromAnimation.setEffectiveWeight(0);
+                        fromAnimation.crossFadeTo(animation, 0.3);
+                    }
+                }
+            };
+
+        playAnimation(this.playingAnimations.top, top);
+        playAnimation(this.playingAnimations.bottom, bottom);
+
+        this.playingAnimations.top = top;
+        this.playingAnimations.bottom = bottom;
     }
 
     getCurrentAnimation() {
