@@ -242,6 +242,7 @@ export default class Scene {
                             .filter(gameObject => (
                                 gameObject !== player
                                 && gameObject instanceof Unit
+                                && !gameObject.isDead()
                                 && gameObject.position.distanceTo(player.position) < 2
                             ))
                             .forEach((collisionGameObject) => {

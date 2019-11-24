@@ -98,12 +98,13 @@ export default class AnimatedGameObject extends GameObject {
         this.initAnimations = this.initAnimations.bind(this);
         this.updateComplexAnimations = this.updateComplexAnimations.bind(this);
         this.blendAnimations = this.blendAnimations.bind(this);
+        this.isMoving = this.isMoving.bind(this);
 
         this.animationState = {
-            isRun: false,
-            isRunRight: false,
-            isRunLeft: false,
-            isWalkBack: false,
+            isMovingForward: false,
+            isMovingRight: false,
+            isMovingLeft: false,
+            isMovingBackward: false,
             isRotateLeft: false,
             isRotateRight: false,
             isAttack: false,
@@ -223,6 +224,15 @@ export default class AnimatedGameObject extends GameObject {
         return animation;
     }
 
+    isMoving() {
+        return (
+            this.animationState.isMovingLeft
+            || this.animationState.isMovingRight
+            || this.animationState.isMovingForward
+            || this.animationState.isMovingBackward
+        );
+    }
+
     clearAnimationBones(animation, bones) {
         if (animation) {
             const getBoneName = item => item.name.split('.')[0],
@@ -250,12 +260,11 @@ export default class AnimatedGameObject extends GameObject {
 
         const {
             isAttack,
-            isRun,
-            isRunRight,
-            isRunLeft,
+            isMovingRight,
+            isMovingLeft,
+            isMovingBackward,
+            isMovingForward,
             isJump,
-            isWalkBack,
-            isRunForward,
             isDie,
         } = this.animationState;
 
@@ -263,16 +272,22 @@ export default class AnimatedGameObject extends GameObject {
             top: (
                 (isAttack && topAttack)
                 || (isJump && topJump)
-                || (isRunRight && topRunRight)
-                || (isRunLeft && topRunLeft)
-                || (isWalkBack && topWalkBack)
-                || (isRun && topRun)
+                || (isMovingBackward && isMovingRight && topRunLeft)
+                || (isMovingBackward && isMovingLeft && topRunRight)
+                || (isMovingBackward && topWalkBack)
+                || (isMovingRight && topRunRight)
+                || (isMovingLeft && topRunLeft)
+                || (isMovingForward && topRun)
                 || (topStand)
             ),
             bottom: (
                 (isJump && bottomJump)
-                || (isRun && bottomRun)
-                || (isWalkBack && bottomWalkBack)
+                || (isMovingBackward && isMovingRight && bottomWalkBack)
+                || (isMovingBackward && isMovingLeft && bottomWalkBack)
+                || (isMovingBackward && bottomWalkBack)
+                || (isMovingRight && bottomRun)
+                || (isMovingLeft && bottomRun)
+                || (isMovingForward && bottomRun)
                 || (isAttack && bottomAttack)
                 || (bottomStand)
             ),
@@ -284,14 +299,14 @@ export default class AnimatedGameObject extends GameObject {
             const { rotation } = legsRotationBone;
             let y = -0.3;
 
-            if (isRunLeft) {
-                y = isRunForward
+            if (isMovingLeft) {
+                y = isMovingForward
                     ? 0.5
-                    : isWalkBack ? 2 : 1;
-            } else if (isRunRight) {
-                y = isRunForward
+                    : isMovingBackward ? -0.7 : 1;
+            } else if (isMovingRight) {
+                y = isMovingForward
                     ? -1.2
-                    : isWalkBack ? -2.5 : -1.7;
+                    : isMovingBackward ? 0.4 : -1.7;
             }
 
             this.legsRotationY = this.legsRotationY - (this.legsRotationY - y) / 10;
@@ -354,11 +369,11 @@ export default class AnimatedGameObject extends GameObject {
 
         const {
             isAttack,
-            isRun,
+            isMovingForward,
             isJump,
-            isRunLeft,
-            isRunRight,
-            isWalkBack,
+            isMovingLeft,
+            isMovingRight,
+            isMovingBackward,
             isRotateLeft,
             isRotateRight,
             isDie,
@@ -368,10 +383,10 @@ export default class AnimatedGameObject extends GameObject {
             (isDie && die)
             || (isAttack && attack)
             || (isJump && jump)
-            || (isWalkBack && walkBack)
-            || (isRunLeft && runLeft)
-            || (isRunRight && runRight)
-            || (isRun && run)
+            || (isMovingBackward && walkBack)
+            || (isMovingLeft && runLeft)
+            || (isMovingRight && runRight)
+            || (isMovingForward && run)
             || (isRotateLeft && rotateLeft)
             || (isRotateRight && rotateRight)
             || stand

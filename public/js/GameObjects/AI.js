@@ -49,7 +49,7 @@ export default class AI extends FiringUnit {
             this.isRunning = false;
         }
 
-        this.animationState.isRun = this.isRunning;
+        this.animationState.isMovingForward = this.isRunning;
 
         if (this.isRunning) {
             this.lastRun = Date.now();
