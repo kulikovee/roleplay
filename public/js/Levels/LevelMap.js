@@ -88,7 +88,7 @@ export default class LevelMap extends AbstractLevel {
 
         const badGuyTimeout = 5000 - player.getLevel() * 500;
         const isBadGuyReleased = Date.now() - this.lastBadGuyCreated >= badGuyTimeout;
-        const badGuysCount = gameObjects.filter(gameObject => gameObject instanceof AI).length;
+        const badGuysCount = gameObjects.filter(gameObject => gameObject instanceof AI && !gameObject.isDead()).length;
 
         if (badGuysCount < 5 && isBadGuyReleased) {
             this.lastBadGuyCreated = Date.now();

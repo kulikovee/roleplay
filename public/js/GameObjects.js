@@ -60,6 +60,7 @@ export default class GameObjectsService {
             parent: firingGameObject,
             getCollisions: () => this.gameObjects.filter(gameObject => (
                 gameObject instanceof Unit
+                && !gameObject.isDead()
                 && fireGameObject.params.parent !== gameObject
                 && fireGameObject.position.distanceTo(gameObject.position) < 3
             )),

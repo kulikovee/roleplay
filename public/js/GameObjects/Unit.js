@@ -22,10 +22,15 @@ export default class Unit extends MovingGameObject {
         this.attack = this.attack.bind(this);
         this.damageTaken = this.damageTaken.bind(this);
         this.isAttackReleased = this.isAttackReleased.bind(this);
+        this.isDead = this.isDead.bind(this);
     }
 
     update() {
         MovingGameObject.prototype.update.call(this);
+
+        if (this.isDead()) {
+            return;
+        }
 
         if (this.isAttackReleased()) {
             this.animationState.isAttack = false;
@@ -48,6 +53,10 @@ export default class Unit extends MovingGameObject {
         this.shouldAttack = true;
     }
 
+    isDead() {
+        return this.params.hp <= 0;
+    }
+
     /**
      * @param {Fire} fire
      */
@@ -62,16 +71,19 @@ export default class Unit extends MovingGameObject {
                 fireParent.dispatchEvent('onDamageDeal', this);
             }
 
-            if (this.params.hp <= 0) {
+            if (this.isDead()) {
                 this.dispatchEvent('onDie', fireParent);
+                this.animationState.isDie = true;
 
                 if (fireParent) {
                     fireParent.dispatchEvent('onKill', this);
                 }
 
-                if (typeof this.params.destroy === 'function') {
-                    this.params.destroy();
-                }
+                setTimeout(() => {
+                    if (this.isDead() && typeof this.params.destroy === 'function') {
+                        this.params.destroy();
+                    }
+                }, 30000);
             }
         }
     }

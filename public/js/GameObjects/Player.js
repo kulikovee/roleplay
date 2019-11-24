@@ -27,6 +27,9 @@ export default class Player extends FiringUnit {
 
     update() {
         FiringUnit.prototype.update.call(this);
+        if (this.isDead()) {
+            return;
+        }
 
         const { input, object, acceleration, speed } = this.params;
 

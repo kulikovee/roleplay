@@ -26,6 +26,11 @@ export default class FiringUnit extends Unit {
 
     update() {
         Unit.prototype.update.call(this);
+
+        if (this.isDead()) {
+            return;
+        }
+
         this.isFire = false;
 
         if (this.shouldFire && this.params.fire && (Date.now() - this.latestFire >= this.params.fireRate)) {

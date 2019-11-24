@@ -23,6 +23,10 @@ export default class AI extends FiringUnit {
     update() {
         FiringUnit.prototype.update.call(this);
 
+        if (this.isDead()) {
+            return;
+        }
+
         const { object, target, acceleration, speed } = this.params;
 
         const rotationToTargetRadians = Math.atan2(

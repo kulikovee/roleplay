@@ -72,6 +72,10 @@ export default class UI {
     }
 
     switchCamera() {
+        document.getElementById('switch-third-person').value = this.scene.input.isThirdPerson
+            ? 'Switch to Third Person Camera'
+            : 'Switch to Isometric Camera';
+
         this.scene.input.isThirdPerson = !this.scene.input.isThirdPerson;
     }
 

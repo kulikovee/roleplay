@@ -10,6 +10,7 @@ const animationNames = {
     runLeft: 'Run Left',
     runRight: 'Run Right',
     walkBack: 'Walk Back',
+    die: 'Die',
 
     // Complex animimations
     topRun: 'Top Run',
@@ -75,6 +76,7 @@ const bottomBones = [
     'Left_Middle_Foot',
     'Left_Foot',
     'Left_Foot_end',
+    'Legs_Rotation',
 ];
 
 export default class AnimatedGameObject extends GameObject {
@@ -106,9 +108,11 @@ export default class AnimatedGameObject extends GameObject {
             isRotateRight: false,
             isAttack: false,
             isJump: false,
+            isDie: false,
         };
 
         this.playingAnimations = {};
+        this.legsRotationY = 0;
 
         this.clock = new THREE.Clock();
         this.mixer = new THREE.AnimationMixer(this.params.object);
@@ -182,13 +186,17 @@ export default class AnimatedGameObject extends GameObject {
             {}
         );
 
-        const { animations: { jump, attack, topAttack } = {} } = this;
+        const { animations: { jump, attack, topAttack, die } = {} } = this;
 
         if (jump) {
             jump.setLoop(THREE.LoopOnce, 0);
             jump.clampWhenFinished = true;
         }
 
+        if (die) {
+            die.setLoop(THREE.LoopOnce, 0);
+            die.clampWhenFinished = true;
+        }
 
         if (attack) {
             attack.setDuration(this.params.attackRate);
@@ -236,6 +244,7 @@ export default class AnimatedGameObject extends GameObject {
                 topRunLeft,
                 topStand, bottomStand,
                 topJump, bottomJump,
+                die,
             } = {}
         } = this;
 
@@ -247,14 +256,15 @@ export default class AnimatedGameObject extends GameObject {
             isJump,
             isWalkBack,
             isRunForward,
+            isDie,
         } = this.animationState;
 
         const playingAnimations = {
             top: (
                 (isAttack && topAttack)
                 || (isJump && topJump)
-                || (isRunRight && topRunLeft)
-                || (isRunLeft && topRunRight)
+                || (isRunRight && topRunRight)
+                || (isRunLeft && topRunLeft)
                 || (isWalkBack && topWalkBack)
                 || (isRun && topRun)
                 || (topStand)
@@ -266,9 +276,10 @@ export default class AnimatedGameObject extends GameObject {
                 || (isAttack && bottomAttack)
                 || (bottomStand)
             ),
+            whole: isDie && die,
         };
 
-        const legsRotationBone = this.object.getChildByName('Legs_Rotation');
+        const legsRotationBone = this.getChildByName('Legs_Rotation');
         if (legsRotationBone) {
             const { rotation } = legsRotationBone;
             let y = -0.3;
@@ -276,22 +287,27 @@ export default class AnimatedGameObject extends GameObject {
             if (isRunLeft) {
                 y = isRunForward
                     ? 0.5
-                    : isWalkBack ? 1.5 : 1;
+                    : isWalkBack ? 2 : 1;
             } else if (isRunRight) {
                 y = isRunForward
                     ? -1.2
-                    : isWalkBack ? -2.2 : -1.7;
+                    : isWalkBack ? -2.5 : -1.7;
             }
 
-            rotation.set(0, rotation.y - (rotation.y - y) / 10, 0);
+            this.legsRotationY = this.legsRotationY - (this.legsRotationY - y) / 10;
+            rotation.set(rotation.x, this.legsRotationY, rotation.z);
         }
 
 
         this.blendAnimations(playingAnimations);
     }
 
-    blendAnimations({ top, bottom }) {
-        if (!top || !bottom || !top._clip || !bottom._clip) return;
+    blendAnimations({ top, bottom, whole }) {
+        const isTopBottom = (top && bottom && top._clip && bottom._clip);
+        const isWhole = whole && whole._clip;
+
+        if (!isTopBottom && !isWhole) return;
+
         const getAnimationName = a => a._clip.name,
             playAnimation = (fromAnimation, animation) => {
                 const animationName = getAnimationName(animation);
@@ -300,20 +316,24 @@ export default class AnimatedGameObject extends GameObject {
                 if (fromAnimationName !== animationName) {
                     animation.reset();
                     animation.play();
-                    // animation.setEffectiveWeight(1);
 
                     if (fromAnimation) {
-                        // fromAnimation.setEffectiveWeight(0);
                         fromAnimation.crossFadeTo(animation, 0.3);
                     }
                 }
             };
 
-        playAnimation(this.playingAnimations.top, top);
-        playAnimation(this.playingAnimations.bottom, bottom);
+        if (isWhole) {
+            playAnimation(this.playingAnimations.top, whole);
+            this.playingAnimations.top = whole;
+            this.playingAnimations.bottom = whole;
+        } else {
+            playAnimation(this.playingAnimations.top, top);
+            playAnimation(this.playingAnimations.bottom, bottom);
 
-        this.playingAnimations.top = top;
-        this.playingAnimations.bottom = bottom;
+            this.playingAnimations.top = top;
+            this.playingAnimations.bottom = bottom;
+        }
     }
 
     getCurrentAnimation() {
@@ -328,6 +348,7 @@ export default class AnimatedGameObject extends GameObject {
                 jump,
                 rotateLeft,
                 rotateRight,
+                die,
             } = {}
         } = this;
 
@@ -340,38 +361,20 @@ export default class AnimatedGameObject extends GameObject {
             isWalkBack,
             isRotateLeft,
             isRotateRight,
+            isDie,
         } = this.animationState;
 
-        let animation = stand;
-
-        if (isAttack && attack) {
-            animation = attack;
-        }
-
-        if (!isAttack && isJump) {
-            animation = jump;
-        }
-
-        if (!isJump && !isAttack) {
-            if (isWalkBack && walkBack) {
-                animation = walkBack;
-            } else if (isRunLeft && runLeft) {
-                animation = runLeft;
-            } else if (isRunRight && runRight) {
-                animation = runRight;
-            } else if (isRun && run) {
-                animation = run;
-            }
-        }
-
-        if (!isJump && !isAttack && !isRun) {
-            if (isRotateLeft && rotateLeft) {
-                animation = rotateLeft;
-            } else if (isRotateRight && rotateRight) {
-                animation = rotateRight;
-            }
-        }
-
-        return animation;
+        return (
+            (isDie && die)
+            || (isAttack && attack)
+            || (isJump && jump)
+            || (isWalkBack && walkBack)
+            || (isRunLeft && runLeft)
+            || (isRunRight && runRight)
+            || (isRun && run)
+            || (isRotateLeft && rotateLeft)
+            || (isRotateRight && rotateRight)
+            || stand
+        );
     }
 }
