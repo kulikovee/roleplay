@@ -2,12 +2,14 @@ import AI from './GameObjects/AI.js';
 import Player from './GameObjects/Player.js';
 import Fire from './GameObjects/Fire.js';
 import Unit from './GameObjects/Unit.js';
+import AnimatedGameObject from './GameObjects/AnimatedGameObject.js';
 
 export {
     AI,
     Player,
     Fire,
     Unit,
+    AnimatedGameObject,
 };
 
 export default class GameObjectsService {
@@ -30,7 +32,7 @@ export default class GameObjectsService {
     }
 
     /**
-     * @param {THREE.Object3D} firingGameObject
+     * @param {GameObject} firingGameObject
      */
     fire(firingGameObject) {
         const createLightCube = left => this.scene.createCube({
@@ -71,7 +73,7 @@ export default class GameObjectsService {
     }
 
     /**
-     * @param {THREE.Object3D} gameObject
+     * @param {GameObject} gameObject
      */
     hookGameObject(gameObject) {
         this.gameObjects.push(gameObject);
@@ -92,7 +94,7 @@ export default class GameObjectsService {
     }
 
     /**
-     * @param {THREE.Object3D} gameObject
+     * @param {GameObject} gameObject
      */
     destroyGameObject(gameObject) {
         const index = this.gameObjects.indexOf(gameObject);
@@ -101,7 +103,9 @@ export default class GameObjectsService {
             this.gameObjects.splice(index, 1);
         }
 
-        this.scene.remove(gameObject.object);
+        const parent = gameObject.object.parent || this.scene;
+
+        parent.remove(gameObject.object);
     }
 }
 

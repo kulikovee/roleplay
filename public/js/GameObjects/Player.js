@@ -11,10 +11,9 @@ export default class Player extends FiringUnit {
             score: 500,
             isFire: false,
             mas: 1,
+            level: 1,
             ...params,
         });
-
-        console.log('Player', this);
 
         this.update = this.update.bind(this);
         this.getExperience = this.getExperience.bind(this);
@@ -23,10 +22,25 @@ export default class Player extends FiringUnit {
         this.getFireInitialPosition = this.getFireInitialPosition.bind(this);
         this.getFireInitialRotation = this.getFireInitialRotation.bind(this);
         this.isGrounded = this.isGrounded.bind(this);
+
+        console.log('Player', this);
+
+        params.onLevelUp && this.addEventListener('onLevelUp', params.onLevelUp);
+
+        this.addEventListener('onKill', () => {
+            const level = this.getLevel();
+            console.log('onKill', { level, paramsLevel: this.params.level });
+
+            if (this.params.level !== level) {
+                this.params.level = level;
+                params.onLevelUp && this.dispatchEvent('onLevelUp', params.onLevelUp);
+            }
+        });
     }
 
     update() {
         FiringUnit.prototype.update.call(this);
+
         if (this.isDead()) {
             return;
         }

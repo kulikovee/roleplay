@@ -56,9 +56,9 @@ export default class LevelMap extends AbstractLevel {
     createEnvironment() {
         const pivot = new THREE.Object3D();
 
-        this.scene.loadObj({
+        this.scene.loadGLTF({
             baseUrl: './public/assets/models/enviroment/hall/hall',
-            callback: (object) => pivot.add(object)
+            callback: object => pivot.add(object.scene)
         });
 
         return pivot;
@@ -108,7 +108,7 @@ export default class LevelMap extends AbstractLevel {
                     animations: gltf.animations,
                     object: gltf.scene,
                     target: this.scene.player,
-                    speed: 0.04 + level * 0.01 + player.params.speed * 0.5,
+                    speed: 0.04 + player.params.speed * 0.5,
                     damage: 5 + level * 5,
                     hp: 140 + level * 30,
                     fire: () => null, // gameObjectsService.fire(badGuy),

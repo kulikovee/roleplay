@@ -2,6 +2,7 @@ import Renderer from './js/Renderer.js';
 import Scene from './js/Scene.js';
 
 window.addEventListener('load', function () {
+    THREE.Cache.enabled = true;
     const container = document.getElementById('container'),
         renderer = new Renderer(container),
         scene = new Scene(renderer),

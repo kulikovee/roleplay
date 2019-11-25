@@ -38,7 +38,7 @@ export default class GameObject {
     addEventListener(eventName, callback) {
         if (typeof callback === 'function') {
             if (this.events[eventName]) {
-                this[eventName].push(callback);
+                this.events[eventName].push(callback);
             } else {
                 this.events[eventName] = [callback];
             }

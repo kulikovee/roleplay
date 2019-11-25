@@ -1,7 +1,7 @@
 import Input from './Input.js';
 import UI from './UI.js';
 import Camera from './Camera.js';
-import GameObjectsService, { Player, Unit } from './GameObjects.js';
+import GameObjectsService, { Player, Unit, AnimatedGameObject } from './GameObjects.js';
 import Connection from './Connection.js';
 import Particles from './Particles.js';
 import LevelMap from './Levels/LevelMap.js';
@@ -15,12 +15,10 @@ export default class Scene {
     constructor(renderer) {
         this.animate = this.animate.bind(this);
         this.createCube = this.createCube.bind(this);
-        this.loadObj = this.loadObj.bind(this);
         this.add = this.add.bind(this);
         this.remove = this.remove.bind(this);
         this.clearScene = this.clearScene.bind(this);
         this.loadGLTF = this.loadGLTF.bind(this);
-        this.loadDae = this.loadDae.bind(this);
 
         this.players = {};
         this.renderer = renderer;
@@ -127,58 +125,16 @@ export default class Scene {
         return cube;
     }
 
-    loadObj(params) {
-        params = params || {};
-        const baseUrl = params.baseUrl,
-            callback = params.callback || function () {
-            },
-            done = (object) => {
-                if (!this.loadObj[baseUrl]) {
-                    this.loadObj[baseUrl] = object;
-                }
-
-                this.add(object);
-                callback(object);
-            };
-
-        if (this.loadObj[baseUrl]) {
-            return done(this.loadObj[baseUrl].clone());
-        }
-
-        return new THREE.MTLLoader().load(`${params.baseUrl}.mtl`, function (materials) {
-            materials.preload();
-            const loader = new THREE.OBJLoader();
-            loader.setMaterials(materials);
-            loader.load(`${params.baseUrl}.obj`, done);
-        });
-    }
-
     loadGLTF(params) {
         const loader = new THREE.GLTFLoader();
+        const url = `${params.baseUrl}.glb${params.isGLTF ? '.gltf' : ''}`;
 
-        loader.load(`${params.baseUrl}.glb${params.isGLTF ? '.gltf' : ''}`, (gltf) => {
-            params.callback && params.callback(gltf);
-            this.add(gltf.scene);
-        });
-    }
+        loader.load(url, (loadedModel) => {
+            params.callback && params.callback(loadedModel);
 
-    loadDae(params) {
-        const daeLoader = new THREE.ColladaLoader();
-        // daeLoader.options.convertUpAxis = true;
-        daeLoader.load(params.baseUrl + '.dae', (collada) => {
-            params.callback && params.callback(collada);
-            this.add(collada.scene);
-        });
-
-    }
-
-    loadFBX(params) {
-        const loader = new THREE.FBXLoader();
-
-        loader.load(`${params.baseUrl}.fbx`, (fbx) => {
-            params.callback && params.callback(fbx);
-            fbx.scale.set(0.01, 0.01, 0.01);
-            this.add(fbx);
+            if (!params.noScene) {
+                this.add(loadedModel.scene);
+            }
         });
     }
 
@@ -237,6 +193,25 @@ export default class Scene {
                         this.ui.pause = true;
                         onDie();
                     },
+                    onLevelUp: () => this.loadGLTF({
+                        baseUrl: './public/assets/models/effects/level-up/level-up',
+                        noScene: true,
+                        callback: loadedObject => {
+                            loadedObject.scene.scale.set(1.5, 1.5, 1.5);
+
+                            this.player.object.add(loadedObject.scene);
+
+                            const effect = new AnimatedGameObject({
+                                object: loadedObject.scene,
+                                animations: loadedObject.animations,
+                                destroy: () => this.gameObjectsService.destroyGameObject(player),
+                            });
+
+                            this.gameObjectsService.hookGameObject(effect);
+
+                            setTimeout(() => this.gameObjectsService.destroyGameObject(effect), 2080);
+                        }
+                    }),
                     attack: () => {
                         this.gameObjectsService.gameObjects
                             .filter(gameObject => (

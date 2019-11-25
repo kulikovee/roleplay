@@ -23,7 +23,7 @@ export default class AbstractLevel {
         const pivot = new THREE.Object3D();
 
         const pointLight = new THREE.PointLight(0xffffff);
-        pointLight.position.set(100, 250, 250);
+        pointLight.position.set(250, 250, 250);
         pivot.add(pointLight);
 
         var ambientLight = new THREE.AmbientLight(0x303030);
