@@ -199,12 +199,18 @@ export default class Scene {
                         callback: loadedObject => {
                             loadedObject.scene.scale.set(1.5, 1.5, 1.5);
 
+                            loadedObject.scene.traverse((child) => {
+                                if (child.isMesh) {
+                                    child.material.transparent = true;
+                                    child.material.alphaTest = 0.5;
+                                }
+                            });
+
                             this.player.object.add(loadedObject.scene);
 
                             const effect = new AnimatedGameObject({
                                 object: loadedObject.scene,
                                 animations: loadedObject.animations,
-                                destroy: () => this.gameObjectsService.destroyGameObject(player),
                             });
 
                             this.gameObjectsService.hookGameObject(effect);
