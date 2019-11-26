@@ -45,16 +45,20 @@ export default class UI {
 
     updatePlayerLabels() {
         if (this.scene.player) {
-            document.getElementById('exp').innerHTML =
-                `Exp: ${this.scene.player.getExperience()} | Level: ${this.scene.player.getLevel()}`;
+            const { player } = this.scene;
 
-            document.getElementById('score').innerHTML = `$${Math.round(this.scene.player.params.score)}`;
-            document.getElementById('shop-score').innerHTML = `Shop ($${Math.round(this.scene.player.params.score)} left):`;
+            document.getElementById('exp').innerHTML =
+                `Exp: ${Math.floor(player.getExperience())} \
+                / ${Math.floor(player.getLevelExperience())} \
+                | Level: ${player.getLevel()}`;
+
+            document.getElementById('score').innerHTML = `$${Math.round(player.params.score)}`;
+            document.getElementById('shop-score').innerHTML = `Shop ($${Math.round(player.params.score)} left):`;
 
             document.getElementById('hp').innerHTML =`
-                HP +${Math.round(this.scene.player.params.hp)} \
-                | Speed: ${Math.round(this.scene.player.params.speed * 1000)}% \
-                | Damage: ${this.scene.player.params.damage}
+                HP +${Math.round(player.params.hp)} \
+                | Speed: ${Math.round(player.params.speed * 1000)}% \
+                | Damage: ${player.params.damage}
             `;
         }
     }
@@ -77,6 +81,7 @@ export default class UI {
             : 'Switch to Isometric Camera';
 
         this.scene.input.isThirdPerson = !this.scene.input.isThirdPerson;
+        this.scene.camera.update();
     }
 
     restart() {

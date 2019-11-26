@@ -18,6 +18,7 @@ export default class Player extends FiringUnit {
         this.update = this.update.bind(this);
         this.getExperience = this.getExperience.bind(this);
         this.getLevel = this.getLevel.bind(this);
+        this.getLevelExperience = this.getLevelExperience.bind(this);
         this.getMovingAcceleration = this.getMovingAcceleration.bind(this);
         this.getFireInitialPosition = this.getFireInitialPosition.bind(this);
         this.getFireInitialRotation = this.getFireInitialRotation.bind(this);
@@ -29,7 +30,6 @@ export default class Player extends FiringUnit {
 
         this.addEventListener('onKill', () => {
             const level = this.getLevel();
-            console.log('onKill', { level, paramsLevel: this.params.level });
 
             if (this.params.level !== level) {
                 this.params.level = level;
@@ -99,6 +99,10 @@ export default class Player extends FiringUnit {
 
     getExperience() {
         return this.params.experience;
+    }
+
+    getLevelExperience() {
+        return Math.pow(this.getLevel(), 2) * 100;
     }
 
     getLevel() {
