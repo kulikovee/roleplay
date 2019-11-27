@@ -21,10 +21,8 @@ export default class Intervals {
                 .forEach((interval) => {
                     interval.calledAt = this.timePassed;
                     interval.fn();
-                    console.log('call', interval);
 
                     if (interval.loops && --interval.loops === 0) {
-                        console.log('clearInterval', interval);
                         this.clearInterval(interval.id);
                     }
                 });

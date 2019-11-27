@@ -22,6 +22,7 @@ export default class Scene {
         this.loadGLTF = this.loadGLTF.bind(this);
 
         this.players = {};
+        this.player = undefined;
         this.intervals = new Intervals(this);
         this.renderer = renderer;
         this.scene = new THREE.Scene();
@@ -36,10 +37,30 @@ export default class Scene {
         this.connection = new Connection(this, 'gohtml.ru');
         this.level = new LevelMap(this);
 
-        this.particles.createParticles();
+        const area = new THREE.Vector3(100, 25, 100);
+
+        this.particles.createParticles({
+            particleCount: 100000,
+            blending: THREE.NormalBlending,
+            position: new THREE.Vector3(-area.x / 2, 0, -area.z / 2),
+            getParticlePosition: (i, position = this.particles.getRandomPosition(area)) => {
+                if (position.y < 0) {
+                    const newPosition = this.particles.getRandomPosition(area);
+                    position.x = newPosition.x;
+                    position.y = area.y;
+                    position.z = newPosition.z;
+                }
+
+                return position;
+            }
+        });
 
         this.clearScene();
         this.animate();
+
+        const color = 0xFFFFFF;
+        const density = 0.05;
+        this.scene.fog = new THREE.FogExp2(color, density);
 
         console.log('Scene', this);
     }

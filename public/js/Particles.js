@@ -40,60 +40,72 @@ export default class Particles {
         });
     }
 
+    getRandomPosition(area) {
+        const random = (from, to) => Math.random() * (to - from) + from;
+
+        return new THREE.Vector3(
+            random(0, area.x),
+            random(0, area.y),
+            random(0, area.z),
+        );
+    }
+
     createParticles({
-        particleCount = 100,
+        particleCount = 1000,
         noScene = false,
+        position = new THREE.Vector3(0, 5, 0),
+        size = 0.01,
+        color = 0xFFFFFF,
+        blending = THREE.AdditiveBlending,
+        depthTest = true,
+        transparent = true,
+        area = new THREE.Vector3(10, 5, 10),
+        getParticleVelocity = () => new THREE.Vector3(-0.01, -0.01, 0),
+        getParticlePosition = (i, position = this.getRandomPosition(area)) => position,
     } = {}) {
         const particles = new THREE.Geometry;
-
-        const pMaterial = new THREE.PointCloudMaterial({
-           color: 0xFFFFFF,
-           size: 4,
-           blending: THREE.AdditiveBlending,
-           depthTest: false,
-           transparent: true
-        });
+        const material = new THREE.PointCloudMaterial({ color, size, blending, depthTest, transparent });
 
         for (var i = 0; i < particleCount; i++) {
-            const pX = Math.random() * 100 - 50,
-                pY = Math.random() * 50 - 25,
-                pZ = Math.random() * 100 - 50,
-                particle = new THREE.Vector3(pX, pY, pZ);
-            particle.velocity = {};
-            particle.velocity.y = -1;
+            const particle = getParticlePosition(i);
+            particles.velocity = getParticleVelocity(i, particle);
             particles.vertices.push(particle);
         }
 
-        const particleSystem = new THREE.PointCloud(particles, pMaterial);
-        particleSystem.position.y = 200;
+        const particleSystem = new THREE.PointCloud(particles, material);
+        particleSystem.position.copy(position);
+
+        this.particles.push({
+            object: particleSystem,
+            update: function () {
+                let index = particleCount;
+
+                while (index--) {
+                    const particle = particles.vertices[index];
+
+                    particle.velocity = getParticleVelocity(index, particle);
+
+                    particle.x += particle.velocity.x;
+                    particle.y += particle.velocity.y;
+                    particle.z += particle.velocity.z;
+
+                    const particlePosition = getParticlePosition(index, particle);
+
+                    particle.x = particlePosition.x;
+                    particle.y = particlePosition.y;
+                    particle.z = particlePosition.z;
+                }
+
+                particles.verticesNeedUpdate = true;
+            },
+        });
 
         if (!noScene) {
             this.scene.add(particleSystem);
         }
 
-        const particlesWrapper = {
-            object: particleSystem,
-            update: function () {
-                let pCount = particleCount;
+        console.log({ particleSystem });
 
-                while (pCount--) {
-                    const particle = particles.vertices[pCount];
-                    if (particle.y < -20) {
-                        particle.y = 20;
-                        particle.velocity.y = -1.2;
-                    }
-
-                    particle.velocity.y -= Math.random() * .02;
-
-                    particle.y += particle.velocity.y;
-                }
-
-                particles.verticesNeedUpdate = true;
-            },
-        };
-
-        this.particles.push(particlesWrapper);
-
-        return particlesWrapper;
+        return particleSystem;
     }
 }
