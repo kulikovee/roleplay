@@ -182,7 +182,7 @@ export default class Scene {
                     },
                     onKill: (object) => {
                         this.player.params.experience += object.params.bounty;
-                        this.player.params.score += object.params.bounty;
+                        this.player.params.money += object.params.bounty;
                         this.ui.updatePlayerLabels();
 
                         onKill();

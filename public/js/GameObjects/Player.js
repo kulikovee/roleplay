@@ -8,7 +8,8 @@ export default class Player extends FiringUnit {
             damage: 50,
             hp: 100,
             experience: 0,
-            score: 500,
+            unspentTalents: 0,
+            money: 500,
             isFire: false,
             mas: 1,
             level: 1,
@@ -33,6 +34,7 @@ export default class Player extends FiringUnit {
 
             if (this.params.level !== level) {
                 this.params.level = level;
+                this.params.unspentTalents += 1;
                 params.onLevelUp && this.dispatchEvent('onLevelUp', params.onLevelUp);
             }
         });

@@ -22,8 +22,9 @@ export default class UI {
 
         document.getElementById('close-shop').onclick = () => this.closeShop();
         document.getElementById('buy-hp').onclick = () => this.buy('hp');
-        document.getElementById('buy-speed').onclick = () => this.buy('speed');
-        document.getElementById('buy-damage').onclick = () => this.buy('damage');
+        document.getElementById('buy-talent-hp').onclick = () => this.buy('talent-hp');
+        document.getElementById('buy-talent-speed').onclick = () => this.buy('talent-speed');
+        document.getElementById('buy-talent-damage').onclick = () => this.buy('talent-damage');
         document.getElementById('restart-button').onclick = () => this.restart();
         document.getElementById('switch-third-person').onclick = () => this.switchCamera();
 
@@ -52,8 +53,9 @@ export default class UI {
                 / ${Math.floor(player.getLevelExperience())} \
                 | Level: ${player.getLevel()}`;
 
-            document.getElementById('score').innerHTML = `$${Math.round(player.params.score)}`;
-            document.getElementById('shop-score').innerHTML = `Shop ($${Math.round(player.params.score)} left):`;
+            document.getElementById('money').innerHTML = `$${Math.round(player.params.money)}`;
+            document.getElementById('shop-talent').innerHTML = `Talents (${Math.round(player.params.unspentTalents)} unspent talents left):`;
+            document.getElementById('shop-money').innerHTML = `Shop ($${Math.round(player.params.money)} left):`;
 
             document.getElementById('hp').innerHTML =`
                 HP +${Math.round(player.params.hp)} \
@@ -92,23 +94,30 @@ export default class UI {
     buy(type) {
         switch (type) {
             case 'hp':
-                if (this.scene.player.params.score >= 100) {
-                    this.scene.player.params.score -= 100;
+                if (this.scene.player.params.money >= 250) {
+                    this.scene.player.params.money -= 250;
                     this.scene.player.params.hp += 10;
                 }
 
                 break;
-            case 'speed':
-                if (this.scene.player.params.score >= 200) {
-                    this.scene.player.params.score -= 200;
+            case 'talent-hp':
+                if (this.scene.player.params.unspentTalents >= 1) {
+                    this.scene.player.params.unspentTalents -= 1;
+                    this.scene.player.params.hp += 10;
+                }
+
+                break;
+            case 'talent-speed':
+                if (this.scene.player.params.unspentTalents >= 1) {
+                    this.scene.player.params.unspentTalents -= 1;
                     this.scene.player.params.speed += 0.005;
                 }
 
                 break;
-            case 'damage':
-                if (this.scene.player.params.score >= 250) {
-                    this.scene.player.params.score -= 250;
-                    this.scene.player.params.damage += 25;
+            case 'talent-damage':
+                if (this.scene.player.params.unspentTalents >= 1) {
+                    this.scene.player.params.unspentTalents -= 1;
+                    this.scene.player.params.damage += 5;
                 }
 
                 break;
