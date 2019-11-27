@@ -19,7 +19,7 @@ input[type=button] {
     font-size: 1.5em;
 }
 
-#blocker, #hp, #exp, #money, #shop, #restart {
+#blocker, #hp, #exp, #money, #shop {
     position: absolute;
     background: rgba(0, 0, 0, 0.5);
     color: #fff;
@@ -42,19 +42,7 @@ input[type=button] {
 }
 
 #restart {
-    left: 50%;
-    top: 50%;
-    margin-left: -50px;
-    margin-top: -25px;
-    width: 100px;
-    height: 50px;
     display: none;
-}
-
-#restart > input {
-    margin: 2.5%;
-    width: 95%;
-    height: 95%;
 }
 
 #action {

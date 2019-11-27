@@ -206,6 +206,9 @@ export default class Scene {
                     onDamageTaken: () => {
                         this.ui.updatePlayerLabels();
                         onDamageTaken();
+                        this.particles.loadParticles({
+                            position: player.position.clone().add(new THREE.Vector3(0, 0.75, 0))
+                        });
                     },
                     onKill: (object) => {
                         this.player.params.experience += object.params.bounty;
@@ -220,51 +223,38 @@ export default class Scene {
                         this.ui.pause = true;
                         onDie();
                     },
-                    onLevelUp: () => this.loadGLTF({
-                        baseUrl: './public/assets/models/effects/level-up/level-up',
-                        noScene: true,
-                        callback: loadedObject => {
-                            loadedObject.scene.scale.set(1.5, 1.5, 1.5);
+                    onLevelUp: () => {
+                        this.ui.updatePlayerLabels();
+                        this.loadGLTF({
+                            baseUrl: './public/assets/models/effects/level-up/level-up',
+                            noScene: true,
+                            callback: loadedObject => {
+                                loadedObject.scene.scale.set(1.5, 1.5, 1.5);
 
-                            loadedObject.scene.traverse((child) => {
-                                if (child.isMesh) {
-                                    child.material.transparent = true;
-                                    child.material.alphaTest = 0.5;
-                                }
-                            });
-
-                            this.player.object.add(loadedObject.scene);
-
-                            const effect = new AnimatedGameObject({
-                                object: loadedObject.scene,
-                                animations: loadedObject.animations,
-                            });
-
-                            this.gameObjectsService.hookGameObject(effect);
-
-                            this.intervals.setTimeout(
-                                () => this.gameObjectsService.destroyGameObject(effect),
-                        2080
-                            );
-                        }
-                    }),
-                    attack: () => {
-                        this.gameObjectsService.gameObjects
-                            .filter(gameObject => (
-                                gameObject !== player
-                                && gameObject instanceof Unit
-                                && !gameObject.isDead()
-                                && gameObject.position.distanceTo(player.position) < 2
-                            ))
-                            .forEach((collisionGameObject) => {
-                                collisionGameObject.damageTaken({
-                                    params: {
-                                        damage: player.params.damage,
-                                        parent: player
+                                loadedObject.scene.traverse((child) => {
+                                    if (child.isMesh) {
+                                        child.material.transparent = true;
+                                        child.material.alphaTest = 0.5;
                                     }
-                                })
-                            });
+                                });
+
+                                this.player.object.add(loadedObject.scene);
+
+                                const effect = new AnimatedGameObject({
+                                    object: loadedObject.scene,
+                                    animations: loadedObject.animations,
+                                });
+
+                                this.gameObjectsService.hookGameObject(effect);
+
+                                this.intervals.setTimeout(
+                                    () => this.gameObjectsService.destroyGameObject(effect),
+                                    2080,
+                                );
+                            }
+                        })
                     },
+                    attack: () => gameObjectsService.attack(player),
                     fire: () => gameObjectsService.fire(player),
                     destroy: () => gameObjectsService.destroyGameObject(player),
                 }));

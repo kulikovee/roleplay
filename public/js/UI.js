@@ -50,7 +50,8 @@ export default class UI {
 
             document.getElementById('exp').innerHTML =
                 `Exp: ${Math.floor(player.getExperience())} \
-                / ${Math.floor(player.getLevelExperience())} \
+                / ${Math.floor(player.getLevelExperience())}  \
+                | Talents: ${player.params.unspentTalents}\
                 | Level: ${player.getLevel()}`;
 
             document.getElementById('money').innerHTML = `$${Math.round(player.params.money)}`;
@@ -58,8 +59,8 @@ export default class UI {
             document.getElementById('shop-money').innerHTML = `Shop ($${Math.round(player.params.money)} left):`;
 
             document.getElementById('hp').innerHTML =`
-                HP +${Math.round(player.params.hp)} \
-                | Speed: ${Math.round(player.params.speed * 1000)}% \
+                HP ${Math.ceil(player.params.hp)} / ${Math.ceil(player.params.hpMax)} \
+                | Speed: ${Math.floor(player.params.speed * 1000)}% \
                 | Damage: ${player.params.damage}
             `;
         }
@@ -94,30 +95,30 @@ export default class UI {
     buy(type) {
         switch (type) {
             case 'hp':
-                if (this.scene.player.params.money >= 250) {
-                    this.scene.player.params.money -= 250;
-                    this.scene.player.params.hp += 10;
+                if (this.scene.player.params.money >= 100) {
+                    this.scene.player.params.money -= 100;
+                    this.scene.player.addHP(10);
                 }
 
                 break;
             case 'talent-hp':
-                if (this.scene.player.params.unspentTalents >= 1) {
-                    this.scene.player.params.unspentTalents -= 1;
-                    this.scene.player.params.hp += 10;
+                if (this.scene.player.params.unspentTalents) {
+                    this.scene.player.params.unspentTalents--;
+                    this.scene.player.addMaxHP(10);
                 }
 
                 break;
             case 'talent-speed':
-                if (this.scene.player.params.unspentTalents >= 1) {
-                    this.scene.player.params.unspentTalents -= 1;
-                    this.scene.player.params.speed += 0.005;
+                if (this.scene.player.params.unspentTalents) {
+                    this.scene.player.params.unspentTalents--;
+                    this.scene.player.addSpeed(0.005);
                 }
 
                 break;
             case 'talent-damage':
-                if (this.scene.player.params.unspentTalents >= 1) {
-                    this.scene.player.params.unspentTalents -= 1;
-                    this.scene.player.params.damage += 5;
+                if (this.scene.player.params.unspentTalents) {
+                    this.scene.player.params.unspentTalents--;
+                    this.scene.player.addDamage(5);
                 }
 
                 break;
@@ -141,6 +142,7 @@ export default class UI {
         this.scene.level.restartLevel();
         document.getElementById('restart').style.display = 'none';
         this.updatePlayerLabels();
+        this.scene.camera.update();
     }
 
     requestPointerLock() {

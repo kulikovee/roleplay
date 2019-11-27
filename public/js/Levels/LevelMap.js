@@ -86,41 +86,42 @@ export default class LevelMap extends AbstractLevel {
             return;
         }
 
-        const badGuyTimeout = 5000 - player.getLevel() * 500;
-        const isBadGuyReleased = Date.now() - this.lastBadGuyCreated >= badGuyTimeout;
-        const badGuysCount = gameObjects.filter(gameObject => gameObject instanceof AI && !gameObject.isDead()).length;
+        const level = player.getLevel(),
+            badGuyTimeout = 5000 - level * 500,
+            isBadGuyReleased = Date.now() - this.lastBadGuyCreated >= badGuyTimeout,
+            badGuysCount = gameObjects
+                .filter(gameObject => gameObject instanceof AI && gameObject.isAlive())
+                .length;
 
-        if (badGuysCount < 5 && isBadGuyReleased) {
+        if (badGuysCount < level && isBadGuyReleased) {
             this.lastBadGuyCreated = Date.now();
             this.createBadGuy();
         }
     }
 
     createBadGuy() {
-        const level = this.scene.player.getLevel(),
-            player = this.scene.player,
+        const player = this.scene.player,
+            level = player.getLevel(),
             gameObjectsService = this.scene.gameObjectsService;
 
         this.scene.loadGLTF({
             baseUrl: './public/assets/models/units/enemy',
             callback: (gltf) => {
+                /** @type {AI} */
                 const badGuy = gameObjectsService.hookGameObject(new AI({
                     animations: gltf.animations,
                     object: gltf.scene,
                     target: this.scene.player,
-                    speed: 0.04 + player.params.speed * 0.5,
-                    damage: 5 + level * 5,
-                    hp: 140 + level * 30,
-                    fire: () => null, // gameObjectsService.fire(badGuy),
-                    destroy: () => gameObjectsService.destroyGameObject(badGuy),
+                    speed: 0.04 + level * 0.005,
+                    damage: 5 + level * 2.5,
+                    hp: 70 + level * 30,
+                    attack: () => gameObjectsService.attack(badGuy),
                     onDamageTaken: () => this.scene.particles.loadParticles({
                         position: badGuy.position.clone().add(new THREE.Vector3(0, 0.75, 0))
                     }),
-                    onDie: () => this.scene.intervals.setTimeout(() => {
-                        if (badGuy.isDead() && typeof badGuy.params.destroy === 'function') {
-                            badGuy.params.destroy();
-                        }
-                    }, 30000),
+                    onDie: () => this.scene.intervals.setTimeout(() => (
+                        badGuy.isDead() && gameObjectsService.destroyGameObject(badGuy)
+                    ), 30000),
                 }));
 
                 badGuy.position.set(

@@ -4,6 +4,7 @@ export default class Unit extends MovingGameObject {
     constructor(params = {}) {
         super({
             hp: 100,
+            hpMax: params.hp || 100,
             damage: 10,
             attackRate: 0.9,
             ...params,
@@ -23,6 +24,11 @@ export default class Unit extends MovingGameObject {
         this.damageTaken = this.damageTaken.bind(this);
         this.isAttackReleased = this.isAttackReleased.bind(this);
         this.isDead = this.isDead.bind(this);
+        this.isAlive = this.isAlive.bind(this);
+        this.addMaxHP = this.addMaxHP.bind(this);
+        this.addHP = this.addHP.bind(this);
+        this.addSpeed = this.addSpeed.bind(this);
+        this.addDamage = this.addDamage.bind(this);
     }
 
     update() {
@@ -57,6 +63,10 @@ export default class Unit extends MovingGameObject {
         return this.params.hp <= 0;
     }
 
+    isAlive() {
+        return !this.isDead();
+    }
+
     /**
      * @param {Fire} fire
      */
@@ -79,6 +89,27 @@ export default class Unit extends MovingGameObject {
                     fireParent.dispatchEvent('onKill', this);
                 }
             }
+        }
+    }
+
+    addSpeed(speed) {
+        this.params.speed += speed;
+    }
+
+    addDamage(damage) {
+        this.params.damage += damage;
+    }
+
+    addHP(hp) {
+        if (this.isAlive()) {
+            this.params.hp = Math.min(this.params.hp + hp, this.params.hpMax);
+        }
+    }
+
+    addMaxHP(hp) {
+        if (this.isAlive()) {
+            this.params.hpMax += hp;
+            this.params.hp += hp;
         }
     }
 }

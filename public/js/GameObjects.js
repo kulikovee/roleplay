@@ -32,9 +32,38 @@ export default class GameObjectsService {
     }
 
     /**
+     * @param {GameObject} attackingUnit
+     */
+    attack(attackingUnit) {
+        if (attackingUnit.isDead()) {
+            return;
+        }
+
+        this.gameObjects
+            .filter(gameObject => (
+                gameObject !== attackingUnit
+                && gameObject instanceof Unit
+                && gameObject.isAlive()
+                && gameObject.position.distanceTo(attackingUnit.position) < 2
+            ))
+            .forEach((collisionGameObject) => {
+                collisionGameObject.damageTaken({
+                    params: {
+                        damage: attackingUnit.params.damage,
+                        parent: attackingUnit
+                    }
+                })
+            });
+    }
+
+    /**
      * @param {GameObject} firingGameObject
      */
     fire(firingGameObject) {
+        if (firingGameObject.isDead()) {
+            return;
+        }
+
         const createLightCube = left => this.scene.createCube({
             x: 0.02,
             y: 0.02,
@@ -62,7 +91,7 @@ export default class GameObjectsService {
             parent: firingGameObject,
             getCollisions: () => this.gameObjects.filter(gameObject => (
                 gameObject instanceof Unit
-                && !gameObject.isDead()
+                && gameObject.isAlive()
                 && fireGameObject.params.parent !== gameObject
                 && fireGameObject.position.distanceTo(gameObject.position) < 3
             )),

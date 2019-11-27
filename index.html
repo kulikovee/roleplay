@@ -20,10 +20,14 @@
 <div id="hp"></div>
 <div id="exp"></div>
 <div id="money"></div>
-<div id="money"></div>
 <div id="shop">
     <div class="row">
         <label>Game is paused</label>
+    </div>
+    <div class="row">
+        <div id="restart">
+            <input id="restart-button" type="button" value="Restart" />
+        </div>
     </div>
     <div class="row">
         <div><input id="close-shop" type="button" value="Resume" /></div>
@@ -37,13 +41,13 @@
         <label id="shop-talent">Talents (0 unspent talents left):</label>
     </div>
     <div class="row">
-        <div><input id="buy-talent-hp" type="button" value="+10 HP" /></div>
+        <div><input id="buy-talent-hp" type="button" value="+10 MAX HP" /></div>
     </div>
     <div class="row">
         <div><input id="buy-talent-speed" type="button" value="Speed +5%" /></div>
     </div>
     <div class="row">
-        <div><input id="buy-talent-damage" type="button" value="Damage +10" /></div>
+        <div><input id="buy-talent-damage" type="button" value="Damage +5" /></div>
     </div>
 
 
@@ -51,11 +55,8 @@
         <label id="shop-money">Shop ($500 left):</label>
     </div>
     <div class="row">
-        <div><input id="buy-hp" type="button" value="Buy: +10 HP ($250)" /></div>
+        <div><input id="buy-hp" type="button" value="Buy: Heal +10 HP ($100)" /></div>
     </div>
-</div>
-<div id="restart">
-    <input id="restart-button" type="button" value="Restart" />
 </div>
 <div id="action"></div>
 <div id="cursor"></div>

@@ -34,7 +34,8 @@ export default class Player extends FiringUnit {
 
             if (this.params.level !== level) {
                 this.params.level = level;
-                this.params.unspentTalents += 1;
+                this.params.unspentTalents += 3;
+                this.params.hp = this.params.hpMax;
                 params.onLevelUp && this.dispatchEvent('onLevelUp', params.onLevelUp);
             }
         });

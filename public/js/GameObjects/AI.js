@@ -41,12 +41,13 @@ export default class AI extends FiringUnit {
 
         // this.fire();
 
-        if (object.position.distanceTo(target.position) > 10) {
+        if (object.position.distanceTo(target.position) > 2) {
             if (Date.now() - this.lastRun > this.lastRunTimeout) {
                 this.isRunning = true;
             }
         } else {
             this.isRunning = false;
+            this.attack();
         }
 
         this.animationState.isMovingForward = this.isRunning;
