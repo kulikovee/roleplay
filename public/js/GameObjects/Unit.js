@@ -11,7 +11,7 @@ export default class Unit extends MovingGameObject {
         });
 
         this.shouldAttack = false;
-        this.latestAttackTimestamp = Date.now() - this.params.attackRate;
+        this.latestAttackTimestamp = Date.now() - this.params.attackRate * 1000;
 
         ['onDamageTaken', 'onDamageDeal', 'onKill', 'onDie'].forEach((eventName) => {
             if (typeof params[eventName] === 'function') {

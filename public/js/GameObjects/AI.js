@@ -6,7 +6,7 @@ export default class AI extends FiringUnit {
             speed: 0.05,
             damage: 10,
             hp: 100,
-            fireRate: 500,
+            fireRate: 0.5,
             ...params,
         });
 

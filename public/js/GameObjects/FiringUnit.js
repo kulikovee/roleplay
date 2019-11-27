@@ -3,7 +3,7 @@ import Unit from './Unit.js';
 export default class FiringUnit extends Unit {
     constructor(params = {}) {
         super({
-            fireRate: 40,
+            fireRate: 1.5,
             fireFlySpeed: 0.3,
             ...params
         });
@@ -11,8 +11,9 @@ export default class FiringUnit extends Unit {
         this.shouldFire = false;
         this.latestFire = Date.now();
 
-        this.fire = this.fire.bind(this);
         this.update = this.update.bind(this);
+        this.fire = this.fire.bind(this);
+        this.isFireReleased = this.isFireReleased.bind(this);
         this.getFireInitialPosition = this.getFireInitialPosition.bind(this);
     }
 
@@ -33,12 +34,18 @@ export default class FiringUnit extends Unit {
 
         this.isFire = false;
 
-        if (this.shouldFire && this.params.fire && (Date.now() - this.latestFire >= this.params.fireRate)) {
+        if (this.shouldFire && this.params.fire && this.isFireReleased()) {
             this.isFire = true;
             this.shouldFire = false;
             this.latestFire = Date.now();
             this.params.fire();
+        } else {
+            this.shouldFire = false;
         }
+    }
+
+    isFireReleased() {
+        return Date.now() - this.latestFire >= this.params.fireRate * 1000;
     }
 
     fire() {
