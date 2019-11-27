@@ -34,7 +34,7 @@ export default class LevelMap extends AbstractLevel {
             clearInterval(this.interval);
         }
 
-        this.interval = setInterval(this.createBadGuyByTimeout, 500);
+        this.interval = this.scene.intervals.setInterval(this.createBadGuyByTimeout, 500);
         this.scene.ui.startGame();
         this.scene.ui.openShop();
     }
@@ -113,9 +113,14 @@ export default class LevelMap extends AbstractLevel {
                     hp: 140 + level * 30,
                     fire: () => null, // gameObjectsService.fire(badGuy),
                     destroy: () => gameObjectsService.destroyGameObject(badGuy),
-                    onDamageTaken: () => this.scene.particles.createParticles({
+                    onDamageTaken: () => this.scene.particles.loadParticles({
                         position: badGuy.position.clone().add(new THREE.Vector3(0, 0.75, 0))
                     }),
+                    onDie: () => this.scene.intervals.setTimeout(() => {
+                        if (badGuy.isDead() && typeof badGuy.params.destroy === 'function') {
+                            badGuy.params.destroy();
+                        }
+                    }, 30000),
                 }));
 
                 badGuy.position.set(

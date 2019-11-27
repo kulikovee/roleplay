@@ -69,7 +69,7 @@ export default class GameObjectsService {
             destroy: () => this.destroyGameObject(fireGameObject),
         }));
 
-        setTimeout(() => this.destroyGameObject(fireGameObject), 2000);
+        this.scene.intervals.setTimeout(() => this.destroyGameObject(fireGameObject), 2000);
     }
 
     /**

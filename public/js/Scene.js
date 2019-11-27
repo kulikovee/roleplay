@@ -4,6 +4,7 @@ import Camera from './Camera.js';
 import GameObjectsService, { Player, Unit, AnimatedGameObject } from './GameObjects.js';
 import Connection from './Connection.js';
 import Particles from './Particles.js';
+import Intervals from './Intervals.js';
 import LevelMap from './Levels/LevelMap.js';
 
 const isPlayerHelperNeeded = false;
@@ -21,6 +22,7 @@ export default class Scene {
         this.loadGLTF = this.loadGLTF.bind(this);
 
         this.players = {};
+        this.intervals = new Intervals(this);
         this.renderer = renderer;
         this.scene = new THREE.Scene();
         this.camera = new Camera(this);
@@ -33,6 +35,8 @@ export default class Scene {
         this.particles = new Particles(this);
         this.connection = new Connection(this, 'gohtml.ru');
         this.level = new LevelMap(this);
+
+        this.particles.createParticles();
 
         this.clearScene();
         this.animate();
@@ -50,6 +54,8 @@ export default class Scene {
     }
 
     animate() {
+        this.intervals.update();
+
         if (!this.ui.pause) {
             this.gameObjectsService.update();
             this.camera.update();
@@ -215,7 +221,10 @@ export default class Scene {
 
                             this.gameObjectsService.hookGameObject(effect);
 
-                            setTimeout(() => this.gameObjectsService.destroyGameObject(effect), 2080);
+                            this.intervals.setTimeout(
+                                () => this.gameObjectsService.destroyGameObject(effect),
+                        2080
+                            );
                         }
                     }),
                     attack: () => {

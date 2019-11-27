@@ -182,7 +182,7 @@ export default class UI {
     }
 
     onPointerLockChange() {
-        setTimeout(() => {
+        window.setTimeout(() => {
             const isPointerLocked = (
                 document.pointerLockElement === document.body
                 || document.mozPointerLockElement === document.body

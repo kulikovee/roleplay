@@ -78,12 +78,6 @@ export default class Unit extends MovingGameObject {
                 if (fireParent) {
                     fireParent.dispatchEvent('onKill', this);
                 }
-
-                setTimeout(() => {
-                    if (this.isDead() && typeof this.params.destroy === 'function') {
-                        this.params.destroy();
-                    }
-                }, 30000);
             }
         }
     }
