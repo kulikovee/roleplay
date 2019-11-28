@@ -66,10 +66,11 @@ export default class LevelMap extends AbstractLevel {
 
     createSkybox() {
         const materialArray = ['RT', 'LF', 'UP', 'DN', 'FT', 'BK'].map(function (direction) {
-            const url = `./public/assets/textures/sky-day/skybox${direction}.jpg`;
+            const url = `./public/assets/textures/sky/skybox${direction}.jpg`;
             return new THREE.MeshBasicMaterial({
                 map: new THREE.TextureLoader().load(url),
-                side: THREE.BackSide
+                side: THREE.BackSide,
+                fog: false,
             });
         });
 

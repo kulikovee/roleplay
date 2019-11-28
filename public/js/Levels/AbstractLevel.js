@@ -31,4 +31,21 @@ export default class AbstractLevel {
 
         return pivot;
     }
+
+
+    createSkybox() {
+        const materialArray = ['xpos', 'xneg', 'ypos', 'yneg', 'zpos', 'zneg'].map(function (direction) {
+            const url = `./public/assets/textures/sky-nebula/nebula-${direction}.png`;
+            return new THREE.MeshBasicMaterial({
+                map: new THREE.TextureLoader().load(url),
+                side: THREE.BackSide,
+                fog: false
+            });
+        });
+
+        const skyGeometry = new THREE.CubeGeometry(75000, 75000, 75000);
+        const skyMaterial = new THREE.MeshFaceMaterial(materialArray);
+
+        return new THREE.Mesh(skyGeometry, skyMaterial);
+    }
 }

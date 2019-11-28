@@ -41,6 +41,7 @@ export default class Scene {
 
         this.particles.createParticles({
             particleCount: 100000,
+            color: 0x888888,
             blending: THREE.NormalBlending,
             position: new THREE.Vector3(-area.x / 2, 0, -area.z / 2),
             getParticlePosition: (i, position = this.particles.getRandomPosition(area)) => {
@@ -58,7 +59,7 @@ export default class Scene {
         this.clearScene();
         this.animate();
 
-        const color = 0xFFFFFF;
+        const color = 0x000000;
         const density = 0.05;
         this.scene.fog = new THREE.FogExp2(color, density);
 

@@ -27,6 +27,7 @@ export default class UI {
         document.getElementById('buy-talent-damage').onclick = () => this.buy('talent-damage');
         document.getElementById('restart-button').onclick = () => this.restart();
         document.getElementById('switch-third-person').onclick = () => this.switchCamera();
+        document.getElementById('god-mode-enable').onclick = () => this.buy('god-hp');
 
         this.addPointerLockEvents(
             document.getElementById('blocker'),
@@ -120,6 +121,10 @@ export default class UI {
                     this.scene.player.params.unspentTalents--;
                     this.scene.player.addDamage(5);
                 }
+
+                break;
+            case 'god-hp':
+                this.scene.player.addMaxHP(9999);
 
                 break;
             default:
