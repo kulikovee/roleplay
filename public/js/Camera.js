@@ -10,6 +10,7 @@ export default class Camera {
         this.deltaY = 5;
 
         this.toScreenPosition = this.toScreenPosition.bind(this);
+        this.objectToScreenPosition = this.objectToScreenPosition.bind(this);
         this.update = this.update.bind(this);
         this.getWidth = this.getWidth.bind(this);
         this.getHeight = this.getHeight.bind(this);
@@ -52,23 +53,23 @@ export default class Camera {
         return renderer.getContext().canvas.height;
     }
 
-    toScreenPosition(obj) {
-        const vector = new THREE.Vector3();
-
+    toScreenPosition(vector) {
         const widthHalf = 0.5 * this.getWidth();
         const heightHalf = 0.5 * this.getHeight();
-
-        obj.updateMatrixWorld();
-        vector.setFromMatrixPosition(obj.matrixWorld);
-        vector.project(this.camera);
-
-        vector.x = (vector.x * widthHalf) + widthHalf;
-        vector.y = -(vector.y * heightHalf) + heightHalf;
+        const copiedProjectVector = vector.clone().project(this.camera);
 
         return {
-            x: vector.x,
-            y: vector.y
-        };
+            x: Math.round((copiedProjectVector.x + 1) * widthHalf),
+            y: Math.round((-copiedProjectVector.y + 1) * heightHalf),
+            z: copiedProjectVector.z
+        }
+    }
 
-    };
+    objectToScreenPosition(obj) {
+        const vector = new THREE.Vector3();
+        obj.updateMatrixWorld();
+        vector.setFromMatrixPosition(obj.matrixWorld);
+
+        return this.toScreenPosition(vector);
+    }
 }

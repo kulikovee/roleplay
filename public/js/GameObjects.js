@@ -17,14 +17,17 @@ export default class GameObjectsService {
      * @param {Scene} scene
      */
     constructor(scene) {
-        this.gameObjects = [];
-        this.scene = scene;
-
         this.update = this.update.bind(this);
         this.fire = this.fire.bind(this);
         this.hookGameObject = this.hookGameObject.bind(this);
         this.removeAllGameObjects = this.removeAllGameObjects.bind(this);
         this.destroyGameObject = this.destroyGameObject.bind(this);
+        this.getUnits = this.getUnits.bind(this);
+        this.getAliveUnits = this.getAliveUnits.bind(this);
+
+        this.gameObjects = [];
+        this.nextGameObjectId = 0;
+        this.scene = scene;
     }
 
     update() {
@@ -106,6 +109,8 @@ export default class GameObjectsService {
      */
     hookGameObject(gameObject) {
         this.gameObjects.push(gameObject);
+        gameObject.__game_object_id = this.nextGameObjectId++;
+
         return gameObject;
     }
 
@@ -135,6 +140,14 @@ export default class GameObjectsService {
         const parent = gameObject.object.parent || this.scene;
 
         parent.remove(gameObject.object);
+    }
+
+    getUnits() {
+        return this.gameObjects.filter(gameObject => gameObject instanceof Unit);
+    }
+
+    getAliveUnits() {
+        return this.getUnits().filter(gameObject => gameObject.isAlive());
     }
 }
 

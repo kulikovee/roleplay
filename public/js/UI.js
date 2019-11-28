@@ -14,11 +14,14 @@ export default class UI {
         this.addPointerLockEvents = this.addPointerLockEvents.bind(this);
         this.onPointerLockChange = this.onPointerLockChange.bind(this);
         this.onFullscreenChange = this.onFullscreenChange.bind(this);
+        this.updateCursor = this.updateCursor.bind(this);
+        this.updateHPBars = this.updateHPBars.bind(this);
 
         this.scene = scene;
         this.pause = false;
         this.isPointerLocked = false;
         this.cursor = document.getElementById('cursor');
+        this.hpBars = document.getElementById('hp-bars');
 
         document.getElementById('close-shop').onclick = () => this.closeShop();
         document.getElementById('buy-hp').onclick = () => this.buy('hp');
@@ -36,13 +39,61 @@ export default class UI {
     }
 
     update() {
-        if (this.scene.input.isThirdPerson) {
-            this.cursor.style.left = '0';
-            this.cursor.style.top = '0';
-        } else {
-            this.cursor.style.left = `${this.scene.input.cursor.x}px`;
-            this.cursor.style.top = `${this.scene.input.cursor.y}px`;
+        this.updateCursor();
+        this.updateHPBars();
+    }
+
+    updateCursor() {
+        const { isThirdPerson, cursor: { x, y } } = this.scene.input;
+        this.cursor.style.left = isThirdPerson ? '0' : `${x}px`;
+        this.cursor.style.top = isThirdPerson ? '0' : `${y}px`;
+    }
+
+    updateHPBars() {
+        const { gameObjectsService, camera } = this.scene;
+
+        camera.camera.updateMatrixWorld(true);
+        const cameraPosition = new THREE.Vector3().setFromMatrixPosition(camera.camera.matrixWorld);
+
+        gameObjectsService.getUnits().forEach((unit) => {
+            const element = this.getUnitHpBar(unit);
+
+            if (unit.isAlive()) {
+                camera.camera.updateMatrixWorld(true);
+                const unitPosition = new THREE.Vector3()
+                        .setFromMatrixPosition(unit.object.matrixWorld)
+                        .add(new THREE.Vector3(0, 1.5, 0)),
+                    distance = cameraPosition.distanceTo(unitPosition),
+                    screenBarPosition = camera.toScreenPosition(unitPosition),
+                    width = Math.min(70, 1000 / distance);
+
+                element.style.display = screenBarPosition.z > 1 ? 'none' : 'block';
+                element.style.left = `${screenBarPosition.x}px`;
+                element.style.top = `${screenBarPosition.y}px`;
+                element.style.width = `${width}px`;
+                element.children[0].style.width = `${Math.round(100 * unit.params.hp / unit.params.hpMax)}%`;
+            } else if (element) {
+                element.remove();
+            }
+        });
+    }
+
+    getUnitHpBar(unit) {
+        const id = `hp-bars-gameobject-${unit.__game_object_id}`;
+        let element = document.getElementById(id);
+
+        if (!element && unit.isAlive()) {
+            element = document.createElement('div');
+            element.id = id;
+            element.className = 'hp-bar';
+
+            const content = document.createElement('div');
+            element.append(content);
+
+            this.hpBars.append(element);
         }
+
+        return element;
     }
 
     updatePlayerLabels() {
