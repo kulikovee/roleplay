@@ -41,7 +41,7 @@ export default class AI extends FiringUnit {
 
         // this.fire();
 
-        if (object.position.distanceTo(target.position) > 2) {
+        if (object.position.distanceTo(target.position) > 1.75) {
             if (Date.now() - this.lastRun > this.lastRunTimeout) {
                 this.isRunning = true;
             }

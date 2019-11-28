@@ -40,7 +40,7 @@ export default class Scene {
         const area = new THREE.Vector3(100, 25, 100);
 
         this.particles.createParticles({
-            particleCount: 100000,
+            particleCount: 10000,
             color: 0x888888,
             blending: THREE.NormalBlending,
             position: new THREE.Vector3(-area.x / 2, 0, -area.z / 2),
@@ -58,10 +58,6 @@ export default class Scene {
 
         this.clearScene();
         this.animate();
-
-        const color = 0x000000;
-        const density = 0.05;
-        this.scene.fog = new THREE.FogExp2(color, density);
 
         console.log('Scene', this);
     }
@@ -198,6 +194,12 @@ export default class Scene {
                     helper.material.linewidth = 4;
                     this.add(helper);
                 }
+
+                const pointLight = new THREE.PointLight(0xffffff);
+                pointLight.position.set(0, 10, 0);
+                pointLight.distance = 50;
+                pointLight.decay = 2;
+                loadedModel.scene.add(pointLight);
 
                 const player = gameObjectsService.hookGameObject(new Player({
                     animations: loadedModel.animations,
