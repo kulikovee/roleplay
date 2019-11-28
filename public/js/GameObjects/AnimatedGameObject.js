@@ -191,35 +191,32 @@ export default class AnimatedGameObject extends GameObject {
             {}
         );
 
-        const { animations: { jump, attack, topAttack, die, topDie, bottomDie } = {} } = this;
+        const {
+            animations: {
+                jump,
+                attack,
+                topAttack,
+                die,
+                topDie,
+                bottomDie,
+                topJump,
+                bottomJump,
+                bottomAttack
+            } = {}
+        } = this;
 
-        if (jump) {
-            jump.setLoop(THREE.LoopOnce, 0);
-            jump.clampWhenFinished = true;
-        }
+        [jump, die, topDie, bottomDie, topJump, bottomJump].forEach((clampAnimation) => {
+            if (clampAnimation) {
+                clampAnimation.setLoop(THREE.LoopOnce, 0);
+                clampAnimation.clampWhenFinished = true;
+            }
+        });
 
-        if (die) {
-            die.setLoop(THREE.LoopOnce, 0);
-            die.clampWhenFinished = true;
-        }
-
-        if (topDie) {
-            topDie.setLoop(THREE.LoopOnce, 0);
-            topDie.clampWhenFinished = true;
-        }
-
-        if (bottomDie) {
-            bottomDie.setLoop(THREE.LoopOnce, 0);
-            bottomDie.clampWhenFinished = true;
-        }
-
-        if (attack) {
-            attack.setDuration(this.params.attackRate);
-        }
-
-        if (topAttack) {
-            topAttack.setDuration(this.params.attackRate);
-        }
+        [attack, topAttack, bottomAttack].forEach((attackAnimation) => {
+            if (attackAnimation) {
+                attackAnimation.setDuration(this.params.attackRate);
+            }
+        });
     }
 
     createClipAction(action) {

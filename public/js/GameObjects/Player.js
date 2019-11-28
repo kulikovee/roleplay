@@ -23,7 +23,6 @@ export default class Player extends FiringUnit {
         this.getMovingAcceleration = this.getMovingAcceleration.bind(this);
         this.getFireInitialPosition = this.getFireInitialPosition.bind(this);
         this.getFireInitialRotation = this.getFireInitialRotation.bind(this);
-        this.isGrounded = this.isGrounded.bind(this);
 
         console.log('Player', this);
 
@@ -48,7 +47,9 @@ export default class Player extends FiringUnit {
             return;
         }
 
-        const { input, object, acceleration, speed } = this.params;
+        const { input, object, acceleration } = this.params;
+
+        acceleration.add(this.getMovingAcceleration());
 
         if (input.attack1) {
             this.attack();
@@ -62,8 +63,6 @@ export default class Player extends FiringUnit {
         this.animationState.isMovingRight = input.horizontal === 1;
         this.animationState.isMovingForward = input.vertical === 1;
         this.animationState.isMovingBackward = input.vertical === -1;
-
-        acceleration.add(this.getMovingAcceleration());
 
         if (input.isThirdPerson) {
             const horizontalLook = input.look.horizontal;
@@ -112,10 +111,6 @@ export default class Player extends FiringUnit {
         return Math.floor(Math.sqrt(this.params.experience / 100)) + 1;
     }
 
-    isGrounded() {
-        return this.position.y === 0;
-    }
-
     getMovingAcceleration() {
         const { input: { horizontal, vertical, jump } } = this.params;
 
@@ -131,7 +126,7 @@ export default class Player extends FiringUnit {
             ? (-horizontal * speed * 0.6)
             : (-horizontal * speed);
 
-        const addUp = Number(jump && this.isGrounded()) * 0.25;
+        const addUp = Number(jump && this.params.isGrounded) * 0.25;
 
         return this.getDirection(new THREE.Vector3(addSide, addUp, addForward));
     }

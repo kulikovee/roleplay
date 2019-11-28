@@ -12,7 +12,6 @@ export default class LevelMap extends AbstractLevel {
         this.stopLevel = this.stopLevel.bind(this);
         this.restartLevel = this.restartLevel.bind(this);
         this.createBadGuyByTimeout = this.createBadGuyByTimeout.bind(this);
-        this.createBadGuy = this.createBadGuy.bind(this);
         this.createEnvironment = this.createEnvironment.bind(this);
         this.createSkybox = this.createSkybox.bind(this);
 
@@ -25,6 +24,14 @@ export default class LevelMap extends AbstractLevel {
         this.scene.add(this.enviroment);
         this.scene.add(this.skybox);
         this.scene.add(this.globalLight);
+
+        this.scene.colliders.addColliderFunction(({ x, y, z }) => (
+            (y < 0.1 && Math.abs(x) < 50 && Math.abs(z) < 50) // flat
+            || (Math.abs(z) < 5 && x > -39 && x < -28 && y < 1.2) // table
+            || (Math.abs(z) < 0.8 && x > -41 && x < -40 && y < 0.7) // chair
+            || (Math.abs(z) > 0.8 && Math.abs(z) < 1.6 && x > -41 && x < -39 && y < 2) // chair
+            || (Math.abs(z) < 1.6 && x > -43 && x < -41 && y < 2) // chair
+        ));
 
         this.startLevel();
     }
@@ -47,7 +54,7 @@ export default class LevelMap extends AbstractLevel {
         this.scene.remove(this.enviroment);
         this.scene.remove(this.skybox);
         this.scene.remove(this.globalLight);
-        this.scene.gameObjectsService.removeAllGameObjectsExceptPlayer();
+        this.scene.gameObjectsService.removeAllExceptPlayer();
         if (this.interval) {
             clearInterval(this.interval);
         }
@@ -55,10 +62,27 @@ export default class LevelMap extends AbstractLevel {
 
     createEnvironment() {
         const pivot = new THREE.Object3D();
+        const treePositions = [{ x: 0, z: 15 }, { x: 0, z: -15 }, { x: 15, z: 0 }, { x: -15, z: 0 }];
 
         this.scene.loadGLTF({
             baseUrl: './public/assets/models/enviroment/hall/hall',
             callback: object => pivot.add(object.scene)
+        });
+
+        this.scene.loadGLTF({
+            baseUrl: './public/assets/models/enviroment/tree',
+            noScene: true,
+            callback: (loadedModel) => treePositions.forEach((position) => {
+                const model = loadedModel.scene.clone();
+                model.position.set(position.x, 0, position.z);
+                const { x, z } = model.position;
+
+                this.scene.colliders.addColliderFunction(
+                    (position) => Math.abs(position.x - x) < 2 && Math.abs(position.z - z) < 2
+                );
+
+                pivot.add(model);
+            })
         });
 
         return pivot;
@@ -81,7 +105,8 @@ export default class LevelMap extends AbstractLevel {
     }
 
     createBadGuyByTimeout() {
-        const { player, ui: { pause }, gameObjectsService: { gameObjects } } = this.scene;
+        const { ui: { pause }, gameObjectsService: { gameObjects } } = this.scene;
+        const player = this.scene.getPlayer();
 
         if (!player || pause) {
             return;
@@ -96,41 +121,7 @@ export default class LevelMap extends AbstractLevel {
 
         if (badGuysCount < level && isBadGuyReleased) {
             this.lastBadGuyCreated = Date.now();
-            this.createBadGuy();
+            this.scene.units.createAI();
         }
-    }
-
-    createBadGuy() {
-        const player = this.scene.player,
-            level = player.getLevel(),
-            gameObjectsService = this.scene.gameObjectsService;
-
-        this.scene.loadGLTF({
-            baseUrl: './public/assets/models/units/enemy',
-            callback: (gltf) => {
-                /** @type {AI} */
-                const badGuy = gameObjectsService.hookGameObject(new AI({
-                    animations: gltf.animations,
-                    object: gltf.scene,
-                    target: this.scene.player,
-                    speed: 0.04 + level * 0.005,
-                    damage: 5 + level * 2.5,
-                    hp: 70 + level * 30,
-                    attack: () => gameObjectsService.attack(badGuy),
-                    onDamageTaken: () => this.scene.particles.loadParticles({
-                        position: badGuy.position.clone().add(new THREE.Vector3(0, 0.75, 0))
-                    }),
-                    onDie: () => this.scene.intervals.setTimeout(() => (
-                        badGuy.isDead() && gameObjectsService.destroyGameObject(badGuy)
-                    ), 30000),
-                }));
-
-                badGuy.position.set(
-                    player.position.x + 100 * (Math.random() - 0.5),
-                    0,
-                    player.position.z + 100 * (Math.random() - 0.5)
-                );
-            }
-        });
     }
 }

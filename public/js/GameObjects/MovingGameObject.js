@@ -7,6 +7,8 @@ export default class MovingGameObject extends AnimatedGameObject {
             throttling: new THREE.Vector3(0.5, 0.95, 0.5),
             acceleration: new THREE.Vector3(),
             mas: 0,
+            isGrounded: false,
+            checkWay: () => true,
             ...params
         });
 
@@ -16,21 +18,29 @@ export default class MovingGameObject extends AnimatedGameObject {
         this.getForward = this.getForward.bind(this);
         this.getDirection = this.getDirection.bind(this);
         this.getScalarAcceleration = this.getScalarAcceleration.bind(this);
+        this.checkWay = this.checkWay.bind(this);
     }
 
     update() {
         AnimatedGameObject.prototype.update.call(this);
-        const { acceleration, throttling } = this.params;
+        const { params: { acceleration, throttling } } = this;
 
         if (this.params.mas) {
-            if (this.position.y > 0) {
-                acceleration.y -= 0.01;
-                this.animationState.isJump = true;
-            } else if (acceleration.y <= 0) {
-                acceleration.y = 0;
-                this.position.y = 0;
-                this.animationState.isJump = false;
-            }
+            acceleration.y -= 0.01;
+
+            this.params.isGrounded = acceleration.y <= 0 && !this.checkWay(0, -0.1, 0);
+            this.animationState.isJump = !this.params.isGrounded;
+        }
+
+        const isX = acceleration.x && this.checkWay(acceleration.x, 0, 0);
+        const isY = acceleration.y && this.checkWay(0, acceleration.y, 0);
+        const isZ = acceleration.z && this.checkWay(0, 0, acceleration.z);
+
+        if (!isX || !isY || !isZ) {
+            if (!this.params.mas) { acceleration.multiplyScalar(0.75); }
+            if (!isX) { acceleration.x = 0; }
+            if (!isY) { acceleration.y = 0; }
+            if (!isZ) { acceleration.z = 0; }
         }
 
         acceleration.x *= throttling.x;
@@ -38,6 +48,10 @@ export default class MovingGameObject extends AnimatedGameObject {
         acceleration.z *= throttling.z;
 
         this.position.add(acceleration);
+    }
+
+    checkWay(x = 0, y = 0, z = 0) {
+        return this.params.checkWay(new THREE.Vector3(this.position.x + x, this.position.y + y, this.position.z + z));
     }
 
     getLeft() {

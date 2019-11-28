@@ -3,6 +3,7 @@ const KEYS = {
   MOUSE_RIGHT: 3,
   SPACE: 32,
   ENTER: 13,
+  ESC: 27,
   W: 87,
   A: 65,
   S: 83,
@@ -91,6 +92,7 @@ export default class Input {
         document.addEventListener('keydown', (e) => {
             switch (e.which) {
                 case KEYS.ENTER: this.params.onAction && this.params.onAction(); break;
+                case KEYS.ESC: this.params.onExit && this.params.onExit(); break;
                 case KEYS.W: case KEYS.ARROW_UP: this.vertical = 1; break;
                 case KEYS.S: case KEYS.ARROW_DOWN: this.vertical = -1; break;
                 case KEYS.A: case KEYS.ARROW_LEFT: this.horizontal = -1; break;

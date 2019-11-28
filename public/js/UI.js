@@ -16,6 +16,7 @@ export default class UI {
         this.onFullscreenChange = this.onFullscreenChange.bind(this);
         this.updateCursor = this.updateCursor.bind(this);
         this.updateHPBars = this.updateHPBars.bind(this);
+        this.clearHpBars = this.clearHpBars.bind(this);
 
         this.scene = scene;
         this.pause = false;
@@ -50,24 +51,24 @@ export default class UI {
     }
 
     updateHPBars() {
-        const { gameObjectsService, camera } = this.scene;
+        const { units, camera } = this.scene;
 
         camera.camera.updateMatrixWorld(true);
         const cameraPosition = new THREE.Vector3().setFromMatrixPosition(camera.camera.matrixWorld);
 
-        gameObjectsService.getUnits().forEach((unit) => {
+        units.getUnits().forEach((unit) => {
             const element = this.getUnitHpBar(unit);
 
             if (unit.isAlive()) {
                 camera.camera.updateMatrixWorld(true);
                 const unitPosition = new THREE.Vector3()
                         .setFromMatrixPosition(unit.object.matrixWorld)
-                        .add(new THREE.Vector3(0, 1.5, 0)),
+                        .add(new THREE.Vector3(0, 1.8, 0)),
                     distance = cameraPosition.distanceTo(unitPosition),
                     screenBarPosition = camera.toScreenPosition(unitPosition),
                     width = Math.min(70, 1000 / distance);
 
-                element.style.display = screenBarPosition.z > 1 ? 'none' : 'block';
+                element.style.display = screenBarPosition.z > 1 || distance > 20 ? 'none' : 'block';
                 element.style.left = `${screenBarPosition.x}px`;
                 element.style.top = `${screenBarPosition.y}px`;
                 element.style.width = `${width}px`;
@@ -96,9 +97,13 @@ export default class UI {
         return element;
     }
 
+    clearHpBars() {
+        this.hpBars.innerHTML = '';
+    }
+
     updatePlayerLabels() {
-        if (this.scene.player) {
-            const { player } = this.scene;
+        if (this.scene.getPlayer()) {
+            const player = this.scene.getPlayer();
 
             document.getElementById('exp').innerHTML =
                 `Exp: ${Math.floor(player.getExperience())} \
@@ -140,42 +145,45 @@ export default class UI {
     }
 
     restart() {
+        this.clearHpBars();
         this.restartGame();
         this.openShop();
     }
 
     buy(type) {
+        const player = this.scene.getPlayer();
+
         switch (type) {
             case 'hp':
-                if (this.scene.player.params.money >= 100) {
-                    this.scene.player.params.money -= 100;
-                    this.scene.player.addHP(10);
+                if (player.params.money >= 100) {
+                    player.params.money -= 100;
+                    player.addHP(10);
                 }
 
                 break;
             case 'talent-hp':
-                if (this.scene.player.params.unspentTalents) {
-                    this.scene.player.params.unspentTalents--;
-                    this.scene.player.addMaxHP(10);
+                if (player.params.unspentTalents) {
+                    player.params.unspentTalents--;
+                    player.addMaxHP(10);
                 }
 
                 break;
             case 'talent-speed':
-                if (this.scene.player.params.unspentTalents) {
-                    this.scene.player.params.unspentTalents--;
-                    this.scene.player.addSpeed(0.005);
+                if (player.params.unspentTalents) {
+                    player.params.unspentTalents--;
+                    player.addSpeed(0.005);
                 }
 
                 break;
             case 'talent-damage':
-                if (this.scene.player.params.unspentTalents) {
-                    this.scene.player.params.unspentTalents--;
-                    this.scene.player.addDamage(5);
+                if (player.params.unspentTalents) {
+                    player.params.unspentTalents--;
+                    player.addDamage(5);
                 }
 
                 break;
             case 'god-hp':
-                this.scene.player.addMaxHP(9999);
+                player.addMaxHP(9999);
 
                 break;
             default:

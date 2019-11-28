@@ -19,6 +19,7 @@ export default class Connection {
         this.connection.onopen = () => console.log('open connection');
         this.connection.onerror = (error) => console.log('error connection', error);
         this.connection.onmessage = this.onMessage;
+        this.players = {};
     }
 
     onMessage({ data }) {
@@ -41,16 +42,16 @@ export default class Connection {
         this.id = id;
     }
 
-    updatePlayer({ id, levelId, position, rotation, fire }) {
+    updatePlayer({ id, levelId, position, rotation, fire, attack }) {
         if (!id || id === this.id || levelId === this.scene.level.getLevelId()) {
             return;
         }
 
-        if (!this.scene.players[id]) {
+        if (!this.players[id]) {
             this.scene.createAnotherPlayer(id);
         }
 
-        const player = this.scene.players[id];
+        const player = this.players[id];
         player.position.set(position.x, position.y, position.z);
         player.rotation.set(rotation.x, rotation.y, rotation.z);
     }

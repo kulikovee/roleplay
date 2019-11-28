@@ -19,11 +19,12 @@ export default class GameObjectsService {
     constructor(scene) {
         this.update = this.update.bind(this);
         this.fire = this.fire.bind(this);
+        this.attack = this.attack.bind(this);
         this.hookGameObject = this.hookGameObject.bind(this);
-        this.removeAllGameObjects = this.removeAllGameObjects.bind(this);
+        this.removeAll = this.removeAll.bind(this);
+        this.removeAllExceptPlayer = this.removeAllExceptPlayer.bind(this);
         this.destroyGameObject = this.destroyGameObject.bind(this);
-        this.getUnits = this.getUnits.bind(this);
-        this.getAliveUnits = this.getAliveUnits.bind(this);
+        this.removeGameObjectFromScene = this.removeGameObjectFromScene.bind(this);
 
         this.gameObjects = [];
         this.nextGameObjectId = 0;
@@ -92,6 +93,7 @@ export default class GameObjectsService {
             speed: firingGameObject.params.fireFlySpeed,
             damage: firingGameObject.params.damage,
             parent: firingGameObject,
+            checkWay: this.scene.colliders.checkWay,
             getCollisions: () => this.gameObjects.filter(gameObject => (
                 gameObject instanceof Unit
                 && gameObject.isAlive()
@@ -114,16 +116,23 @@ export default class GameObjectsService {
         return gameObject;
     }
 
-    removeAllGameObjects() {
+    removeAll() {
         while (this.gameObjects.length) {
             this.destroyGameObject(this.gameObjects[0]);
         }
     }
 
-    removeAllGameObjectsExceptPlayer() {
-        while (this.gameObjects.length > 1) {
-            const removeIdx = Number(this.gameObjects[0] instanceof Player);
-            this.destroyGameObject(this.gameObjects[removeIdx]);
+    removeAllExceptPlayer() {
+        const getNextNonPlayerIndex = () => this.gameObjects.findIndex(go => go !== this.scene.getPlayer());
+        let removeIdx = getNextNonPlayerIndex();
+
+        while (removeIdx > -1) {
+            const gameObject = this.gameObjects[removeIdx];
+            this.gameObjects.splice(removeIdx, 1);
+
+            this.removeGameObjectFromScene(gameObject);
+
+            removeIdx = getNextNonPlayerIndex();
         }
     }
 
@@ -137,17 +146,20 @@ export default class GameObjectsService {
             this.gameObjects.splice(index, 1);
         }
 
-        const parent = gameObject.object.parent || this.scene;
-
-        parent.remove(gameObject.object);
+        this.removeGameObjectFromScene(gameObject);
     }
 
-    getUnits() {
-        return this.gameObjects.filter(gameObject => gameObject instanceof Unit);
-    }
+    /**
+     * @param {GameObject} gameObject
+     */
+    removeGameObjectFromScene(gameObject) {
+        const parent = (gameObject.object && gameObject.object.parent) || this.scene;
 
-    getAliveUnits() {
-        return this.getUnits().filter(gameObject => gameObject.isAlive());
+        if (parent.remove) {
+            parent.remove(gameObject.object);
+        } else {
+            console.error('Cannot find object parent to remove the object', gameObject);
+        }
     }
 }
 

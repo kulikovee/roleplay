@@ -18,7 +18,8 @@ export default class Camera {
     }
 
     update() {
-        const { scene: { player, input: { isThirdPerson } } } = this;
+        const { scene: { input: { isThirdPerson } } } = this;
+        const player = this.scene.getPlayer();
 
         if (!player) return;
 

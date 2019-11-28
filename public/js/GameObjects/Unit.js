@@ -10,15 +10,6 @@ export default class Unit extends MovingGameObject {
             ...params,
         });
 
-        this.shouldAttack = false;
-        this.latestAttackTimestamp = Date.now() - this.params.attackRate * 1000;
-
-        ['onDamageTaken', 'onDamageDeal', 'onKill', 'onDie'].forEach((eventName) => {
-            if (typeof params[eventName] === 'function') {
-                this.addEventListener(eventName, params[eventName]);
-            }
-        });
-
         this.update = this.update.bind(this);
         this.attack = this.attack.bind(this);
         this.damageTaken = this.damageTaken.bind(this);
@@ -29,6 +20,16 @@ export default class Unit extends MovingGameObject {
         this.addHP = this.addHP.bind(this);
         this.addSpeed = this.addSpeed.bind(this);
         this.addDamage = this.addDamage.bind(this);
+        this.die = this.die.bind(this);
+
+        this.shouldAttack = false;
+        this.latestAttackTimestamp = Date.now() - this.params.attackRate * 1000;
+
+        ['onDamageTaken', 'onDamageDeal', 'onKill', 'onDie'].forEach((eventName) => {
+            if (typeof params[eventName] === 'function') {
+                this.addEventListener(eventName, params[eventName]);
+            }
+        });
     }
 
     update() {
@@ -36,6 +37,10 @@ export default class Unit extends MovingGameObject {
 
         if (this.isDead()) {
             return;
+        }
+
+        if (this.position.y < -100) {
+            this.die();
         }
 
         if (this.isAttackReleased()) {
@@ -67,28 +72,30 @@ export default class Unit extends MovingGameObject {
         return !this.isDead();
     }
 
-    /**
-     * @param {Fire} fire
-     */
-    damageTaken(fire) {
-        if (fire) {
-            this.params.hp -= fire.params.damage;
-            const fireParent = fire.params.parent;
+    damageTaken(attackParams) {
+        if (attackParams) {
+            this.params.hp -= attackParams.params.damage;
+            const damageDealerUnit = attackParams.params.parent;
 
-            this.dispatchEvent('onDamageTaken', fireParent);
+            this.dispatchEvent('onDamageTaken', damageDealerUnit);
 
-            if (fireParent) {
-                fireParent.dispatchEvent('onDamageDeal', this);
+            if (damageDealerUnit) {
+                damageDealerUnit.dispatchEvent('onDamageDeal', this);
             }
 
             if (this.isDead()) {
-                this.dispatchEvent('onDie', fireParent);
-                this.animationState.isDie = true;
-
-                if (fireParent) {
-                    fireParent.dispatchEvent('onKill', this);
-                }
+                this.die(damageDealerUnit);
             }
+        }
+    }
+
+    die(killingUnit) {
+        this.params.hp = 0;
+        this.dispatchEvent('onDie', killingUnit);
+        this.animationState.isDie = true;
+
+        if (killingUnit) {
+            killingUnit.dispatchEvent('onKill', this);
         }
     }
 

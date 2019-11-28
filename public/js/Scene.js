@@ -1,13 +1,14 @@
-import Input from './Input.js';
-import UI from './UI.js';
 import Camera from './Camera.js';
-import GameObjectsService, { Player, Unit, AnimatedGameObject } from './GameObjects.js';
 import Connection from './Connection.js';
-import Particles from './Particles.js';
+import GameObjectsService from './GameObjects.js';
+import Input from './Input.js';
 import Intervals from './Intervals.js';
 import LevelMap from './Levels/LevelMap.js';
+import Colliders from './Colliders.js';
+import Particles from './Particles.js';
+import UI from './UI.js';
+import Units from './Units.js';
 
-const isPlayerHelperNeeded = false;
 
 export default class Scene {
     /**
@@ -20,15 +21,17 @@ export default class Scene {
         this.remove = this.remove.bind(this);
         this.clearScene = this.clearScene.bind(this);
         this.loadGLTF = this.loadGLTF.bind(this);
+        this.getPlayer = this.getPlayer.bind(this);
 
-        this.players = {};
-        this.player = undefined;
         this.intervals = new Intervals(this);
         this.renderer = renderer;
         this.scene = new THREE.Scene();
+        this.colliders = new Colliders(this);
+        this.units = new Units(this);
         this.camera = new Camera(this);
         this.input = new Input({
             onAction: () => this.level.onAction(),
+            onExit: () => this.ui.openShop(),
             onZoom: zoom => this.camera.addY(zoom),
         });
         this.gameObjectsService = new GameObjectsService(this);
@@ -63,8 +66,8 @@ export default class Scene {
     }
 
     clearScene() {
-        this.gameObjectsService.removeAllGameObjects();
-        this.createPlayer({
+        this.gameObjectsService.removeAll();
+        this.units.createPlayer({
             onCreate: () => {
                 this.ui.updatePlayerLabels();
             }
@@ -81,11 +84,15 @@ export default class Scene {
             this.input.update();
             this.level.update();
             this.particles.update();
-            this.connection.send(this.player);
+            this.connection.send(this.getPlayer());
         }
 
         this.renderer.render(this.scene, this.camera.camera);
         requestAnimationFrame(this.animate);
+    }
+
+    getPlayer() {
+        return this.units.getPlayer();
     }
 
     /**
@@ -158,116 +165,6 @@ export default class Scene {
 
             if (!params.noScene) {
                 this.add(loadedModel.scene);
-            }
-        });
-    }
-
-    createAnotherPlayer(id) {
-        this.players[id] = {
-            position: { set: () => null },
-            rotation: { set: () => null },
-        };
-
-        return this.loadObj({
-            baseUrl: './public/assets/models/units/player',
-            callback: (object) => {
-                this.players[id] = object;
-                this.add(object);
-            }
-        });
-    }
-
-    createPlayer({
-        onCreate = () => {},
-        onKill = () => {},
-        onDamageTaken = () => {},
-        onDie = () => {},
-        onMove = () => {},
-    }) {
-        const gameObjectsService = this.gameObjectsService;
-
-        return this.loadGLTF({
-            baseUrl: './public/assets/models/units/player',
-            callback: (loadedModel) => {
-                if (isPlayerHelperNeeded) {
-                    var helper = new THREE.SkeletonHelper(gltf);
-                    helper.material.linewidth = 4;
-                    this.add(helper);
-                }
-
-                const pointLight = new THREE.PointLight(0xffffff);
-                pointLight.position.set(0, 10, 0);
-                pointLight.distance = 50;
-                pointLight.decay = 2;
-                loadedModel.scene.add(pointLight);
-
-                const player = gameObjectsService.hookGameObject(new Player({
-                    animations: loadedModel.animations,
-                    object: loadedModel.scene,
-                    input: this.input,
-                    complexAnimations: true,
-                    onDamageTaken: () => {
-                        this.ui.updatePlayerLabels();
-                        onDamageTaken();
-                        this.particles.loadParticles({
-                            position: player.position.clone().add(new THREE.Vector3(0, 0.75, 0))
-                        });
-                    },
-                    onKill: (object) => {
-                        this.player.params.experience += object.params.bounty;
-                        this.player.params.money += object.params.bounty;
-                        this.ui.updatePlayerLabels();
-
-                        onKill();
-                    },
-                    onDie: () => {
-                        onDie();
-                        window.setTimeout(() => {
-                            this.ui.showRestart();
-                            this.ui.exitPointerLock();
-                            this.ui.pause = true;
-                        }, 2500);
-                    },
-                    onLevelUp: () => {
-                        this.ui.updatePlayerLabels();
-                        this.loadGLTF({
-                            baseUrl: './public/assets/models/effects/level-up-alt/level-up',
-                            noScene: true,
-                            callback: loadedObject => {
-                                loadedObject.scene.scale.set(1.5, 1.5, 1.5);
-
-                                loadedObject.scene.traverse((child) => {
-                                    if (child.isMesh) {
-                                        child.material.transparent = true;
-                                        child.material.alphaTest = 0.5;
-                                    }
-                                });
-
-                                this.player.object.add(loadedObject.scene);
-
-                                const effect = new AnimatedGameObject({
-                                    object: loadedObject.scene,
-                                    animations: loadedObject.animations,
-                                });
-
-                                this.gameObjectsService.hookGameObject(effect);
-
-                                this.intervals.setTimeout(
-                                    () => this.gameObjectsService.destroyGameObject(effect),
-                                    2080,
-                                );
-                            }
-                        })
-                    },
-                    attack: () => gameObjectsService.attack(player),
-                    fire: () => gameObjectsService.fire(player),
-                    destroy: () => gameObjectsService.destroyGameObject(player),
-                }));
-
-                this.player = player;
-                this.camera.player = player;
-
-                onCreate();
             }
         });
     }
