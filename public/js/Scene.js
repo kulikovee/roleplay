@@ -229,7 +229,7 @@ export default class Scene {
                     onLevelUp: () => {
                         this.ui.updatePlayerLabels();
                         this.loadGLTF({
-                            baseUrl: './public/assets/models/effects/level-up/level-up',
+                            baseUrl: './public/assets/models/effects/level-up-alt/level-up',
                             noScene: true,
                             callback: loadedObject => {
                                 loadedObject.scene.scale.set(1.5, 1.5, 1.5);
