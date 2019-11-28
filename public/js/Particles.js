@@ -104,8 +104,6 @@ export default class Particles {
             this.scene.add(particleSystem);
         }
 
-        console.log({ particleSystem });
-
         return particleSystem;
     }
 }

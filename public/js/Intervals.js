@@ -50,7 +50,7 @@ export default class Intervals {
             this.intervals.push({
                 fn,
                 interval: timeout,
-                loop: 1,
+                loops: 1,
                 calledAt: this.timePassed,
                 id: ++this.intervalIndex,
             });

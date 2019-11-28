@@ -221,10 +221,12 @@ export default class Scene {
                         onKill();
                     },
                     onDie: () => {
-                        this.ui.showRestart();
-                        this.ui.exitPointerLock();
-                        this.ui.pause = true;
                         onDie();
+                        window.setTimeout(() => {
+                            this.ui.showRestart();
+                            this.ui.exitPointerLock();
+                            this.ui.pause = true;
+                        }, 2500);
                     },
                     onLevelUp: () => {
                         this.ui.updatePlayerLabels();

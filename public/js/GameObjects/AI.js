@@ -47,7 +47,10 @@ export default class AI extends FiringUnit {
             }
         } else {
             this.isRunning = false;
-            this.attack();
+
+            if (target.isAlive()) {
+                this.attack();
+            }
         }
 
         this.animationState.isMovingForward = this.isRunning;

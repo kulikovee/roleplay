@@ -27,6 +27,8 @@ const animationNames = {
     bottomRunRight: 'Bottom Run Right',
     bottomRunLeft: 'Bottom Run Left',
     bottomJump: 'Bottom Jump',
+    topDie: 'Top Die',
+    bottomDie: 'Bottom Die',
 };
 
 const topAnimations = [
@@ -37,6 +39,7 @@ const topAnimations = [
     'topRunRight',
     'topRunLeft',
     'topJump',
+    'topDie',
 ];
 
 const bottomAnimations = [
@@ -47,6 +50,7 @@ const bottomAnimations = [
     'bottomRunRight',
     'bottomRunLeft',
     'bottomJump',
+    'bottomDie',
 ];
 
 const topBones = [
@@ -187,7 +191,7 @@ export default class AnimatedGameObject extends GameObject {
             {}
         );
 
-        const { animations: { jump, attack, topAttack, die } = {} } = this;
+        const { animations: { jump, attack, topAttack, die, topDie, bottomDie } = {} } = this;
 
         if (jump) {
             jump.setLoop(THREE.LoopOnce, 0);
@@ -197,6 +201,16 @@ export default class AnimatedGameObject extends GameObject {
         if (die) {
             die.setLoop(THREE.LoopOnce, 0);
             die.clampWhenFinished = true;
+        }
+
+        if (topDie) {
+            topDie.setLoop(THREE.LoopOnce, 0);
+            topDie.clampWhenFinished = true;
+        }
+
+        if (bottomDie) {
+            bottomDie.setLoop(THREE.LoopOnce, 0);
+            bottomDie.clampWhenFinished = true;
         }
 
         if (attack) {
@@ -254,7 +268,7 @@ export default class AnimatedGameObject extends GameObject {
                 topRunLeft,
                 topStand, bottomStand,
                 topJump, bottomJump,
-                die,
+                topDie, bottomDie,
             } = {}
         } = this;
 
@@ -270,7 +284,8 @@ export default class AnimatedGameObject extends GameObject {
 
         const playingAnimations = {
             top: (
-                (isAttack && topAttack)
+                (isDie && topDie)
+                || (isAttack && topAttack)
                 || (isJump && topJump)
                 || (isMovingBackward && isMovingRight && topRunLeft)
                 || (isMovingBackward && isMovingLeft && topRunRight)
@@ -281,7 +296,8 @@ export default class AnimatedGameObject extends GameObject {
                 || (topStand)
             ),
             bottom: (
-                (isJump && bottomJump)
+                (isDie && bottomDie)
+                || (isJump && bottomJump)
                 || (isMovingBackward && isMovingRight && bottomWalkBack)
                 || (isMovingBackward && isMovingLeft && bottomWalkBack)
                 || (isMovingBackward && bottomWalkBack)
@@ -291,7 +307,6 @@ export default class AnimatedGameObject extends GameObject {
                 || (isAttack && bottomAttack)
                 || (bottomStand)
             ),
-            whole: isDie && die,
         };
 
         const legsRotationBone = this.getChildByName('Legs_Rotation');
@@ -313,15 +328,11 @@ export default class AnimatedGameObject extends GameObject {
             rotation.set(rotation.x, this.legsRotationY, rotation.z);
         }
 
-
         this.blendAnimations(playingAnimations);
     }
 
-    blendAnimations({ top, bottom, whole }) {
-        const isTopBottom = (top && bottom && top._clip && bottom._clip);
-        const isWhole = whole && whole._clip;
-
-        if (!isTopBottom && !isWhole) return;
+    blendAnimations({ top, bottom }) {
+        if (!(top && bottom && top._clip && bottom._clip)) return;
 
         const getAnimationName = a => a._clip.name,
             playAnimation = (fromAnimation, animation) => {
@@ -338,17 +349,11 @@ export default class AnimatedGameObject extends GameObject {
                 }
             };
 
-        if (isWhole) {
-            playAnimation(this.playingAnimations.top, whole);
-            this.playingAnimations.top = whole;
-            this.playingAnimations.bottom = whole;
-        } else {
-            playAnimation(this.playingAnimations.top, top);
-            playAnimation(this.playingAnimations.bottom, bottom);
+        playAnimation(this.playingAnimations.top, top);
+        playAnimation(this.playingAnimations.bottom, bottom);
 
-            this.playingAnimations.top = top;
-            this.playingAnimations.bottom = bottom;
-        }
+        this.playingAnimations.top = top;
+        this.playingAnimations.bottom = bottom;
     }
 
     getCurrentAnimation() {
