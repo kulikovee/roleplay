@@ -5,7 +5,7 @@ The project provides:
  * Keyboard Player control
  * Levels(locations) switching
  * Player stats improving
- * Basic AI (keep target on the player, moving and shooting)
+ * Basic AI (keep target on the player, move and attack)
  * UI controls
  * WebSocket connection
  * Animation control
