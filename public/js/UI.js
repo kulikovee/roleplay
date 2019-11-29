@@ -1,53 +1,37 @@
-export default class UI {
+import AutoBindMethods from './AutoBindMethods.js';
+
+export default class UI extends AutoBindMethods {
     /**
      * @param {Scene} scene
      */
     constructor(scene) {
-        this.updatePlayerLabels = this.updatePlayerLabels.bind(this);
-        this.openShop = this.openShop.bind(this);
-        this.closeShop = this.closeShop.bind(this);
-        this.buy = this.buy.bind(this);
-        this.startGame = this.startGame.bind(this);
-        this.restartGame = this.restartGame.bind(this);
-        this.restart = this.restart.bind(this);
-        this.requestPointerLock = this.requestPointerLock.bind(this);
-        this.addPointerLockEvents = this.addPointerLockEvents.bind(this);
-        this.onPointerLockChange = this.onPointerLockChange.bind(this);
-        this.onFullscreenChange = this.onFullscreenChange.bind(this);
-        this.updateCursor = this.updateCursor.bind(this);
-        this.updateHPBars = this.updateHPBars.bind(this);
-        this.clearHpBars = this.clearHpBars.bind(this);
-
+        super();
         this.scene = scene;
+        this.elements = this.getElements();
         this.pause = false;
         this.isPointerLocked = false;
-        this.cursor = document.getElementById('cursor');
-        this.hpBars = document.getElementById('hp-bars');
 
-        document.getElementById('close-shop').onclick = () => this.closeShop();
-        document.getElementById('buy-hp').onclick = () => this.buy('hp');
-        document.getElementById('buy-talent-hp').onclick = () => this.buy('talent-hp');
-        document.getElementById('buy-talent-speed').onclick = () => this.buy('talent-speed');
-        document.getElementById('buy-talent-damage').onclick = () => this.buy('talent-damage');
-        document.getElementById('restart-button').onclick = () => this.restart();
-        document.getElementById('switch-third-person').onclick = () => this.switchCamera();
-        document.getElementById('god-mode-enable').onclick = () => this.buy('god-hp');
+        this.elements.closeShopButton.onclick = () => this.closeShop();
+        this.elements.buyHpButton.onclick = () => this.buy('hp');
+        this.elements.buyTalentHpButton.onclick = () => this.buy('talent-hp');
+        this.elements.buyTalentSpeedButton.onclick = () => this.buy('talent-speed');
+        this.elements.buyTalentDamageButton.onclick = () => this.buy('talent-damage');
+        this.elements.restartButton.onclick = () => this.restart();
+        this.elements.switchCameraModeButton.onclick = () => this.switchCamera();
+        this.elements.godModeHpButton.onclick = () => this.buy('god-hp');
 
-        this.addPointerLockEvents(
-            document.getElementById('blocker'),
-            document.getElementById('instructions'),
-        );
+        this.addPointerLockEvents(this.elements.blockerLabel, this.elements.instructionsLabel);
     }
 
     update() {
         this.updateCursor();
         this.updateHPBars();
-    }
+    };
 
     updateCursor() {
         const { isThirdPerson, cursor: { x, y } } = this.scene.input;
-        this.cursor.style.left = isThirdPerson ? '0' : `${x}px`;
-        this.cursor.style.top = isThirdPerson ? '0' : `${y}px`;
+        this.elements.cursor.style.left = isThirdPerson ? '0' : `${x}px`;
+        this.elements.cursor.style.top = isThirdPerson ? '0' : `${y}px`;
     }
 
     updateHPBars() {
@@ -91,31 +75,31 @@ export default class UI {
             const content = document.createElement('div');
             element.append(content);
 
-            this.hpBars.append(element);
+            this.elements.hpBarsContainer.append(element);
         }
 
         return element;
     }
 
     clearHpBars() {
-        this.hpBars.innerHTML = '';
+        this.elements.hpBarsContainer.innerHTML = '';
     }
 
     updatePlayerLabels() {
         if (this.scene.getPlayer()) {
             const player = this.scene.getPlayer();
 
-            document.getElementById('exp').innerHTML =
+            this.elements.rightBottomLabel.innerHTML =
                 `Exp: ${Math.floor(player.getExperience())} \
                 / ${Math.floor(player.getLevelExperience())}  \
                 | Talents: ${player.params.unspentTalents}\
                 | Level: ${player.getLevel()}`;
 
-            document.getElementById('money').innerHTML = `$${Math.round(player.params.money)}`;
-            document.getElementById('shop-talent').innerHTML = `Talents (${Math.round(player.params.unspentTalents)} unspent talents left):`;
-            document.getElementById('shop-money').innerHTML = `Shop ($${Math.round(player.params.money)} left):`;
+            this.elements.rightTopLabel.innerHTML = `$${Math.round(player.params.money)}`;
+            this.elements.shopTalentLabel.innerHTML = `Talents (${Math.round(player.params.unspentTalents)} unspent talents left):`;
+            this.elements.shopMoneyLabel.innerHTML = `Shop ($${Math.round(player.params.money)} left):`;
 
-            document.getElementById('hp').innerHTML =`
+            this.elements.leftBottomLabel.innerHTML =`
                 HP ${Math.ceil(player.params.hp)} / ${Math.ceil(player.params.hpMax)} \
                 | Speed: ${Math.floor(player.params.speed * 1000)}% \
                 | Damage: ${player.params.damage}
@@ -126,17 +110,17 @@ export default class UI {
     openShop() {
         this.pause = true;
         this.exitPointerLock();
-        document.getElementById('shop').style.display = 'block';
+        this.elements.pausePane.style.display = 'block';
     }
 
     closeShop() {
         this.pause = false;
         this.requestPointerLock();
-        document.getElementById('shop').style.display = 'none';
+        this.elements.pausePane.style.display = 'none';
     }
 
     switchCamera() {
-        document.getElementById('switch-third-person').value = this.scene.input.isThirdPerson
+        this.elements.switchCameraModeButton.value = this.scene.input.isThirdPerson
             ? 'Switch to Third Person Camera'
             : 'Switch to Isometric Camera';
 
@@ -194,17 +178,17 @@ export default class UI {
     }
 
     showRestart() {
-        document.getElementById('restart').style.display = 'block';
+        this.elements.restartButton.style.display = 'block';
     }
 
     startGame() {
-        document.getElementById('restart').style.display = 'none';
+        this.elements.restartButton.style.display = 'none';
         this.updatePlayerLabels();
     }
 
     restartGame() {
         this.scene.level.restartLevel();
-        document.getElementById('restart').style.display = 'none';
+        this.elements.restartButton.style.display = 'none';
         this.updatePlayerLabels();
         this.scene.camera.update();
     }
@@ -262,11 +246,11 @@ export default class UI {
             if (isPointerLocked) {
                 this.scene.input.cursor.x = this.scene.input.mouse.x;
                 this.scene.input.cursor.y = this.scene.input.mouse.y;
-                blocker.style.display = 'none';
+                this.elements.blockerLabel.style.display = 'none';
                 this.isPointerLocked = true;
             } else {
-                blocker.style.display = 'inline-block';
-                instructions.style.display = '';
+                this.elements.blockerLabel.style.display = 'inline-block';
+                this.elements.instructionsLabel.style.display = '';
                 this.isPointerLocked = false;
 
                 this.openShop();
@@ -323,5 +307,39 @@ export default class UI {
         } else {
             instructions.innerHTML += 'Your browser doesn\'t seem to support Fullscreen API<br>';
         }
+    }
+
+    getElements() {
+        return {
+            // Pause pane
+            pausePane: document.getElementById('shop'),
+
+            // Clickable messages on the Pause screen
+            blockerLabel: document.getElementById('blocker'),
+            instructionsLabel: document.getElementById('instructions'),
+
+            // Mouse cursor in isometric camera mode
+            cursor: document.getElementById('cursor'),
+
+            // Container for Units HP bars
+            hpBarsContainer: document.getElementById('hp-bars'),
+
+            // Buttons
+            closeShopButton: document.getElementById('close-shop'),
+            buyHpButton: document.getElementById('buy-hp'),
+            buyTalentHpButton: document.getElementById('buy-talent-hp'),
+            buyTalentSpeedButton: document.getElementById('buy-talent-speed'),
+            buyTalentDamageButton: document.getElementById('buy-talent-damage'),
+            restartButton: document.getElementById('restart-button'),
+            switchCameraModeButton: document.getElementById('switch-third-person'),
+            godModeHpButton: document.getElementById('god-mode-enable'),
+
+            // Labels
+            leftBottomLabel: document.getElementById('hp'),
+            rightTopLabel: document.getElementById('money'),
+            rightBottomLabel: document.getElementById('exp'),
+            shopTalentLabel: document.getElementById('shop-talent'),
+            shopMoneyLabel: document.getElementById('shop-money'),
+        };
     }
 }
