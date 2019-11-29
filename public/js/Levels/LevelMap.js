@@ -17,11 +17,11 @@ export default class LevelMap extends AbstractLevel {
 
         this.id = 'map';
         this.lastBadGuyCreated = Date.now();
-        this.enviroment = this.createEnvironment();
+        this.environment = this.createEnvironment();
         this.skybox = this.createSkybox();
         this.globalLight = this.createGlobalLight();
 
-        this.scene.add(this.enviroment);
+        this.scene.add(this.environment);
         this.scene.add(this.skybox);
         this.scene.add(this.globalLight);
 
@@ -51,7 +51,7 @@ export default class LevelMap extends AbstractLevel {
     }
 
     stopLevel() {
-        this.scene.remove(this.enviroment);
+        this.scene.remove(this.environment);
         this.scene.remove(this.skybox);
         this.scene.remove(this.globalLight);
         this.scene.gameObjectsService.removeAllExceptPlayer();
@@ -62,18 +62,20 @@ export default class LevelMap extends AbstractLevel {
 
     createEnvironment() {
         const pivot = new THREE.Object3D();
+        pivot.name = 'Level Environment';
         const treePositions = [{ x: 0, z: 15 }, { x: 0, z: -15 }, { x: 15, z: 0 }, { x: -15, z: 0 }];
 
         this.scene.loadGLTF({
-            baseUrl: './public/assets/models/enviroment/hall/hall',
+            baseUrl: './public/assets/models/environment/hall/hall',
             callback: object => pivot.add(object.scene)
         });
 
         this.scene.loadGLTF({
-            baseUrl: './public/assets/models/enviroment/tree',
+            baseUrl: './public/assets/models/environment/tree',
             noScene: true,
             callback: (loadedModel) => treePositions.forEach((position) => {
                 const model = loadedModel.scene.clone();
+                model.name = 'Tree';
                 model.position.set(position.x, 0, position.z);
                 const { x, z } = model.position;
 

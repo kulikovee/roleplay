@@ -35,12 +35,12 @@ export default class Unit extends MovingGameObject {
     update() {
         MovingGameObject.prototype.update.call(this);
 
-        if (this.isDead()) {
-            return;
+        if (this.position.y < -150) {
+            this.die();
         }
 
-        if (this.position.y < -100) {
-            this.die();
+        if (this.isDead()) {
+            return;
         }
 
         if (this.isAttackReleased()) {

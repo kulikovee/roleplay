@@ -8,9 +8,12 @@ export default class Camera {
         this.camera = new THREE.PerspectiveCamera(45, ratio, 1, 100000);
         this.camera.position.set(5, 3, 15);
         this.deltaY = 5;
+        this.distance = 10;
+        this.raycaster = new THREE.Raycaster();
 
         this.toScreenPosition = this.toScreenPosition.bind(this);
         this.objectToScreenPosition = this.objectToScreenPosition.bind(this);
+        this.getThirdPersonPosition = this.getThirdPersonPosition.bind(this);
         this.update = this.update.bind(this);
         this.getWidth = this.getWidth.bind(this);
         this.getHeight = this.getHeight.bind(this);
@@ -18,7 +21,7 @@ export default class Camera {
     }
 
     update() {
-        const { scene: { input: { isThirdPerson } } } = this;
+        const { scene: { input: { isThirdPerson }, scene: { children } } } = this;
         const player = this.scene.getPlayer();
 
         if (!player) return;
@@ -29,7 +32,7 @@ export default class Camera {
             player.position.clone().add(
                 distanceToPlayer.add(
                     isThirdPerson
-                        ? player.getForward().multiplyScalar(-10)
+                        ? this.getThirdPersonPosition(player)
                         : new THREE.Vector3(7.5, 0, 0)
                 )
             )
@@ -52,6 +55,29 @@ export default class Camera {
     getHeight() {
         const renderer = this.scene.renderer.renderer;
         return renderer.getContext().canvas.height;
+    }
+
+    getThirdPersonPosition(player) {
+        const defaultDistance = 10;
+
+        const origin = player.object.position;
+        const destination = this.camera.position;
+        const direction = new THREE.Vector3();
+        const far = new THREE.Vector3();
+
+        let intersectObjects = [children.find(c => c.name === 'Level Environment')];
+
+        const getChildrenFlat = objects => [].concat(...objects.map(obj => obj.children ? [obj, ...getChildrenFlat(obj.children)] : [obj]));
+        const flatChildrenMeshes = getChildrenFlat(intersectObjects).filter(obj => obj.type === 'Mesh');
+
+        this.raycaster.set(origin, direction.subVectors(destination, origin).normalize());
+        this.raycaster.far = defaultDistance;
+        const intersects = this.raycaster.intersectObjects(flatChildrenMeshes);
+
+        let distance = Math.min(defaultDistance, ...intersects.map(i => i.distance - 2));
+        this.distance += (distance - this.distance) * 0.1;
+
+        return player.getForward().multiplyScalar(-this.distance);
     }
 
     toScreenPosition(vector) {
