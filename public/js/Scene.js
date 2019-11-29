@@ -17,7 +17,6 @@ export default class Scene extends AutoBindMethods {
      */
     constructor(renderer) {
         super();
-
         this.intervals = new Intervals(this);
         this.renderer = renderer;
         this.scene = new THREE.Scene();

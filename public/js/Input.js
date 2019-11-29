@@ -19,7 +19,6 @@ const KEYS = {
 export default class Input extends AutoBindMethods {
     constructor(params) {
         super();
-
         this.params = params;
         this.vertical = 0;
         this.horizontal = 0;
@@ -40,6 +39,8 @@ export default class Input extends AutoBindMethods {
             x: 0,
             y: 0,
         };
+
+        this.addEventListeners();
     }
 
     update() {
@@ -47,7 +48,7 @@ export default class Input extends AutoBindMethods {
         this.look.vertical = 0;
     }
 
-    createInput() {
+    addEventListeners() {
         document.addEventListener('mousedown', (e) => {
             if (e.which === KEYS.MOUSE_LEFT) { this.attack1 = true; }
             if (e.which === KEYS.MOUSE_RIGHT) { this.attack2 = true; }

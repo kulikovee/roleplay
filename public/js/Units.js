@@ -6,7 +6,6 @@ const isPlayerHelperNeeded = false;
 export default class Units extends AutoBindMethods {
     constructor(scene) {
         super();
-
         this.scene = scene;
         this.units = [];
         this.player = undefined;

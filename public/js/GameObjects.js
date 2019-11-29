@@ -19,7 +19,6 @@ export default class GameObjectsService extends AutoBindMethods {
      */
     constructor(scene) {
         super();
-
         this.gameObjects = [];
         this.nextGameObjectId = 0;
         this.scene = scene;

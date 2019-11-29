@@ -6,7 +6,6 @@ export default class AbstractLevel extends AutoBindMethods {
      */
     constructor(scene) {
         super();
-
         this.scene = scene;
         this.id = 'unknown-level';
         this.actionElement = document.getElementById('action');

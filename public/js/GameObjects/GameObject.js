@@ -3,7 +3,6 @@ import AutoBindMethods from '../AutoBindMethods.js';
 export default class GameObject extends AutoBindMethods {
     constructor(params = {}) {
         super();
-
         this.params = params;
         this.object = params.object;
 

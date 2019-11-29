@@ -3,7 +3,6 @@ import AutoBindMethods from './AutoBindMethods.js';
 export default class Colliders extends AutoBindMethods {
     constructor(scene) {
         super();
-
         this.scene = scene;
         this.colliders = [];
         this.nextId = 0;

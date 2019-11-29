@@ -9,7 +9,6 @@ export default class Connection extends AutoBindMethods {
      */
     constructor(scene, ip = 'localhost', port = '1337', isSecure = true) {
         super();
-
         this.scene = scene;
 
         const WebSocket = window.WebSocket || window.MozWebSocket;

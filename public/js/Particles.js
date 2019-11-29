@@ -4,7 +4,6 @@ import AnimatedGameObject from './GameObjects/AnimatedGameObject.js';
 export default class Particles extends AutoBindMethods {
     constructor(scene) {
         super();
-
         this.scene = scene;
         this.particles = [];
     }

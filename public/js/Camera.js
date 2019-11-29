@@ -6,7 +6,6 @@ export default class Camera extends AutoBindMethods {
      */
     constructor(scene) {
         super();
-
         this.scene = scene;
         const ratio = this.getWidth() / this.getHeight();
         this.camera = new THREE.PerspectiveCamera(45, ratio, 1, 100000);

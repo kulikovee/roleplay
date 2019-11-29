@@ -3,7 +3,6 @@ import AutoBindMethods from './AutoBindMethods.js';
 export default class Intervals extends AutoBindMethods {
     constructor(scene) {
         super();
-
         this.scene = scene;
         this.timePassed = 0;
         this.lastFrame = Date.now();
