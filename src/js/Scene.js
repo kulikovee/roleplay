@@ -1,14 +1,16 @@
-import AutoBindMethods from './AutoBindMethods.js';
-import Camera from './Camera.js';
-import Connection from './Connection.js';
-import GameObjectsService from './GameObjects.js';
-import Input from './Input.js';
-import Intervals from './Intervals.js';
-import LevelMap from './Levels/LevelMap.js';
-import Colliders from './Colliders.js';
-import Particles from './Particles.js';
-import UI from './UI.js';
-import Units from './Units.js';
+import * as THREE from 'three';
+import * as GLTFLoader from 'three-gltf-loader';
+import AutoBindMethods from './AutoBindMethods';
+import Camera from './Camera';
+import Connection from './Connection';
+import GameObjectsService from './GameObjects';
+import Input from './Input';
+import Intervals from './Intervals';
+import LevelMap from './Levels/LevelMap';
+import Colliders from './Colliders';
+import Particles from './Particles';
+import UI from './UI';
+import Units from './Units';
 
 
 export default class Scene extends AutoBindMethods {
@@ -151,7 +153,7 @@ export default class Scene extends AutoBindMethods {
     }
 
     loadGLTF(params) {
-        const loader = new THREE.GLTFLoader();
+        const loader = new GLTFLoader();
         const url = `${params.baseUrl}.glb${params.isGLTF ? '.gltf' : ''}`;
 
         loader.load(url, (loadedModel) => {

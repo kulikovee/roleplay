@@ -1,4 +1,5 @@
-import AutoBindMethods from '../AutoBindMethods.js';
+import * as THREE from 'three';
+import AutoBindMethods from '../AutoBindMethods';
 
 export default class AbstractLevel extends AutoBindMethods {
     /**
@@ -33,7 +34,7 @@ export default class AbstractLevel extends AutoBindMethods {
 
     createSkybox() {
         const materialArray = ['xpos', 'xneg', 'ypos', 'yneg', 'zpos', 'zneg'].map(function (direction) {
-            const url = `./public/assets/textures/sky-nebula/nebula-${direction}.png`;
+            const url = `./assets/textures/sky-nebula/nebula-${direction}.png`;
             return new THREE.MeshBasicMaterial({
                 map: new THREE.TextureLoader().load(url),
                 side: THREE.BackSide,

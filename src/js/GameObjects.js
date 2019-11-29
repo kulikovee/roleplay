@@ -1,9 +1,10 @@
-import AutoBindMethods from './AutoBindMethods.js';
-import AI from './GameObjects/AI.js';
-import Player from './GameObjects/Player.js';
-import Fire from './GameObjects/Fire.js';
-import Unit from './GameObjects/Unit.js';
-import AnimatedGameObject from './GameObjects/AnimatedGameObject.js';
+import * as THREE from 'three';
+import AutoBindMethods from './AutoBindMethods';
+import AI from './GameObjects/AI';
+import Player from './GameObjects/Player';
+import Fire from './GameObjects/Fire';
+import Unit from './GameObjects/Unit';
+import AnimatedGameObject from './GameObjects/AnimatedGameObject';
 
 export {
     AI,

@@ -1,4 +1,4 @@
-import AutoBindMethods from './AutoBindMethods.js';
+import AutoBindMethods from './AutoBindMethods';
 
 const KEYS = {
   MOUSE_LEFT: 1,

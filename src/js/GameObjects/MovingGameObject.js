@@ -1,4 +1,5 @@
-import AnimatedGameObject from './AnimatedGameObject.js';
+import * as THREE from 'three';
+import AnimatedGameObject from './AnimatedGameObject';
 
 export default class MovingGameObject extends AnimatedGameObject {
     constructor(params = {}) {

@@ -1,5 +1,6 @@
-import AutoBindMethods from './AutoBindMethods.js';
-import AnimatedGameObject from './GameObjects/AnimatedGameObject.js';
+import * as THREE from 'three';
+import AutoBindMethods from './AutoBindMethods';
+import AnimatedGameObject from './GameObjects/AnimatedGameObject';
 
 export default class Particles extends AutoBindMethods {
     constructor(scene) {
@@ -20,7 +21,7 @@ export default class Particles extends AutoBindMethods {
         const gameObjectsService = this.scene.gameObjectsService;
 
         return this.scene.loadGLTF({
-            baseUrl: `./public/assets/models/effects/${particleName}`,
+            baseUrl: `./assets/models/effects/${particleName}`,
             callback: (gltf) => {
                 gltf.scene.position.copy(position);
                 gltf.scene.scale.copy(scale);

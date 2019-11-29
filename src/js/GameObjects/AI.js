@@ -1,4 +1,4 @@
-import FiringUnit from './FiringUnit.js';
+import FiringUnit from './FiringUnit';
 
 export default class AI extends FiringUnit {
     constructor(params = {}) {

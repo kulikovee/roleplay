@@ -1,4 +1,4 @@
-import AutoBindMethods from './AutoBindMethods.js';
+import AutoBindMethods from './AutoBindMethods';
 
 export default class Connection extends AutoBindMethods {
     /**

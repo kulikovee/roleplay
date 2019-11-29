@@ -1,5 +1,6 @@
-import AutoBindMethods from './AutoBindMethods.js';
-import { Player, AI, AnimatedGameObject } from './GameObjects.js';
+import * as THREE from 'three';
+import AutoBindMethods from './AutoBindMethods';
+import { Player, AI, AnimatedGameObject } from './GameObjects';
 
 const isPlayerHelperNeeded = false;
 
@@ -34,7 +35,7 @@ export default class Units extends AutoBindMethods {
         };
 
         return this.scene.loadObj({
-            baseUrl: './public/assets/models/units/player',
+            baseUrl: './assets/models/units/player',
             callback: (object) => {
                 this.units[id] = object;
                 this.scene.add(object);
@@ -52,7 +53,7 @@ export default class Units extends AutoBindMethods {
         const gameObjectsService = this.scene.gameObjectsService;
 
         return this.scene.loadGLTF({
-            baseUrl: './public/assets/models/units/player',
+            baseUrl: './assets/models/units/player',
             callback: (loadedModel) => {
                 if (isPlayerHelperNeeded) {
                     var helper = new THREE.SkeletonHelper(gltf);
@@ -99,7 +100,7 @@ export default class Units extends AutoBindMethods {
                     onLevelUp: () => {
                         this.scene.ui.updatePlayerLabels();
                         this.scene.loadGLTF({
-                            baseUrl: './public/assets/models/effects/level-up-alt/level-up',
+                            baseUrl: './assets/models/effects/level-up-alt/level-up',
                             noScene: true,
                             callback: loadedObject => {
                                 loadedObject.scene.scale.set(1.5, 1.5, 1.5);
@@ -147,7 +148,7 @@ export default class Units extends AutoBindMethods {
             gameObjectsService = this.scene.gameObjectsService;
 
         this.scene.loadGLTF({
-            baseUrl: './public/assets/models/units/enemy',
+            baseUrl: './assets/models/units/enemy',
             callback: (gltf) => {
                 /** @type {AI} */
                 const badGuy = gameObjectsService.hookGameObject(new AI({

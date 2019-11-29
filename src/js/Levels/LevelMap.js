@@ -1,5 +1,6 @@
-import AbstractLevel from './AbstractLevel.js';
-import { AI } from '../GameObjects.js';
+import * as THREE from 'three';
+import AbstractLevel from './AbstractLevel';
+import { AI } from '../GameObjects';
 
 export default class LevelMap extends AbstractLevel {
     /**
@@ -59,12 +60,12 @@ export default class LevelMap extends AbstractLevel {
         const treePositions = [{ x: 0, z: 15 }, { x: 0, z: -15 }, { x: 15, z: 0 }, { x: -15, z: 0 }];
 
         this.scene.loadGLTF({
-            baseUrl: './public/assets/models/environment/hall/hall',
+            baseUrl: './assets/models/environment/hall/hall',
             callback: object => pivot.add(object.scene)
         });
 
         this.scene.loadGLTF({
-            baseUrl: './public/assets/models/environment/tree',
+            baseUrl: './assets/models/environment/tree',
             noScene: true,
             callback: (loadedModel) => treePositions.forEach((position) => {
                 const model = loadedModel.scene.clone();
@@ -85,7 +86,7 @@ export default class LevelMap extends AbstractLevel {
 
     createSkybox() {
         const materialArray = ['RT', 'LF', 'UP', 'DN', 'FT', 'BK'].map(function (direction) {
-            const url = `./public/assets/textures/sky/skybox${direction}.jpg`;
+            const url = `./assets/textures/sky/skybox${direction}.jpg`;
             return new THREE.MeshBasicMaterial({
                 map: new THREE.TextureLoader().load(url),
                 side: THREE.BackSide,

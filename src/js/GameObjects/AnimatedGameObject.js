@@ -1,4 +1,5 @@
-import GameObject from './GameObject.js';
+import * as THREE from 'three';
+import GameObject from './GameObject';
 
 const animationNames = {
     stand: 'Stand',

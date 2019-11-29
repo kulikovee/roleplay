@@ -1,4 +1,5 @@
-import FiringUnit from './FiringUnit.js';
+import * as THREE from 'three';
+import FiringUnit from './FiringUnit';
 
 export default class Player extends FiringUnit {
     constructor(params = {}) {

@@ -1,4 +1,5 @@
-import AutoBindMethods from './AutoBindMethods.js';
+import * as THREE from 'three'
+import AutoBindMethods from './AutoBindMethods';
 
 export default class UI extends AutoBindMethods {
     /**
@@ -7,7 +8,7 @@ export default class UI extends AutoBindMethods {
     constructor(scene) {
         super();
         this.scene = scene;
-        this.elements = this.getElements();
+        this.elements = UI.getElements();
         this.pause = false;
         this.isPointerLocked = false;
 
@@ -26,7 +27,7 @@ export default class UI extends AutoBindMethods {
     update() {
         this.updateCursor();
         this.updateHPBars();
-    };
+    }
 
     updateCursor() {
         const { isThirdPerson, cursor: { x, y } } = this.scene.input;
@@ -309,7 +310,7 @@ export default class UI extends AutoBindMethods {
         }
     }
 
-    getElements() {
+    static getElements() {
         return {
             // Pause pane
             pausePane: document.getElementById('shop'),

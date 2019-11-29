@@ -1,4 +1,5 @@
-import AutoBindMethods from './AutoBindMethods.js';
+import * as THREE from 'three';
+import AutoBindMethods from './AutoBindMethods';
 
 export default class Renderer extends AutoBindMethods {
     /**

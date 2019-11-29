@@ -1,4 +1,4 @@
-import Unit from './Unit.js';
+import Unit from './Unit';
 
 export default class FiringUnit extends Unit {
     constructor(params = {}) {

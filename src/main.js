@@ -1,5 +1,7 @@
-import Renderer from './js/Renderer.js';
-import Scene from './js/Scene.js';
+import * as THREE from 'three'
+import './style.scss';
+import Renderer from './js/Renderer';
+import Scene from './js/Scene';
 
 window.addEventListener('load', function () {
     THREE.Cache.enabled = true;

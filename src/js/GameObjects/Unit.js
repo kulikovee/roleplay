@@ -1,4 +1,4 @@
-import MovingGameObject from './MovingGameObject.js';
+import MovingGameObject from './MovingGameObject';
 
 export default class Unit extends MovingGameObject {
     constructor(params = {}) {
