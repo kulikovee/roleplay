@@ -7,8 +7,9 @@ export default class Camera {
         const ratio = this.getWidth() / this.getHeight();
         this.camera = new THREE.PerspectiveCamera(45, ratio, 1, 100000);
         this.camera.position.set(5, 3, 15);
-        this.deltaY = 5;
-        this.distance = 10;
+        this.deltaY = 3;
+        this.defaultDistance = 10;
+        this.distance = this.defaultDistance;
         this.raycaster = new THREE.Raycaster();
 
         this.toScreenPosition = this.toScreenPosition.bind(this);
@@ -21,7 +22,7 @@ export default class Camera {
     }
 
     update() {
-        const { scene: { input: { isThirdPerson }, scene: { children } } } = this;
+        const { scene: { input: { isThirdPerson } } } = this;
         const player = this.scene.getPlayer();
 
         if (!player) return;
@@ -58,16 +59,20 @@ export default class Camera {
     }
 
     getThirdPersonPosition(player) {
-        const defaultDistance = 10;
-
-        const origin = player.object.position;
-        const destination = this.camera.position;
-        const direction = new THREE.Vector3();
-        const far = new THREE.Vector3();
+        const { scene: { scene: { children } }, defaultDistance } = this,
+            origin = player.object.position,
+            destination = this.camera.position,
+            direction = new THREE.Vector3(),
+            far = new THREE.Vector3();
 
         let intersectObjects = [children.find(c => c.name === 'Level Environment')];
 
-        const getChildrenFlat = objects => [].concat(...objects.map(obj => obj.children ? [obj, ...getChildrenFlat(obj.children)] : [obj]));
+        const getChildrenFlat = objects => [].concat(...objects.map(
+            obj => obj.children
+                ? [obj, ...getChildrenFlat(obj.children)]
+                : [obj]
+        ));
+
         const flatChildrenMeshes = getChildrenFlat(intersectObjects).filter(obj => obj.type === 'Mesh');
 
         this.raycaster.set(origin, direction.subVectors(destination, origin).normalize());
