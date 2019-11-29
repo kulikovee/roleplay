@@ -1,12 +1,12 @@
+import AutoBindMethods from './AutoBindMethods.js';
 import AnimatedGameObject from './GameObjects/AnimatedGameObject.js';
 
-export default class Particles {
+export default class Particles extends AutoBindMethods {
     constructor(scene) {
+        super();
+
         this.scene = scene;
         this.particles = [];
-        this.loadParticles = this.loadParticles.bind(this);
-        this.createParticles = this.createParticles.bind(this);
-        this.update = this.update.bind(this);
     }
 
     update() {

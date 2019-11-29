@@ -1,8 +1,12 @@
-export default class Camera {
+import AutoBindMethods from './AutoBindMethods.js';
+
+export default class Camera extends AutoBindMethods {
     /**
      * @param {Scene} scene
      */
     constructor(scene) {
+        super();
+
         this.scene = scene;
         const ratio = this.getWidth() / this.getHeight();
         this.camera = new THREE.PerspectiveCamera(45, ratio, 1, 100000);
@@ -11,14 +15,6 @@ export default class Camera {
         this.defaultDistance = 10;
         this.distance = this.defaultDistance;
         this.raycaster = new THREE.Raycaster();
-
-        this.toScreenPosition = this.toScreenPosition.bind(this);
-        this.objectToScreenPosition = this.objectToScreenPosition.bind(this);
-        this.getThirdPersonPosition = this.getThirdPersonPosition.bind(this);
-        this.update = this.update.bind(this);
-        this.getWidth = this.getWidth.bind(this);
-        this.getHeight = this.getHeight.bind(this);
-        this.addY = this.addY.bind(this);
     }
 
     update() {

@@ -1,9 +1,8 @@
-export default class Colliders {
+import AutoBindMethods from './AutoBindMethods.js';
+
+export default class Colliders extends AutoBindMethods {
     constructor(scene) {
-        this.resetColliders = this.resetColliders.bind(this);
-        this.removeCollider = this.removeCollider.bind(this);
-        this.addColliderFunction = this.addColliderFunction.bind(this);
-        this.checkWay = this.checkWay.bind(this);
+        super();
 
         this.scene = scene;
         this.colliders = [];

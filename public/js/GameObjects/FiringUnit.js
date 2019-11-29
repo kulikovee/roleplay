@@ -10,11 +10,6 @@ export default class FiringUnit extends Unit {
 
         this.shouldFire = false;
         this.latestFire = Date.now();
-
-        this.update = this.update.bind(this);
-        this.fire = this.fire.bind(this);
-        this.isFireReleased = this.isFireReleased.bind(this);
-        this.getFireInitialPosition = this.getFireInitialPosition.bind(this);
     }
 
     getFireInitialPosition() {

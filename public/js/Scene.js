@@ -1,3 +1,4 @@
+import AutoBindMethods from './AutoBindMethods.js';
 import Camera from './Camera.js';
 import Connection from './Connection.js';
 import GameObjectsService from './GameObjects.js';
@@ -10,18 +11,12 @@ import UI from './UI.js';
 import Units from './Units.js';
 
 
-export default class Scene {
+export default class Scene extends AutoBindMethods {
     /**
      * @param {Renderer} renderer
      */
     constructor(renderer) {
-        this.animate = this.animate.bind(this);
-        this.createCube = this.createCube.bind(this);
-        this.add = this.add.bind(this);
-        this.remove = this.remove.bind(this);
-        this.clearScene = this.clearScene.bind(this);
-        this.loadGLTF = this.loadGLTF.bind(this);
-        this.getPlayer = this.getPlayer.bind(this);
+        super();
 
         this.intervals = new Intervals(this);
         this.renderer = renderer;

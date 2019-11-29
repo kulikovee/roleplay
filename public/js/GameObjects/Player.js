@@ -16,14 +16,6 @@ export default class Player extends FiringUnit {
             ...params,
         });
 
-        this.update = this.update.bind(this);
-        this.getExperience = this.getExperience.bind(this);
-        this.getLevel = this.getLevel.bind(this);
-        this.getLevelExperience = this.getLevelExperience.bind(this);
-        this.getMovingAcceleration = this.getMovingAcceleration.bind(this);
-        this.getFireInitialPosition = this.getFireInitialPosition.bind(this);
-        this.getFireInitialRotation = this.getFireInitialRotation.bind(this);
-
         console.log('Player', this);
 
         params.onLevelUp && this.addEventListener('onLevelUp', params.onLevelUp);

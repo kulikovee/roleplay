@@ -1,9 +1,12 @@
-export default class AbstractLevel {
+import AutoBindMethods from '../AutoBindMethods.js';
+
+export default class AbstractLevel extends AutoBindMethods {
     /**
      * @param {Scene} scene
      */
     constructor(scene) {
-        this.getLevelId = this.getLevelId.bind(this);
+        super();
+
         this.scene = scene;
         this.id = 'unknown-level';
         this.actionElement = document.getElementById('action');

@@ -11,14 +11,6 @@ export default class MovingGameObject extends AnimatedGameObject {
             checkWay: () => true,
             ...params
         });
-
-        this.update = this.update.bind(this);
-        this.getUp = this.getUp.bind(this);
-        this.getLeft = this.getLeft.bind(this);
-        this.getForward = this.getForward.bind(this);
-        this.getDirection = this.getDirection.bind(this);
-        this.getScalarAcceleration = this.getScalarAcceleration.bind(this);
-        this.checkWay = this.checkWay.bind(this);
     }
 
     update() {

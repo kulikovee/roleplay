@@ -1,3 +1,5 @@
+import AutoBindMethods from './AutoBindMethods.js';
+
 const KEYS = {
   MOUSE_LEFT: 1,
   MOUSE_RIGHT: 3,
@@ -14,8 +16,10 @@ const KEYS = {
   ARROW_DOWN: 40,
 };
 
-export default class Input {
+export default class Input extends AutoBindMethods {
     constructor(params) {
+        super();
+
         this.params = params;
         this.vertical = 0;
         this.horizontal = 0;
@@ -36,8 +40,6 @@ export default class Input {
             x: 0,
             y: 0,
         };
-
-        this.createInput();
     }
 
     update() {

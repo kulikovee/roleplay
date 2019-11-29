@@ -1,5 +1,9 @@
-export default class GameObject {
+import AutoBindMethods from '../AutoBindMethods.js';
+
+export default class GameObject extends AutoBindMethods {
     constructor(params = {}) {
+        super();
+
         this.params = params;
         this.object = params.object;
 
@@ -9,13 +13,6 @@ export default class GameObject {
         }
 
         this.events = {};
-
-        this.update = this.update.bind(this);
-        this.dispatchEvent = this.dispatchEvent.bind(this);
-        this.addEventListener = this.addEventListener.bind(this);
-        this.getChildByName = this.getChildByName.bind(this);
-        this.getChildPosition = this.getChildPosition.bind(this);
-        this.getChildRotation = this.getChildRotation.bind(this);
     }
 
     update() {

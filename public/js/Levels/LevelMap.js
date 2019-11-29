@@ -8,13 +8,6 @@ export default class LevelMap extends AbstractLevel {
     constructor(scene) {
         super(scene);
 
-        this.startLevel = this.startLevel.bind(this);
-        this.stopLevel = this.stopLevel.bind(this);
-        this.restartLevel = this.restartLevel.bind(this);
-        this.createBadGuyByTimeout = this.createBadGuyByTimeout.bind(this);
-        this.createEnvironment = this.createEnvironment.bind(this);
-        this.createSkybox = this.createSkybox.bind(this);
-
         this.id = 'map';
         this.lastBadGuyCreated = Date.now();
         this.environment = this.createEnvironment();

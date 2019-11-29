@@ -1,14 +1,11 @@
+import AutoBindMethods from './AutoBindMethods.js';
 import { Player, AI, AnimatedGameObject } from './GameObjects.js';
 
 const isPlayerHelperNeeded = false;
 
-export default class Units {
+export default class Units extends AutoBindMethods {
     constructor(scene) {
-        this.getPlayer = this.getPlayer.bind(this);
-        this.createAnotherPlayer = this.createAnotherPlayer.bind(this);
-        this.createPlayer = this.createPlayer.bind(this);
-        this.getAliveUnits = this.getAliveUnits.bind(this);
-        this.clearUnits = this.clearUnits.bind(this);
+        super();
 
         this.scene = scene;
         this.units = [];

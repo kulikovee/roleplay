@@ -10,18 +10,6 @@ export default class Unit extends MovingGameObject {
             ...params,
         });
 
-        this.update = this.update.bind(this);
-        this.attack = this.attack.bind(this);
-        this.damageTaken = this.damageTaken.bind(this);
-        this.isAttackReleased = this.isAttackReleased.bind(this);
-        this.isDead = this.isDead.bind(this);
-        this.isAlive = this.isAlive.bind(this);
-        this.addMaxHP = this.addMaxHP.bind(this);
-        this.addHP = this.addHP.bind(this);
-        this.addSpeed = this.addSpeed.bind(this);
-        this.addDamage = this.addDamage.bind(this);
-        this.die = this.die.bind(this);
-
         this.shouldAttack = false;
         this.latestAttackTimestamp = Date.now() - this.params.attackRate * 1000;
 

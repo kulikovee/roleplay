@@ -18,8 +18,6 @@ export default class AI extends FiringUnit {
         this.lastRun = Date.now();
         this.lastRunTimeout = 1000;
         this.isRunning = false;
-
-        this.update = this.update.bind(this);
     }
 
     update() {

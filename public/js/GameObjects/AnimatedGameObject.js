@@ -94,16 +94,6 @@ export default class AnimatedGameObject extends GameObject {
             ...params
         });
 
-        this.update = this.update.bind(this);
-        this.createClipAction = this.createClipAction.bind(this);
-        this.findModelAnimation = this.findModelAnimation.bind(this);
-        this.playAnimation = this.playAnimation.bind(this);
-        this.getCurrentAnimation = this.getCurrentAnimation.bind(this);
-        this.initAnimations = this.initAnimations.bind(this);
-        this.updateComplexAnimations = this.updateComplexAnimations.bind(this);
-        this.blendAnimations = this.blendAnimations.bind(this);
-        this.isMoving = this.isMoving.bind(this);
-
         this.animationState = {
             isMovingForward: false,
             isMovingRight: false,

@@ -1,3 +1,4 @@
+import AutoBindMethods from './AutoBindMethods.js';
 import AI from './GameObjects/AI.js';
 import Player from './GameObjects/Player.js';
 import Fire from './GameObjects/Fire.js';
@@ -12,19 +13,12 @@ export {
     AnimatedGameObject,
 };
 
-export default class GameObjectsService {
+export default class GameObjectsService extends AutoBindMethods {
     /**
      * @param {Scene} scene
      */
     constructor(scene) {
-        this.update = this.update.bind(this);
-        this.fire = this.fire.bind(this);
-        this.attack = this.attack.bind(this);
-        this.hookGameObject = this.hookGameObject.bind(this);
-        this.removeAll = this.removeAll.bind(this);
-        this.removeAllExceptPlayer = this.removeAllExceptPlayer.bind(this);
-        this.destroyGameObject = this.destroyGameObject.bind(this);
-        this.removeGameObjectFromScene = this.removeGameObjectFromScene.bind(this);
+        super();
 
         this.gameObjects = [];
         this.nextGameObjectId = 0;

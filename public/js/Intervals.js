@@ -1,9 +1,8 @@
-export default class Intervals {
+import AutoBindMethods from './AutoBindMethods.js';
+
+export default class Intervals extends AutoBindMethods {
     constructor(scene) {
-        this.update = this.update.bind(this);
-        this.setInterval = this.setInterval.bind(this);
-        this.setTimeout = this.setTimeout.bind(this);
-        this.clearInterval = this.clearInterval.bind(this);
+        super();
 
         this.scene = scene;
         this.timePassed = 0;

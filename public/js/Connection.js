@@ -1,4 +1,6 @@
-export default class Connection {
+import AutoBindMethods from './AutoBindMethods.js';
+
+export default class Connection extends AutoBindMethods {
     /**
      * @param {Scene} scene
      * @param {string|number} ip
@@ -6,10 +8,7 @@ export default class Connection {
      * @param {boolean} isSecure
      */
     constructor(scene, ip = 'localhost', port = '1337', isSecure = true) {
-        this.send = this.send.bind(this);
-        this.onMessage = this.onMessage.bind(this);
-        this.setId = this.setId.bind(this);
-        this.updatePlayer = this.updatePlayer.bind(this);
+        super();
 
         this.scene = scene;
 
