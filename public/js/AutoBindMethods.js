@@ -4,14 +4,15 @@ export default class AutoBindMethods {
         let obj = Object.getPrototypeOf(this);
 
         while (obj) {
-            if (obj === Object.prototype) {
+            if (obj === Object.prototype || obj === AutoBindMethods.prototype) {
                 obj = Object.getPrototypeOf(obj);
                 continue;
             }
 
             functionNames = functionNames.concat(
                 Object.getOwnPropertyNames(obj).filter(name => (
-                    functionNames.indexOf(name) === -1
+                    name !== 'constructor'
+                    && functionNames.indexOf(name) === -1
                     && typeof this[name] === 'function'
                 ))
             );
