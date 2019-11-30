@@ -37,7 +37,7 @@ export default class LevelMap extends AbstractLevel {
 
         this.interval = this.scene.intervals.setInterval(this.createBadGuyByTimeout, 500);
         this.scene.ui.startGame();
-        this.scene.ui.openShop();
+        this.scene.ui.setPause(true);
     }
 
     restartLevel() {
@@ -61,6 +61,7 @@ export default class LevelMap extends AbstractLevel {
 
         this.scene.loadGLTF({
             baseUrl: './assets/models/environment/hall/hall',
+            noScene: true,
             callback: object => pivot.add(object.scene)
         });
 

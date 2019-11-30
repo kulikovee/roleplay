@@ -12,7 +12,7 @@ export default class UI extends AutoBindMethods {
         this.pause = false;
         this.isPointerLocked = false;
 
-        this.elements.closeShopButton.onclick = () => this.closeShop();
+        this.elements.closeShopButton.onclick = () => this.setPause(false);
         this.elements.buyHpButton.onclick = () => this.buy('hp');
         this.elements.buyTalentHpButton.onclick = () => this.buy('talent-hp');
         this.elements.buyTalentSpeedButton.onclick = () => this.buy('talent-speed');
@@ -108,31 +108,32 @@ export default class UI extends AutoBindMethods {
         }
     }
 
-    openShop() {
-        this.pause = true;
-        this.exitPointerLock();
-        this.elements.pausePane.style.display = 'block';
-    }
+    setPause(pause = !this.pause) {
+        this.pause = pause;
 
-    closeShop() {
-        this.pause = false;
-        this.requestPointerLock();
-        this.elements.pausePane.style.display = 'none';
+        this.elements.pausePane.style.display = this.pause ? 'block' : 'none';
+
+        if (pause) {
+            this.exitPointerLock();
+        } else {
+            this.requestPointerLock();
+        }
     }
 
     switchCamera() {
-        this.elements.switchCameraModeButton.value = this.scene.input.isThirdPerson
+        const { scene: { input: { isThirdPerson } }, elements: { switchCameraModeButton } } = this;
+        switchCameraModeButton.value = isThirdPerson
             ? 'Switch to Third Person Camera'
             : 'Switch to Isometric Camera';
 
-        this.scene.input.isThirdPerson = !this.scene.input.isThirdPerson;
+        this.scene.input.isThirdPerson = !isThirdPerson;
         this.scene.camera.update();
     }
 
     restart() {
         this.clearHpBars();
         this.restartGame();
-        this.openShop();
+        this.setPause(true);
     }
 
     buy(type) {
@@ -244,17 +245,16 @@ export default class UI extends AutoBindMethods {
                 return;
             }
 
+            this.isPointerLocked = isPointerLocked;
+
             if (isPointerLocked) {
                 this.scene.input.cursor.x = this.scene.input.mouse.x;
                 this.scene.input.cursor.y = this.scene.input.mouse.y;
                 this.elements.blockerLabel.style.display = 'none';
-                this.isPointerLocked = true;
             } else {
                 this.elements.blockerLabel.style.display = 'inline-block';
                 this.elements.instructionsLabel.style.display = '';
-                this.isPointerLocked = false;
-
-                this.openShop();
+                this.setPause(true);
             }
         }, 100);
     }

@@ -11,7 +11,8 @@ export default class Camera extends AutoBindMethods {
         const ratio = this.getWidth() / this.getHeight();
         this.camera = new THREE.PerspectiveCamera(45, ratio, 1, 100000);
         this.camera.position.set(5, 3, 15);
-        this.deltaY = 3;
+        this.deltaY = 5;
+        this.rotateY = 0;
         this.defaultDistance = 10;
         this.distance = this.defaultDistance;
         this.raycaster = new THREE.Raycaster();
@@ -23,19 +24,23 @@ export default class Camera extends AutoBindMethods {
 
         if (!player) return;
 
-        const distanceToPlayer = new THREE.Vector3(0, this.deltaY, 0);
+        const rotateY = this.rotateY + this.scene.input.look.vertical / 5000;
 
-        this.camera.position.copy(
-            player.position.clone().add(
-                distanceToPlayer.add(
-                    isThirdPerson
-                        ? this.getThirdPersonPosition(player)
-                        : new THREE.Vector3(7.5, 0, 0)
-                )
-            )
-        );
+        if (rotateY > -0.5 && rotateY < 0.5) {
+            this.rotateY = rotateY;
+        }
 
-        this.camera.lookAt(player.position);
+        if (isThirdPerson) {
+            this.updateThirdPerson(player);
+        } else {
+            this.camera.position.copy(
+                player.position.clone()
+                    .add(new THREE.Vector3(7.5, this.deltaY, 0))
+            );
+
+            this.camera.lookAt(player.position);
+        }
+
     }
 
     addY(y) {
@@ -54,12 +59,12 @@ export default class Camera extends AutoBindMethods {
         return renderer.getContext().canvas.height;
     }
 
-    getThirdPersonPosition(player) {
-        const { scene: { scene: { children } }, defaultDistance } = this,
-            origin = player.object.position,
+    updateThirdPerson(player) {
+        const { scene: { scene: { children } }, deltaY } = this,
+            playerHeadPosition = player.position.clone().add(new THREE.Vector3(0, 1.5, 0)),
+            origin = playerHeadPosition,
             destination = this.camera.position,
-            direction = new THREE.Vector3(),
-            far = new THREE.Vector3();
+            direction = new THREE.Vector3();
 
         let intersectObjects = [children.find(c => c.name === 'Level Environment')];
 
@@ -72,13 +77,23 @@ export default class Camera extends AutoBindMethods {
         const flatChildrenMeshes = getChildrenFlat(intersectObjects).filter(obj => obj.type === 'Mesh');
 
         this.raycaster.set(origin, direction.subVectors(destination, origin).normalize());
-        this.raycaster.far = defaultDistance;
+        this.raycaster.far = deltaY * 1.5;
         const intersects = this.raycaster.intersectObjects(flatChildrenMeshes);
 
-        let distance = Math.min(defaultDistance, ...intersects.map(i => i.distance - 2));
-        this.distance += (distance - this.distance) * 0.1;
+        let distance = Math.min(deltaY, ...intersects.map(i => i.distance - this.distance * 0.5));
+        this.distance += (distance - this.distance) / 2;
 
-        return player.getForward().multiplyScalar(-this.distance);
+        const playerForward = player.getForward().multiplyScalar(-1);
+
+        playerForward.y = this.rotateY;
+        this.camera.position.copy(playerHeadPosition.clone().add(playerForward));
+
+        this.camera.lookAt(playerHeadPosition);
+
+        const cameraForward = new THREE.Vector3();
+        this.camera.getWorldDirection(cameraForward);
+
+        this.camera.position.sub(cameraForward.multiplyScalar(this.distance));
     }
 
     toScreenPosition(vector) {
