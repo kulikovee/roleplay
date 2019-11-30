@@ -44,7 +44,10 @@ export default class MovingGameObject extends AnimatedGameObject {
     }
 
     checkWay(x = 0, y = 0, z = 0) {
-        return this.params.checkWay(new THREE.Vector3(this.position.x + x, this.position.y + y, this.position.z + z));
+        const { position, params: { checkWay } } = this;
+        const nextPosition = new THREE.Vector3(position.x + x, position.y + y, position.z + z);
+
+        return checkWay(nextPosition, this);
     }
 
     getLeft() {

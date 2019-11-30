@@ -11,8 +11,8 @@ export default class Camera extends AutoBindMethods {
         const ratio = this.getWidth() / this.getHeight();
         this.camera = new THREE.PerspectiveCamera(45, ratio, 1, 100000);
         this.camera.position.set(5, 3, 15);
-        this.deltaY = 5;
-        this.rotateY = 0;
+        this.deltaY = 10;
+        this.rotateY = 0.25;
         this.defaultDistance = 10;
         this.distance = this.defaultDistance;
         this.raycaster = new THREE.Raycaster();

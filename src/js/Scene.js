@@ -29,6 +29,7 @@ export default class Scene extends AutoBindMethods {
             onAction: () => this.level.onAction(),
             onExit: () => this.ui.setPause(!this.ui.pause),
             onZoom: zoom => this.camera.addY(zoom),
+            onSwitchCamera: () => this.ui.switchCamera(),
         });
         this.gameObjectsService = new GameObjectsService(this);
         this.ui = new UI(this);

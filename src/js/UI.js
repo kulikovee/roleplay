@@ -122,6 +122,7 @@ export default class UI extends AutoBindMethods {
 
     switchCamera() {
         const { scene: { input: { isThirdPerson } }, elements: { switchCameraModeButton } } = this;
+
         switchCameraModeButton.value = isThirdPerson
             ? 'Switch to Third Person Camera'
             : 'Switch to Isometric Camera';

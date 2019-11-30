@@ -19,14 +19,7 @@ export default class LevelMap extends AbstractLevel {
         this.scene.add(this.skybox);
         this.scene.add(this.globalLight);
 
-        this.scene.colliders.addColliderFunction(({ x, y, z }) => (
-            (y < 0.1 && Math.abs(x) < 50 && Math.abs(z) < 50) // flat
-            || (Math.abs(z) < 5 && x > -39 && x < -28 && y < 1.2) // table
-            || (Math.abs(z) < 0.8 && x > -41 && x < -40 && y < 0.7) // chair
-            || (Math.abs(z) > 0.8 && Math.abs(z) < 1.6 && x > -41 && x < -39 && y < 2) // chair
-            || (Math.abs(z) < 1.6 && x > -43 && x < -41 && y < 2) // chair
-        ));
-
+        this.createLevelColliders();
         this.startLevel();
     }
 
@@ -52,6 +45,32 @@ export default class LevelMap extends AbstractLevel {
         if (this.interval) {
             clearInterval(this.interval);
         }
+    }
+
+    createLevelColliders() {
+        this.scene.colliders.addColliderFunction((position, gameObject) => {
+            const { x, y, z } = position;
+
+            if (
+                (y < 0.1 && Math.abs(x) < 50 && Math.abs(z) < 50) // flat
+                || (Math.abs(z) < 5 && x > -39 && x < -28 && y < 1.2) // table
+                || (Math.abs(z) < 0.8 && x > -41 && x < -40 && y < 0.7) // chair
+                || (Math.abs(z) > 0.8 && Math.abs(z) < 1.6 && x > -41 && x < -39 && y < 2) // chair
+                || (Math.abs(z) < 1.6 && x > -43 && x < -41 && y < 2) // chair
+            ) {
+                return true;
+            }
+
+            const badGuys = this.getBadGuys();
+
+            for(let badGuy of badGuys) {
+                if (badGuy !== gameObject && badGuy.position.distanceTo(position) < 1) {
+                    return true;
+                }
+            }
+
+            return false;
+        });
     }
 
     createEnvironment() {
@@ -101,6 +120,10 @@ export default class LevelMap extends AbstractLevel {
         return new THREE.Mesh(skyGeometry, skyMaterial);
     }
 
+    getBadGuys() {
+        return this.scene.units.getAliveUnits().filter(unit => unit instanceof AI);
+    }
+
     createBadGuyByTimeout() {
         const { ui: { pause }, gameObjectsService: { gameObjects } } = this.scene;
         const player = this.scene.getPlayer();
@@ -112,9 +135,7 @@ export default class LevelMap extends AbstractLevel {
         const level = player.getLevel(),
             badGuyTimeout = 5000 - level * 500,
             isBadGuyReleased = Date.now() - this.lastBadGuyCreated >= badGuyTimeout,
-            badGuysCount = gameObjects
-                .filter(gameObject => gameObject instanceof AI && gameObject.isAlive())
-                .length;
+            badGuysCount = this.getBadGuys().length;
 
         if (badGuysCount < level && isBadGuyReleased) {
             this.lastBadGuyCreated = Date.now();

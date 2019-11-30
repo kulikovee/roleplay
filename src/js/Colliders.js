@@ -8,9 +8,9 @@ export default class Colliders extends AutoBindMethods {
         this.nextId = 0;
     }
 
-    checkWay(position) {
+    checkWay(position, gameObject) {
         for(let collider of this.colliders) {
-            if (collider.fn(position)) {
+            if (collider.fn(position, gameObject)) {
                 return false;
             }
         }
