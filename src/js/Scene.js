@@ -105,6 +105,14 @@ export default class Scene extends AutoBindMethods {
         this.scene.remove(object);
     }
 
+    /**
+     * @param {Object} params
+     * @param {number} params.repeatX
+     * @param {number} params.repeatY
+     * @param {number} params.emissive
+     * @param {THREE.Vector3} params.position
+     * @returns {THREE.Mesh}
+     */
     createCube(params) {
         params = params || {};
 

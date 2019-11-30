@@ -1,7 +1,7 @@
 import * as THREE from 'three'
-import './style.scss';
 import Renderer from './js/Renderer';
 import Scene from './js/Scene';
+import './style.scss';
 
 window.addEventListener('load', function () {
     THREE.Cache.enabled = true;
@@ -20,7 +20,7 @@ window.addEventListener('load', function () {
     document.body.addEventListener('click', requestPointerLock, false);
 });
 
-// ThreeJS stats
+// THREEJS stats
 (function () {
     var script = document.createElement('script');
     script.onload = function () {
