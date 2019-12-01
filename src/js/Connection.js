@@ -1,4 +1,5 @@
 import AutoBindMethods from './AutoBindMethods';
+import AnimatedGameObject from "./GameObjects/AnimatedGameObject";
 
 export default class Connection extends AutoBindMethods {
     /**
@@ -46,7 +47,14 @@ export default class Connection extends AutoBindMethods {
         }
 
         if (!this.players[id]) {
-            this.scene.createAnotherPlayer(id);
+            const setPlayer = (object) => {
+                this.players[id] = object;
+                return object;
+            };
+
+            setPlayer({ position: { set: () => null }, rotation: { set: () => null } });
+
+            this.scene.units.createAnotherPlayer(player => setPlayer(player));
         }
 
         const player = this.players[id];

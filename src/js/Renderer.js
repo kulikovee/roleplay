@@ -7,9 +7,13 @@ export default class Renderer extends AutoBindMethods {
      */
     constructor(container) {
         super();
-        this.renderer = new THREE.WebGLRenderer({ antialias: false });
+        this.renderer = new THREE.WebGLRenderer({ antialias: true });
         this.renderer.setSize(window.innerWidth, window.innerHeight);
-        this.renderer.setClearColor(0xccccff);
+        this.renderer.setClearColor(0xffffff);
+        this.renderer.gammaOutput = true;
+        this.renderer.shadowMap.enabled = true;
+        this.renderer.shadowMap.soft = true;
+        this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         container.appendChild(this.renderer.domElement);
     }
 

@@ -62,7 +62,7 @@ export default class GameObjectsService extends AutoBindMethods {
             return;
         }
 
-        const createLightCube = left => this.scene.createCube({
+        const createLightCube = left => this.scene.models.createCube({
             x: 0.02,
             y: 0.02,
             z: 0.3,
@@ -154,6 +154,10 @@ export default class GameObjectsService extends AutoBindMethods {
         } else {
             console.error('Cannot find object parent to remove the object', gameObject);
         }
+    }
+
+    getUnits() {
+        return this.gameObjects.filter(go => go instanceof Unit);
     }
 }
 

@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import * as GLTFLoader from 'three-gltf-loader';
 import AutoBindMethods from './AutoBindMethods';
 import Camera from './Camera';
 import Connection from './Connection';
@@ -8,6 +7,7 @@ import Input from './Input';
 import Intervals from './Intervals';
 import LevelMap from './Levels/LevelMap';
 import Colliders from './Colliders';
+import Models from './Models';
 import Particles from './Particles';
 import UI from './UI';
 import Units from './Units';
@@ -21,6 +21,7 @@ export default class Scene extends AutoBindMethods {
         super();
         this.intervals = new Intervals(this);
         this.renderer = renderer;
+        this.models = new Models(this);
         this.scene = new THREE.Scene();
         this.colliders = new Colliders(this);
         this.units = new Units(this);
@@ -37,25 +38,6 @@ export default class Scene extends AutoBindMethods {
         this.connection = new Connection(this, 'gohtml.ru');
         this.level = new LevelMap(this);
 
-        const area = new THREE.Vector3(100, 25, 100);
-
-        this.particles.createParticles({
-            particleCount: 10000,
-            color: 0x888888,
-            blending: THREE.NormalBlending,
-            position: new THREE.Vector3(-area.x / 2, 0, -area.z / 2),
-            getParticlePosition: (i, position = this.particles.getRandomPosition(area)) => {
-                if (position.y < 0) {
-                    const newPosition = this.particles.getRandomPosition(area);
-                    position.x = newPosition.x;
-                    position.y = area.y;
-                    position.z = newPosition.z;
-                }
-
-                return position;
-            }
-        });
-
         this.clearScene();
         this.animate();
 
@@ -65,9 +47,23 @@ export default class Scene extends AutoBindMethods {
     clearScene() {
         this.gameObjectsService.removeAll();
         this.units.createPlayer({
-            onCreate: () => {
+            onCreate: (player) => {
+                this.camera.player = player;
                 this.ui.updatePlayerLabels();
-            }
+            },
+            onDie: () => window.setTimeout(() => {
+                this.ui.showRestart();
+                this.ui.exitPointerLock();
+                this.ui.pause = true;
+            }, 2500),
+            onKill: (object) => {
+                const player = this.units.getPlayer();
+                player.params.experience += object.params.bounty;
+                player.params.money += object.params.bounty;
+                this.ui.updatePlayerLabels();
+            },
+            onDamageTaken: () => this.ui.updatePlayerLabels(),
+            onLevelUp: () => this.ui.updatePlayerLabels(),
         });
     }
 
@@ -104,73 +100,5 @@ export default class Scene extends AutoBindMethods {
      */
     remove(object) {
         this.scene.remove(object);
-    }
-
-    /**
-     * @param {Object} params
-     * @param {number} params.repeatX
-     * @param {number} params.repeatY
-     * @param {number} params.emissive
-     * @param {THREE.Vector3} params.position
-     * @returns {THREE.Mesh}
-     */
-    createCube(params) {
-        params = params || {};
-
-        const materialParams = {};
-
-        if (params.image) {
-            const texture = new THREE.TextureLoader().load(params.image);
-            texture.wrapS = THREE.RepeatWrapping;
-            texture.wrapT = THREE.RepeatWrapping;
-            texture.repeat.set(params.repeatX || 1, params.repeatY || 1);
-            materialParams.map = texture;
-        }
-
-        if (params.emissive) {
-            materialParams.emissive = new THREE.Color(params.emissive);
-            materialParams.emissiveIntensity = 1.0;
-            materialParams.emissiveMap = null;
-        }
-
-        const cube = new THREE.Mesh(
-            new THREE.CubeGeometry(params.x || 1, params.y || 1, params.z || 1),
-            new THREE.MeshLambertMaterial(materialParams)
-        );
-
-        if (params.position) {
-            cube.position.set(
-                params.position.x || 0,
-                params.position.y || 0,
-                params.position.z || 0
-            );
-        }
-
-        if (params.rotation) {
-            cube.rotation.set(
-                params.rotation.x || 0,
-                params.rotation.y || 0,
-                params.rotation.z || 0
-            );
-        }
-
-        if (!params.noScene) {
-            this.add(cube);
-        }
-
-        return cube;
-    }
-
-    loadGLTF(params) {
-        const loader = new GLTFLoader();
-        const url = `${params.baseUrl}.glb${params.isGLTF ? '.gltf' : ''}`;
-
-        loader.load(url, (loadedModel) => {
-            params.callback && params.callback(loadedModel);
-
-            if (!params.noScene) {
-                this.add(loadedModel.scene);
-            }
-        });
     }
 }

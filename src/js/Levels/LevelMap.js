@@ -19,6 +19,26 @@ export default class LevelMap extends AbstractLevel {
         this.scene.add(this.skybox);
         this.scene.add(this.globalLight);
 
+        this.house1Positions = [
+            { x: 15, z: 15 },
+            { x: -15, z: 15 },
+            { x: -15, z: -15 },
+            { x: 15, z: -15 },
+        ];
+
+        this.respawnPoints = this.house1Positions.map(({ x, z }) => ({
+            x: x + 0.63,
+            y: 0.1,
+            z: z + 4.03,
+        }));
+
+        this.nextRespawnPoint = 0;
+
+        const color = 0xd5d5d5;
+        const near = 10;
+        const far = 50;
+        this.scene.scene.fog = new THREE.Fog(color, near, far);
+
         this.createLevelColliders();
         this.startLevel();
     }
@@ -75,16 +95,23 @@ export default class LevelMap extends AbstractLevel {
 
     createEnvironment() {
         const pivot = new THREE.Object3D();
-        pivot.name = 'Level Environment';
-        const treePositions = [{ x: 0, z: 15 }, { x: 0, z: -15 }, { x: 15, z: 0 }, { x: -15, z: 0 }];
 
-        this.scene.loadGLTF({
+        pivot.name = 'Level Environment';
+
+        const treePositions = [
+            { x: 0, z: 15 },
+            { x: 0, z: -15 },
+            { x: 15, z: 0 },
+            { x: -15, z: 0 },
+        ];
+
+        this.scene.models.loadGLTF({
             baseUrl: './assets/models/environment/hall/hall',
             noScene: true,
             callback: object => pivot.add(object.scene)
         });
 
-        this.scene.loadGLTF({
+        this.scene.models.loadGLTF({
             baseUrl: './assets/models/environment/tree',
             noScene: true,
             callback: (loadedModel) => treePositions.forEach((position) => {
@@ -101,12 +128,29 @@ export default class LevelMap extends AbstractLevel {
             })
         });
 
+        this.scene.models.loadGLTF({
+            baseUrl: './assets/models/environment/house1',
+            noScene: true,
+            callback: (loadedModel) => this.house1Positions.forEach((position) => {
+                const model = loadedModel.scene.clone();
+                model.name = 'House1';
+                model.position.set(position.x, 0, position.z);
+                const { x, z } = model.position;
+
+                this.scene.colliders.addColliderFunction(
+                    (position) => Math.abs(position.x - x) < 4 && Math.abs(position.z - z) < 3
+                );
+
+                pivot.add(model);
+            })
+        });
+
         return pivot;
     }
 
     createSkybox() {
         const materialArray = ['RT', 'LF', 'UP', 'DN', 'FT', 'BK'].map(function (direction) {
-            const url = `./assets/textures/sky/skybox${direction}.jpg`;
+            const url = `./assets/textures/sky-day/skybox${direction}.jpg`;
             return new THREE.MeshBasicMaterial({
                 map: new THREE.TextureLoader().load(url),
                 side: THREE.BackSide,
@@ -125,7 +169,7 @@ export default class LevelMap extends AbstractLevel {
     }
 
     createBadGuyByTimeout() {
-        const { ui: { pause }, gameObjectsService: { gameObjects } } = this.scene;
+        const { ui: { pause } } = this.scene;
         const player = this.scene.getPlayer();
 
         if (!player || pause) {
@@ -139,7 +183,11 @@ export default class LevelMap extends AbstractLevel {
 
         if (badGuysCount < level && isBadGuyReleased) {
             this.lastBadGuyCreated = Date.now();
-            this.scene.units.createAI();
+            this.scene.units.createAI({ position: this.respawnPoints[this.nextRespawnPoint++] });
+
+            if (this.nextRespawnPoint > this.respawnPoints.length - 1) {
+                this.nextRespawnPoint = 0;
+            }
         }
     }
 }

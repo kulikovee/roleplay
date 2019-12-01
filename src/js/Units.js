@@ -4,20 +4,17 @@ import { Player, AI, AnimatedGameObject } from './GameObjects';
 
 const isPlayerHelperNeeded = false;
 
+// Extend from gameObjectsService
+// TBD: GameLogicService
 export default class Units extends AutoBindMethods {
     constructor(scene) {
         super();
         this.scene = scene;
-        this.units = [];
         this.player = undefined;
     }
 
-    clearUnits() {
-        this.units = [];
-    }
-
     getUnits() {
-        return this.units;
+        return this.scene.gameObjectsService.getUnits();
     }
 
     getAliveUnits() {
@@ -28,19 +25,21 @@ export default class Units extends AutoBindMethods {
         return this.player;
     }
 
-    createAnotherPlayer(id) {
-        this.units[id] = {
-            position: { set: () => null },
-            rotation: { set: () => null },
-        };
+    createAnotherPlayer(callback) {
+        const pivot = new THREE.Object3d();
+        const { hookGameObject } = this.scene.gameObjects;
 
-        return this.scene.loadObj({
+        this.scene.models.loadGLTF({
             baseUrl: './assets/models/units/player',
-            callback: (object) => {
-                this.units[id] = object;
-                this.scene.add(object);
-            }
+            noScene: true,
+            callback: (loadedObject) => hookGameObject(new AnimatedGameObject({
+                object: loadedObject.scene,
+                animations: loadedObject.animations,
+                complexAnimations: true,
+            })),
         });
+
+        return pivot;
     }
 
     createPlayer({
@@ -48,25 +47,13 @@ export default class Units extends AutoBindMethods {
          onKill = () => null,
          onDamageTaken = () => null,
          onDie = () => null,
-         onMove = () => null,
-     }) {
+         onLevelUp = () => null,
+     } = {}) {
         const gameObjectsService = this.scene.gameObjectsService;
 
-        return this.scene.loadGLTF({
+        return this.scene.models.loadGLTF({
             baseUrl: './assets/models/units/player',
             callback: (loadedModel) => {
-                if (isPlayerHelperNeeded) {
-                    var helper = new THREE.SkeletonHelper(gltf);
-                    helper.material.linewidth = 4;
-                    this.scene.add(helper);
-                }
-
-                const pointLight = new THREE.PointLight(0xffffff);
-                pointLight.position.set(0, 10, 0);
-                pointLight.distance = 50;
-                pointLight.decay = 2;
-                loadedModel.scene.add(pointLight);
-
                 loadedModel.scene.position.set(0, 0.1, 0);
 
                 const player = gameObjectsService.hookGameObject(new Player({
@@ -75,33 +62,20 @@ export default class Units extends AutoBindMethods {
                     input: this.scene.input,
                     complexAnimations: true,
                     checkWay: this.scene.colliders.checkWay,
-                    onDamageTaken: () => {
-                        this.scene.ui.updatePlayerLabels();
-                        onDamageTaken();
-                        this.scene.particles.loadParticles({
+                    onDamageTaken: (attacker) => {
+                        onDamageTaken(attacker);
+                        this.scene.particles.loadEffect({
                             position: player.position.clone().add(new THREE.Vector3(0, 0.75, 0))
                         });
                     },
-                    onKill: (object) => {
-                        this.player.params.experience += object.params.bounty;
-                        this.player.params.money += object.params.bounty;
-                        this.scene.ui.updatePlayerLabels();
-
-                        onKill();
-                    },
-                    onDie: () => {
-                        onDie();
-                        window.setTimeout(() => {
-                            this.scene.ui.showRestart();
-                            this.scene.ui.exitPointerLock();
-                            this.scene.ui.pause = true;
-                        }, 2500);
-                    },
+                    onKill: (object) => onKill(object),
+                    onDie: (killer) => onDie(killer),
                     onLevelUp: () => {
-                        this.scene.ui.updatePlayerLabels();
-                        this.scene.loadGLTF({
+                        this.scene.models.loadGLTF({
                             baseUrl: './assets/models/effects/level-up-alt/level-up',
                             noScene: true,
+                            castShadow: false,
+                            receiveShadow: false,
                             callback: loadedObject => {
                                 loadedObject.scene.scale.set(1.5, 1.5, 1.5);
 
@@ -126,7 +100,9 @@ export default class Units extends AutoBindMethods {
                                     2080,
                                 );
                             }
-                        })
+                        });
+
+                        onLevelUp();
                     },
                     attack: () => gameObjectsService.attack(player),
                     fire: () => gameObjectsService.fire(player),
@@ -134,20 +110,18 @@ export default class Units extends AutoBindMethods {
                 }));
 
                 this.player = player;
-                this.scene.camera.player = player;
-                this.units.push(player);
 
-                onCreate();
+                onCreate(player);
             }
         });
     }
 
-    createAI() {
+    createAI({ position: { x, y, z}}) {
         const player = this.scene.getPlayer(),
             level = player.getLevel(),
             gameObjectsService = this.scene.gameObjectsService;
 
-        this.scene.loadGLTF({
+        this.scene.models.loadGLTF({
             baseUrl: './assets/models/units/enemy',
             callback: (gltf) => {
                 /** @type {AI} */
@@ -160,7 +134,7 @@ export default class Units extends AutoBindMethods {
                     hp: 70 + level * 30,
                     checkWay: this.scene.colliders.checkWay,
                     attack: () => gameObjectsService.attack(badGuy),
-                    onDamageTaken: () => this.scene.particles.loadParticles({
+                    onDamageTaken: () => this.scene.particles.loadEffect({
                         position: badGuy.position.clone().add(new THREE.Vector3(0, 0.75, 0))
                     }),
                     onDie: () => this.scene.intervals.setTimeout(() => (
@@ -168,13 +142,7 @@ export default class Units extends AutoBindMethods {
                     ), 30000),
                 }));
 
-                badGuy.position.set(
-                    player.position.x + 100 * (Math.random() - 0.5),
-                    0.1,
-                    player.position.z + 100 * (Math.random() - 0.5)
-                );
-
-                this.units.push(badGuy);
+                badGuy.position.set(x, y, z);
             }
         });
     }

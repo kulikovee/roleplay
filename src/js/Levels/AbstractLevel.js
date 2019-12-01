@@ -25,8 +25,28 @@ export default class AbstractLevel extends AutoBindMethods {
     createGlobalLight() {
         const pivot = new THREE.Object3D();
 
-        var ambientLight = new THREE.AmbientLight(0x303030);
+        var ambientLight = new THREE.AmbientLight(0x888888);
         pivot.add(ambientLight);
+
+        const shadowSize = 50;
+
+        const light = new THREE.DirectionalLight(0xffffff, 1.75);
+        light.position.set(50, 100, 50);
+
+        light.castShadow = true;
+
+        // TODO: Check why there is glitches and artifacts with default bias
+        light.shadow.bias = -0.00005;
+        light.shadow.camera.left = -shadowSize;
+        light.shadow.camera.right = shadowSize;
+        light.shadow.camera.top = shadowSize;
+        light.shadow.camera.bottom = -shadowSize;
+        light.shadow.mapSize.width = 4096;
+        light.shadow.mapSize.height = 4096;
+        light.shadow.camera.far = 1000;
+        light.shadow.darkness = 1;
+
+        pivot.add(light);
 
         return pivot;
     }

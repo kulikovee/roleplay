@@ -13,15 +13,38 @@ export default class Particles extends AutoBindMethods {
         this.particles.forEach(p => p.update());
     }
 
-    loadParticles({
+    createSnow() {
+        const area = new THREE.Vector3(100, 25, 100);
+
+        this.createParticles({
+            particleCount: 10000,
+            color: 0x888888,
+            blending: THREE.NormalBlending,
+            position: new THREE.Vector3(-area.x / 2, 0, -area.z / 2),
+            getParticlePosition: (i, position = this.getRandomPosition(area)) => {
+                if (position.y < 0) {
+                    const newPosition = this.getRandomPosition(area);
+                    position.x = newPosition.x;
+                    position.y = area.y;
+                    position.z = newPosition.z;
+                }
+
+                return position;
+            }
+        });
+    }
+
+    loadEffect({
         particleName = 'blood',
         position = new THREE.Vector3(),
         scale = new THREE.Vector3(1, 1, 1)
     } = {}) {
         const gameObjectsService = this.scene.gameObjectsService;
 
-        return this.scene.loadGLTF({
+        return this.scene.models.loadGLTF({
             baseUrl: `./assets/models/effects/${particleName}`,
+            castShadow: false,
+            receiveShadow: false,
             callback: (gltf) => {
                 gltf.scene.position.copy(position);
                 gltf.scene.scale.copy(scale);

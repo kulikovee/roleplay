@@ -96,7 +96,7 @@ export default class UI extends AutoBindMethods {
                 | Talents: ${player.params.unspentTalents}\
                 | Level: ${player.getLevel()}`;
 
-            this.elements.rightTopLabel.innerHTML = `$${Math.round(player.params.money)}`;
+            this.elements.rightTopLabel.innerHTML = `$${Math.round(player.params.money)} <br> Position: ${Math.round(player.position.x * 100) / 100}, ${Math.round(player.position.z * 100) / 100}`;
             this.elements.shopTalentLabel.innerHTML = `Talents (${Math.round(player.params.unspentTalents)} unspent talents left):`;
             this.elements.shopMoneyLabel.innerHTML = `Shop ($${Math.round(player.params.money)} left):`;
 
@@ -109,6 +109,8 @@ export default class UI extends AutoBindMethods {
     }
 
     setPause(pause = !this.pause) {
+        this.updatePlayerLabels();
+
         this.pause = pause;
 
         this.elements.pausePane.style.display = this.pause ? 'block' : 'none';
@@ -132,7 +134,6 @@ export default class UI extends AutoBindMethods {
     }
 
     restart() {
-        this.clearHpBars();
         this.restartGame();
         this.setPause(true);
     }
@@ -181,19 +182,18 @@ export default class UI extends AutoBindMethods {
     }
 
     showRestart() {
-        this.elements.restartButton.style.display = 'block';
+        this.elements.restartRow.style.display = 'block';
     }
 
     startGame() {
-        this.elements.restartButton.style.display = 'none';
-        this.updatePlayerLabels();
+        this.elements.restartRow.style.display = 'none';
     }
 
     restartGame() {
         this.scene.level.restartLevel();
-        this.elements.restartButton.style.display = 'none';
-        this.updatePlayerLabels();
+        this.elements.restartRow.style.display = 'none';
         this.scene.camera.update();
+        this.clearHpBars();
     }
 
     requestPointerLock() {
@@ -325,6 +325,9 @@ export default class UI extends AutoBindMethods {
 
             // Container for Units HP bars
             hpBarsContainer: document.getElementById('hp-bars'),
+
+            // Hiding restart container
+            restartRow: document.getElementById('restart'),
 
             // Buttons
             closeShopButton: document.getElementById('close-shop'),
