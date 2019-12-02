@@ -26,7 +26,7 @@ export default class Units extends AutoBindMethods {
     }
 
     createAnotherPlayer(callback) {
-        const pivot = new THREE.Object3d();
+        const pivot = new THREE.Object3D();
         const { hookGameObject } = this.scene.gameObjects;
 
         this.scene.models.loadGLTF({

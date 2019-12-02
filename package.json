@@ -4,7 +4,7 @@
   "description": "[demo](https://kulikovee.github.io/roleplay/)",
   "scripts": {
     "build": "webpack",
-    "start": "webpack-dev-server",
+    "start": "webpack-dev-server --inline --hot --hot-only",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist"
   },
