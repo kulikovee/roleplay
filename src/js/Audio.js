@@ -26,7 +26,7 @@ export default class Audio extends AutoBindMethods {
             sound.position.copy(position);
             sound.setBuffer(buffer);
             sound.setLoop(false);
-            sound.setVolume(2);
+            sound.setVolume(0.5);
             sound.play();
         });
     }

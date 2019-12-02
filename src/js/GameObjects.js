@@ -37,21 +37,25 @@ export default class GameObjectsService extends AutoBindMethods {
             return;
         }
 
-        this.gameObjects
-            .filter(gameObject => (
-                gameObject !== attackingUnit
-                && gameObject instanceof Unit
-                && gameObject.isAlive()
-                && gameObject.position.distanceTo(attackingUnit.position) < 2
-            ))
-            .forEach((collisionGameObject) => {
-                collisionGameObject.damageTaken({
-                    params: {
-                        damage: attackingUnit.params.damage,
-                        parent: attackingUnit
-                    }
-                })
-            });
+        const attackedUnits = this.gameObjects.filter(gameObject => (
+            gameObject !== attackingUnit
+            && gameObject instanceof Unit
+            && gameObject.isAlive()
+            && gameObject.position.distanceTo(attackingUnit.position) < 2
+        ));
+
+        attackedUnits.forEach((collisionGameObject) => {
+            collisionGameObject.damageTaken({
+                params: {
+                    damage: attackingUnit.params.damage,
+                    parent: attackingUnit
+                }
+            })
+        });
+
+        if (attackedUnits.length) {
+            this.scene.audio.playSound(attackingUnit.position, 'Attack Soft');
+        }
     }
 
     /**
@@ -98,6 +102,8 @@ export default class GameObjectsService extends AutoBindMethods {
         }));
 
         this.scene.intervals.setTimeout(() => this.destroyGameObject(fireGameObject), 2000);
+
+        this.scene.audio.playSound(firingGameObject.position, 'Lasers');
     }
 
     /**

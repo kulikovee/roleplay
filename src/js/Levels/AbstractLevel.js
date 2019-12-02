@@ -31,20 +31,19 @@ export default class AbstractLevel extends AutoBindMethods {
 
 
         const light = new THREE.DirectionalLight(0xffffff, 1, 100);
-        light.position.set(15, 50, 15);
-
-        const shadowSize = 50;
-        light.shadow.bias = -0.00005;
+        light.position.set(25, 50, 25);
+        light.shadow.bias = -0.000018;
+        const shadowSize = 45;
         light.castShadow = true;
         light.shadow.camera.left = -shadowSize;
         light.shadow.camera.right = shadowSize;
         light.shadow.camera.top = shadowSize;
         light.shadow.camera.bottom = -shadowSize;
-        light.shadow.mapSize.width = 2048;
-        light.shadow.mapSize.height = 2048;
-        light.shadow.camera.near = 0.5;
-        light.shadow.camera.far = 100;
-        light.shadow.darkness = 0.5;
+        light.shadow.mapSize.width = 8192;
+        light.shadow.mapSize.height = 8192;
+        light.shadow.camera.near = 1;
+        light.shadow.camera.far = 1000;
+        light.shadow.camera.visible = true;
 
         pivot.add(light);
 

@@ -63,10 +63,7 @@ export default class Units extends AutoBindMethods {
                     input: this.scene.input,
                     complexAnimations: true,
                     checkWay: this.scene.colliders.checkWay,
-                    onDamageDeal: (damagedUnit) => {
-                        this.scene.audio.playSound(player.position, 'Attack Soft');
-                        onDamageDeal(damagedUnit)
-                    },
+                    onDamageDeal: damagedUnit => onDamageDeal(damagedUnit),
                     onDamageTaken: (attacker) => {
                         onDamageTaken(attacker);
                         this.scene.particles.loadEffect({
@@ -139,7 +136,6 @@ export default class Units extends AutoBindMethods {
                     hp: 70 + level * 30,
                     checkWay: this.scene.colliders.checkWay,
                     attack: () => gameObjectsService.attack(badGuy),
-                    onDamageDeal: () => this.scene.audio.playSound(badGuy.position, 'Attack Soft'),
                     onDamageTaken: () => this.scene.particles.loadEffect({
                         position: badGuy.position.clone().add(new THREE.Vector3(0, 0.75, 0))
                     }),

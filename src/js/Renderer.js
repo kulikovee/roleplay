@@ -12,8 +12,9 @@ export default class Renderer extends AutoBindMethods {
         this.renderer.setClearColor(0xffffff);
         this.renderer.gammaOutput = true;
         this.renderer.shadowMap.enabled = true;
-        this.renderer.shadowMap.soft = true;
         this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        this.renderer.shadowMap.soft = true;
+        this.renderer.shadowMapSoft = true;
         container.appendChild(this.renderer.domElement);
     }
 
