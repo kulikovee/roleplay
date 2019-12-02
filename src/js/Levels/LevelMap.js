@@ -38,6 +38,7 @@ export default class LevelMap extends AbstractLevel {
         const near = 10;
         const far = 50;
         this.scene.scene.fog = new THREE.Fog(color, near, far);
+        // this.scene.audio.playMusic('Music');
 
         this.createLevelColliders();
         this.startLevel();

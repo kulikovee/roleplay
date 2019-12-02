@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import Audio from './Audio';
 import AutoBindMethods from './AutoBindMethods';
 import Camera from './Camera';
 import Connection from './Connection';
@@ -26,6 +27,7 @@ export default class Scene extends AutoBindMethods {
         this.colliders = new Colliders(this);
         this.units = new Units(this);
         this.camera = new Camera(this);
+        this.audio = new Audio(this);
         this.input = new Input({
             onAction: () => this.level.onAction(),
             onExit: () => this.ui.setPause(!this.ui.pause),
@@ -57,7 +59,7 @@ export default class Scene extends AutoBindMethods {
                 this.ui.pause = true;
             }, 2500),
             onKill: (object) => {
-                const player = this.units.getPlayer();
+                const player = this.getPlayer();
                 player.params.experience += object.params.bounty;
                 player.params.money += object.params.bounty;
                 this.ui.updatePlayerLabels();
