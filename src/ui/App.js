@@ -3,148 +3,141 @@ import * as THREE from 'three';
 import TopRight from './Components/TopRightLabel';
 import BottomRight from './Components/BottomRightLabel';
 import BottomLeft from './Components/BottomLeftLabel';
-import WebGLContainer from './Components/WebGLContainer';
 import Cursor from './Components/Cursor';
 import ActionLabel from './Components/ActionLabel';
 import HpBars from './Components/HpBars';
 import Pause from './Components/Pause';
-import  { onPointerLockChange } from './Utilities/PointerLocks';
+import  {
+    addPointerLockEvents,
+    onPointerLockChange,
+    exitPointerLock,
+    requestPointerLock
+} from './Utilities/PointerLocks';
 
 import Renderer from '../js/Renderer';
 import Scene from '../js/Scene';
 
 class App extends Component {
-    state = {
-        pause: true,
-        money: 501,
-        talents: 3,
-        showRestart: false,
-        hpBars: [],
-        isPointerLocked: false,
-    };
+    constructor(props) {
+        super(props);
+
+        this.initWebGL = this.initWebGL.bind(this);
+        this.getAPI = this.getAPI.bind(this);
+        this.update = this.update.bind(this);
+        this.setPause = this.setPause.bind(this);
+        this.clearHpBars = this.clearHpBars.bind(this);
+        this.switchCamera = this.switchCamera.bind(this);
+        this.buy = this.buy.bind(this);
+        this.setRestartButtonVisible = this.setRestartButtonVisible.bind(this);
+        this.restartGame = this.restartGame.bind(this);
+        this.updatePlayerParams = this.updatePlayerParams.bind(this);
+        this.render = this.render.bind(this);
+
+        this.state = {
+            pause: true,
+            showRestart: false,
+            hpBars: [],
+            isPointerLocked: false,
+
+            // Player
+            unspentTalents: 0,
+            hp: 0,
+            hpMax: 0,
+            speed: 0,
+            damage: 0,
+            money: 0,
+            experience: 0,
+            levelExperience: 0,
+            position: new THREE.Vector3(),
+        };
+
+        this.container = React.createRef();
+    }
 
     componentDidMount() {
-        THREE.Cache.enabled = true;
+        this.initWebGL();
+    }
 
-        const container = document.getElementById('container'),
-            renderer = new Renderer(container),
-            scene = new Scene(renderer, this.getAPI()),
-            onResize = () => {
-                scene.camera.camera.aspect = container.clientWidth / container.clientHeight;
-                scene.camera.camera.updateProjectionMatrix();
-                renderer.setSize(container.clientWidth, container.clientHeight);
-            },
-            requestPointerLock = () => !scene.ui.pause && scene.ui.requestPointerLock();
+    initWebGL() {
+        if (this.container.current) {
+            THREE.Cache.enabled = true;
 
-        window.addEventListener('resize', onResize, false);
-        document.body.addEventListener('click', requestPointerLock, false);
+            const container = this.container.current,
+                renderer = new Renderer(container),
+                scene = new Scene(renderer, this.getAPI()),
+                onResize = () => {
+                    scene.camera.camera.aspect = container.clientWidth / container.clientHeight;
+                    scene.camera.camera.updateProjectionMatrix();
+                    renderer.setSize(container.clientWidth, container.clientHeight);
+                },
+                nonPauseRequestPointerLock = () => !scene.ui.isPause() && requestPointerLock();
 
-        this.scene = scene;
+            window.addEventListener('resize', onResize, false);
+            document.body.addEventListener('click', nonPauseRequestPointerLock, false);
+            addPointerLockEvents({
+                onPointerLockChange: onPointerLockChange((isPointerLocked) => {
+                    console.log('onPointerLockChange', {
+                        statePointerLock: this.state.isPointerLocked,
+                        isPointerLocked,
+                    });
 
-        onPointerLockChange((isPointerLocked) => {
-            if (this.state.isPointerLocked === isPointerLocked) {
-                return;
-            }
+                    if (this.state.isPointerLocked === isPointerLocked) {
+                        return;
+                    }
 
-            this.setState({ isPointerLocked });
+                    this.setState({ isPointerLocked });
 
-            if (isPointerLocked) {
-                this.scene.input.cursor.x = this.scene.input.mouse.x;
-                this.scene.input.cursor.y = this.scene.input.mouse.y;
-                this.elements.blockerLabel.style.display = 'none';
-            } else {
-                this.elements.blockerLabel.style.display = 'inline-block';
-                this.elements.instructionsLabel.style.display = '';
-                this.setPause(true);
-            }
-        });
+                    if (isPointerLocked) {
+                        this.scene.input.cursor.x = this.scene.input.mouse.x;
+                        this.scene.input.cursor.y = this.scene.input.mouse.y;
+                        this.elements.blockerLabel.style.display = 'none';
+                    } else {
+                        this.elements.blockerLabel.style.display = 'inline-block';
+                        this.elements.instructionsLabel.style.display = '';
+                        this.setPause(true);
+                    }
+                })
+            });
+
+            this.scene = scene;
+        }
     }
 
     getAPI() {
         return {
-            increaseTalents: count => this.setState({ talents: this.state.talents + count }),
-            increaseMoney: count => this.setState({ money: this.state.money + count }),
-            setMoney: money => this.setState({ money }),
-            setTalents: talents => this.setState({ talents }),
-            learnTalentHp: () => null,
-            learnTalentSpeed: () => null,
-            learnTalentDamage: () => null,
-            buyHp: () => null,
             setRestartButtonVisible: this.setRestartButtonVisible,
             setPause: this.setPause,
             restartGame: this.restartGame,
-            setState: state => this.setState(state),
-            getState: () => this.state,
-            buy: this.buy,
+            isPause: () => this.state.pause,
+            update: this.update,
+            updatePlayerParams: this.updatePlayerParams,
             clearHpBars: this.clearHpBars,
         };
     }
 
     update() {
-        this.updateCursor();
-        this.updateHPBars();
-    }
+        if (!this.scene || !this.scene.input || !this.scene.getPlayer()) {
+            return;
+        }
 
-    updateCursor() {
-        const { isThirdPerson, cursor: { x, y } } = this.scene.input;
-        this.elements.cursor.style.left = isThirdPerson ? '0' : `${x}px`;
-        this.elements.cursor.style.top = isThirdPerson ? '0' : `${y}px`;
-    }
-
-    updateHPBars() {
-        const { units, camera } = this.scene;
-
-        camera.camera.updateMatrixWorld(true);
-        const cameraPosition = new THREE.Vector3().setFromMatrixPosition(camera.camera.matrixWorld);
-
-        units.getUnits().forEach((unit) => {
-            const element = this.getUnitHpBar(unit);
-
-            if (unit.isAlive()) {
-                camera.camera.updateMatrixWorld(true);
-                const unitPosition = new THREE.Vector3()
-                        .setFromMatrixPosition(unit.object.matrixWorld)
-                        .add(new THREE.Vector3(0, 1.8, 0)),
-                    distance = cameraPosition.distanceTo(unitPosition),
-                    screenBarPosition = camera.toScreenPosition(unitPosition),
-                    width = Math.min(70, 1000 / distance);
-
-                element.style.display = screenBarPosition.z > 1 || distance > 20 ? 'none' : 'block';
-                element.style.left = `${screenBarPosition.x}px`;
-                element.style.top = `${screenBarPosition.y}px`;
-                element.style.width = `${width}px`;
-                element.children[0].style.width = `${Math.round(100 * unit.params.hp / unit.params.hpMax)}%`;
-            } else if (element) {
-                element.remove();
-            }
+        this.setState({
+            cursor: {
+                ...this.scene.input.cursor
+            },
+            hpBars: this.scene.gameObjectsService
+                .getUnits()
+                .filter(unit => unit.isAlive())
+                .map(unit => ({ id: unit.__game_object_id, unit })),
         });
     }
 
-    getUnitHpBar(unit) {
-        const id = unit.__game_object_id;
-        let hpBar = this.state.hpBars.find(bar => bar.id === id);
-
-        if (!hpBar && unit.isAlive()) {
-            hpBar = {
-                id,
-                unit,
-            };
-
-            this.setState({ hpBars: [...this.state.hpBars, hpBar]})
-        }
-
-        return hpBar;
-    }
-
     setPause(pause = !this.state.pause) {
-        this.updatePlayerLabels();
-
         this.setState({ pause });
 
         if (pause) {
-            this.exitPointerLock();
+            exitPointerLock();
         } else {
-            this.requestPointerLock();
+            requestPointerLock();
         }
     }
 
@@ -153,14 +146,12 @@ class App extends Component {
     }
 
     switchCamera() {
-        const { scene: { input: { isThirdPerson } }, elements: { switchCameraModeButton } } = this;
+        const { isThirdPerson } = this.state;
 
-        switchCameraModeButton.value = isThirdPerson
-            ? 'Switch to Third Person Camera'
-            : 'Switch to Isometric Camera';
-
-        this.scene.input.isThirdPerson = !isThirdPerson;
-        this.scene.camera.update();
+        this.setState({ isThirdPerson: !isThirdPerson }, (state) => {
+            this.scene.input.isThirdPerson = state.isThirdPerson;
+            this.scene.camera.update();
+        });
     }
 
     buy(type) {
@@ -169,32 +160,28 @@ class App extends Component {
 
         switch (type) {
             case 'hp':
-                if (player.params.money >= 100) {
-                    player.params.money -= 100;
+                if (player.getMoney() >= 100) {
+                    player.addMoney(-100);
                     player.addHP(10);
                 }
-
                 break;
             case 'talent-hp':
-                if (unspentTalents) {
+                if (unspentTalents > 0) {
                     player.decreaseUnspentTalents();
                     player.addMaxHP(10);
                 }
-
                 break;
             case 'talent-speed':
-                if (unspentTalents) {
+                if (unspentTalents > 0) {
                     player.decreaseUnspentTalents();
                     player.addSpeed(0.005);
                 }
-
                 break;
             case 'talent-damage':
-                if (unspentTalents) {
+                if (unspentTalents > 0) {
                     player.decreaseUnspentTalents();
                     player.addDamage(5);
                 }
-
                 break;
             case 'god-hp':
                 player.addMaxHP(9999);
@@ -204,13 +191,28 @@ class App extends Component {
                 break;
         }
 
-        this.setState({
-           unspentTalents: player.getUnspentTalents(),
-           hp: player.getHP(),
-           hpMax: player.getMaxHP(),
-           speed: player.getSpeed(),
-           damage: player.getDamage(),
-        });
+        this.updatePlayerParams();
+    }
+
+    updatePlayerParams() {
+        if (this.scene) {
+            const player = this.scene.getPlayer();
+
+            if (player) {
+                this.setState({
+                    level: player.getLevel(),
+                    unspentTalents: player.getUnspentTalents(),
+                    hp: player.getHP(),
+                    hpMax: player.getMaxHP(),
+                    speed: player.getSpeed(),
+                    damage: player.getDamage(),
+                    money: player.getMoney(),
+                    experience: player.getExperience(),
+                    levelExperience: player.getLevelExperience(),
+                    position: player.position,
+                });
+            }
+        }
     }
 
     setRestartButtonVisible(showRestart) {
@@ -225,27 +227,63 @@ class App extends Component {
 
     render() {
         const {
+            hp,
+            hpMax,
+            speed,
+            damage,
             hpBars,
             pause,
             money,
-            talents,
+            unspentTalents,
             showRestart,
+            level,
+            experience,
+            levelExperience,
+            isThirdPerson,
+            position,
+            action,
         } = this.state;
 
         return (
             <div>
-                <TopRight money={money} />
-                <BottomRight talents={talents} />
-                <BottomLeft />
-                <WebGLContainer />
-                <Cursor />
-                <ActionLabel />
-                <Pause pause={pause} showRestart={showRestart} />
-                <HpBars
-                    hpBars={hpBars}
-                    camera={this.scene.camera.camera}
-                    toScreenPosition={this.scene.camera.toScreenPosition}
-                />
+                <div ref={this.container}></div>
+                {this.scene && (
+                    <div>
+                        <TopRight
+                            money={money}
+                            position={position}
+                        />
+                        <BottomRight
+                            unspentTalents={unspentTalents}
+                            level={level}
+                            experience={experience}
+                            levelExperience={levelExperience}
+                        />
+                        <BottomLeft
+                            hp={hp}
+                            hpMax={hpMax}
+                            speed={speed}
+                            damage={damage}
+                        />
+                        {isThirdPerson ? <Cursor x={cursor.x} y={cursor.y} /> : null}
+                        {action && <ActionLabel action={action} />}
+                        {pause && <Pause
+                            isThirdPerson={isThirdPerson}
+                            unspentTalents={unspentTalents}
+                            money={money}
+                            showRestart={showRestart}
+                            setPause={this.setPause}
+                            switchCamera={this.switchCamera}
+                            restartGame={this.restartGame}
+                            buy={this.buy}
+                        />}
+                        {this.scene.camera && <HpBars
+                            hpBars={hpBars}
+                            camera={this.scene.camera.camera}
+                            toScreenPosition={this.scene.camera.toScreenPosition}
+                        />}
+                    </div>
+                )}
             </div>
         );
     }

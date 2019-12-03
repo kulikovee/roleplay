@@ -20,20 +20,19 @@ class App extends Component {
 
                     return (
                         <div
-                            id={`hp-bars-gameobject-${hpBar.id}`}
-                            style={
-                                {
-                                    display: screenBarPosition.z > 1 || distance > 20 ? 'none' : 'block',
-                                    left: `${screenBarPosition.x}px`,
-                                    top: `${screenBarPosition.y}px`,
-                                    width: `${width}px`,
-                                }
-                            }
+                            key={`hp-bars-gameobject-${hpBar.id}`}
+                            className="hp-bar"
+                            style={{
+                                display: screenBarPosition.z > 1 || distance > 20 ? 'none' : 'block',
+                                left: `${screenBarPosition.x}px`,
+                                top: `${screenBarPosition.y}px`,
+                                width: `${width}px`,
+                            }}
                         >
                             <div
-                                style={
-                                    { width: `${Math.round(100 * unit.params.hp / unit.params.hpMax)}%` }
-                                }
+                                style={{
+                                    width: `${Math.round(100 * hpBar.unit.getHP() / hpBar.unit.getMaxHP())}%`
+                                }}
                             ></div>
                         </div>
                     );

@@ -3,6 +3,17 @@ import BottomLeft from "../BottomLeftLabel/index";
 
 class App extends Component {
     render() {
+        const {
+            isThirdPerson,
+            unspentTalents,
+            money,
+            showRestart,
+            switchCamera,
+            restartGame,
+            setPause,
+            buy,
+        } = this.props;
+
         return (
             <React.Fragment>
                 <div id="shop">
@@ -10,36 +21,52 @@ class App extends Component {
                         <label>Game is paused</label>
                     </div>
                     <div className="row">
-                        <div id="restart">
-                            <input id="restart-button" type="button" value="Restart" />
+                        {showRestart
+                            ? (
+                                <div id="restart">
+                                    <input id="restart-button" type="button" value="Restart" onClick={() => restartGame()} />
+                                </div>
+                            )
+                            : null
+                        }
+                    </div>
+                    <div className="row">
+                        <div><input id="close-shop" type="button" value="Resume" onClick={() => setPause(false)} /></div>
+                    </div>
+                    <div className="row">
+                        <div>
+                            <input
+                                id="switch-third-person"
+                                type="button"
+                                value={
+                                    isThirdPerson
+                                        ? 'Switch to Third Person Camera'
+                                        : 'Switch to Isometric Camera'
+                                }
+                                onClick={() => switchCamera()}
+                            />
                         </div>
                     </div>
-                    <div className="row">
-                        <div><input id="close-shop" type="button" value="Resume" /></div>
-                    </div>
-                    <div className="row">
-                        <div><input id="switch-third-person" type="button" value="Switch to Isometric Camera" /></div>
-                    </div>
 
                     <div className="row title">
-                        <label id="shop-talent">Talents (0 unspent talents left):</label>
+                        <label id="shop-talent">Talents ({unspentTalents} unspent talents left):</label>
                     </div>
                     <div className="row">
-                        <div><input id="buy-talent-hp" type="button" value="+10 MAX HP" /></div>
+                        <div><input id="buy-talent-hp" type="button" value="+10 MAX HP" onClick={() => buy('talent-hp')} /></div>
                     </div>
                     <div className="row">
-                        <div><input id="buy-talent-speed" type="button" value="Speed +5%" /></div>
+                        <div><input id="buy-talent-speed" type="button" value="Speed +5%" onClick={() => buy('talent-speed')} /></div>
                     </div>
                     <div className="row">
-                        <div><input id="buy-talent-damage" type="button" value="Damage +5" /></div>
+                        <div><input id="buy-talent-damage" type="button" value="Damage +5" onClick={() => buy('talent-damage')} /></div>
                     </div>
 
 
                     <div className="row title">
-                        <label id="shop-money">Shop ($500 left):</label>
+                        <label id="shop-money">Shop ({money} left):</label>
                     </div>
                     <div className="row">
-                        <div><input id="buy-hp" type="button" value="Buy: Heal +10 HP ($100)" /></div>
+                        <div><input id="buy-hp" type="button" value="Buy: Heal +10 HP ($100)" onClick={() => buy('hp')}  /></div>
                     </div>
 
 
@@ -47,7 +74,7 @@ class App extends Component {
                         <label id="god-mode">God Mode:</label>
                     </div>
                     <div className="row">
-                        <div><input id="god-mode-enable" type="button" value="Add 9999 HP" /></div>
+                        <div><input id="god-mode-enable" type="button" value="Add 9999 HP" onClick={() => buy('god-hp')} /></div>
                     </div>
                 </div>
                 <div id="blocker">

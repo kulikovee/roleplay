@@ -31,7 +31,7 @@ export default class Scene extends AutoBindMethods {
         this.audio = new Audio(this);
         this.input = new Input({
             onAction: () => this.level.onAction(),
-            onExit: () => this.ui.setPause(!this.ui.pause),
+            onExit: () => this.ui.setPause(!this.ui.isPause()),
             onZoom: zoom => this.camera.addY(zoom),
             onSwitchCamera: () => this.ui.switchCamera(),
         });
@@ -52,7 +52,7 @@ export default class Scene extends AutoBindMethods {
         this.units.createPlayer({
             onCreate: (player) => {
                 this.camera.player = player;
-                this.ui.updatePlayerLabels();
+                this.ui.updatePlayerParams();
             },
             onDie: () => window.setTimeout(() => {
                 this.ui.setRestartButtonVisible(true);
@@ -62,17 +62,16 @@ export default class Scene extends AutoBindMethods {
                 const player = this.getPlayer();
                 player.params.experience += object.params.bounty;
                 player.params.money += object.params.bounty;
-                this.ui.updatePlayerLabels();
             },
-            onDamageTaken: () => this.ui.updatePlayerLabels(),
-            onLevelUp: () => this.ui.updatePlayerLabels(),
+            onDamageTaken: () => this.ui.updatePlayerParams(),
+            onLevelUp: () => this.ui.updatePlayerParams(),
         });
     }
 
     animate() {
         this.intervals.update();
 
-        if (!this.ui.pause) {
+        if (!this.ui.isPause()) {
             this.gameObjectsService.update();
             this.camera.update();
             this.ui.update();

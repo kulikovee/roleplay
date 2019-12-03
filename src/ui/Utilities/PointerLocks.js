@@ -58,42 +58,48 @@ export const onFullscreenChange = (event) => {
     }
 };
 
-export const addPointerLockEvents = (fullscreenButton) => {
+export const addPointerLockEvents = ({
+    fullscreenButton,
+    onPointerLockChange,
+    onFullscreenChange,
+}) => {
     if (
         'pointerLockElement' in document
         || 'onpointerlockchange' in document
         || 'mozRequestPointerLock' in document
         || 'webkitRequestPointerLock' in document
     ) {
-        document.addEventListener('pointerlockchange', this.onPointerLockChange, false);
-        document.addEventListener('mozpointerlockchange', this.onPointerLockChange, false );
-        document.addEventListener('webkitpointerlockchange', this.onPointerLockChange, false );
+        document.addEventListener('pointerlockchange', onPointerLockChange, false);
+        document.addEventListener('mozpointerlockchange', onPointerLockChange, false );
+        document.addEventListener('webkitpointerlockchange', onPointerLockChange, false );
     } else {
         throw 'Your browser doesn\'t seem to support Pointer Lock API';
     }
 
-    if (
-        'fullscreenElement' in document
-        || 'mozRequestFullScreenElement' in document
-        || 'webkitFullscreenElement' in document
-    ) {
-        fullscreenButton.addEventListener(
-            'click',
-            () => {
-                document.addEventListener('fullscreenchange', this.onFullscreenChange, false);
-                document.addEventListener('mozfullscreenchange', this.onFullscreenChange, false);
-                document.addEventListener('webkitfullscreenchange', this.onFullscreenChange, false);
+    if (fullscreenButton) {
+        if (
+            'fullscreenElement' in document
+            || 'mozRequestFullScreenElement' in document
+            || 'webkitFullscreenElement' in document
+        ) {
+            fullscreenButton.addEventListener(
+                'click',
+                () => {
+                    document.addEventListener('fullscreenchange', onFullscreenChange, false);
+                    document.addEventListener('mozfullscreenchange', onFullscreenChange, false);
+                    document.addEventListener('webkitfullscreenchange', onFullscreenChange, false);
 
-                document.body.requestFullscreen =
-                    document.body.requestFullscreen ||
-                    document.body.webkitRequestFullscreen ||
-                    document.body.mozRequestFullScreen;
+                    document.body.requestFullscreen =
+                        document.body.requestFullscreen ||
+                        document.body.webkitRequestFullscreen ||
+                        document.body.mozRequestFullScreen;
 
-                document.body.requestFullscreen();
-            },
-            false
-        );
-    } else {
-        throw 'Your browser doesn\'t seem to support Fullscreen API';
+                    document.body.requestFullscreen();
+                },
+                false
+            );
+        } else {
+            throw 'Your browser doesn\'t seem to support Fullscreen API';
+        }
     }
 };

@@ -101,6 +101,14 @@ export default class Unit extends MovingGameObject {
         }
     }
 
+    getMoney() {
+        return this.params.money;
+    }
+
+    addMoney(money) {
+        this.params.money += money;
+    }
+
     addMaxHP(hp) {
         if (this.isAlive()) {
             this.params.hpMax += hp;
