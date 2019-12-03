@@ -107,4 +107,20 @@ export default class Unit extends MovingGameObject {
             this.params.hp += hp;
         }
     }
+
+    getHP() {
+        return this.params.hp;
+    }
+
+    getMaxHP() {
+        return this.params.hpMax;
+    }
+
+    getSpeed() {
+        return this.params.speed;
+    }
+
+    getDamage() {
+        return this.params.damage;
+    }
 }

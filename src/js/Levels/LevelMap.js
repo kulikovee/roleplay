@@ -50,7 +50,7 @@ export default class LevelMap extends AbstractLevel {
         }
 
         this.interval = this.scene.intervals.setInterval(this.createBadGuyByTimeout, 500);
-        this.scene.ui.startGame();
+        this.scene.ui.setRestartButtonVisible(false);
         this.scene.ui.setPause(true);
     }
 

@@ -78,6 +78,14 @@ export default class Player extends FiringUnit {
         }
     }
 
+    getUnspentTalents() {
+        return this.params.unspentTalents;
+    }
+
+    decreaseUnspentTalents() {
+        return this.params.unspentTalents--;
+    }
+
     getFireInitialPosition() {
         const head = this.getChildByName('Head');
         const headForward = Player.prototype.getForward.call({ params: { object: head } });

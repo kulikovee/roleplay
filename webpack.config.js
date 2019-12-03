@@ -1,7 +1,7 @@
 const path = require('path');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
-var HtmlWebpackPlugin = require('html-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
     entry: './src/main.js',
@@ -17,14 +17,24 @@ module.exports = {
         hot: true,
     },
     module: {
-        rules: [{
-            test: /\.s[ac]ss$/i,
-            use: [
-                'style-loader',
-                'css-loader',
-                'sass-loader',
-            ],
-        }],
+        rules: [
+            {
+                test: /\.s[ac]ss$/i,
+                use: [
+                    'style-loader',
+                    'css-loader',
+                    'sass-loader',
+                ],
+            },
+            {
+                test: /\.jsx?$/,
+                exclude: /node_modules/,
+                loader: 'babel-loader',
+                query: {
+                    presets: ['@babel/preset-env', '@babel/preset-react']
+                }
+            }
+        ],
     },
     plugins: [
         new CleanWebpackPlugin({

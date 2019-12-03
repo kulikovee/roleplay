@@ -18,10 +18,11 @@ export default class Scene extends AutoBindMethods {
     /**
      * @param {Renderer} renderer
      */
-    constructor(renderer) {
+    constructor(renderer, ui) {
         super();
         this.intervals = new Intervals(this);
         this.renderer = renderer;
+        this.ui = ui;
         this.models = new Models(this);
         this.scene = new THREE.Scene();
         this.colliders = new Colliders(this);
@@ -35,7 +36,7 @@ export default class Scene extends AutoBindMethods {
             onSwitchCamera: () => this.ui.switchCamera(),
         });
         this.gameObjectsService = new GameObjectsService(this);
-        this.ui = new UI(this);
+        // this.ui = new UI(this);
         this.particles = new Particles(this);
         this.connection = new Connection(this, 'gohtml.ru');
         this.level = new LevelMap(this);
@@ -54,9 +55,8 @@ export default class Scene extends AutoBindMethods {
                 this.ui.updatePlayerLabels();
             },
             onDie: () => window.setTimeout(() => {
-                this.ui.showRestart();
-                this.ui.exitPointerLock();
-                this.ui.pause = true;
+                this.ui.setRestartButtonVisible(true);
+                this.ui.setPause(true);
             }, 2500),
             onKill: (object) => {
                 const player = this.getPlayer();
