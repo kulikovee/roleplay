@@ -2,11 +2,31 @@ import * as THREE from 'three';
 import React, { Component } from 'react';
 
 class App extends Component {
+    constructor(props) {
+        super(props);
+        this.update = this.update.bind(this);
+        this.state = { hpBars: [] };
+
+        if (props.setUpdate) {
+            props.setUpdate(this.update);
+        }
+    }
+
+    update() {
+        this.setState({
+            hpBars: this.props.scene.gameObjectsService
+                .getUnits()
+                .filter(unit => unit.isAlive())
+                .map(unit => ({ id: unit.__game_object_id, unit }))
+        });
+    }
+
     render() {
-        const { hpBars, camera, toScreenPosition } = this.props;
+        const { camera, toScreenPosition } = this.props;
+        const { hpBars } = this.state;
+
         camera.updateMatrixWorld(true);
         const cameraPosition = new THREE.Vector3().setFromMatrixPosition(camera.matrixWorld);
-        camera.updateMatrixWorld(true);
 
         return (
             <div id="hp-bars">

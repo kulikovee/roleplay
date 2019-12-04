@@ -33,14 +33,14 @@ class App extends Component {
         this.updatePlayerParams = this.updatePlayerParams.bind(this);
         this.render = this.render.bind(this);
 
+        this.cursor = { x: 0, y: 0 };
+
         this.state = {
             // UI
             pause: true,
             showRestart: false,
-            hpBars: [],
 
             // Input
-            cursor: { x: 0, y: 0 },
             isPointerLocked: false,
 
             // Camera
@@ -56,6 +56,7 @@ class App extends Component {
             experience: 0,
             levelExperience: 0,
             position: { x: 0, y: 0, z: 0 },
+            render: 0,
         };
 
         this.container = React.createRef();
@@ -120,16 +121,13 @@ class App extends Component {
             return;
         }
 
-        this.setState({
-            cursor: {
-                x: this.scene.input.cursor.x,
-                y: this.scene.input.cursor.y,
-            },
-            hpBars: this.scene.gameObjectsService
-                .getUnits()
-                .filter(unit => unit.isAlive())
-                .map(unit => ({ id: unit.__game_object_id, unit })),
-        });
+        if (this.updateCursor) {
+            this.updateCursor();
+        }
+
+        if (this.updateHpBars) {
+            this.updateHpBars();
+        }
     }
 
     setPause(pause = !this.state.pause) {
@@ -143,7 +141,7 @@ class App extends Component {
     }
 
     clearHpBars() {
-        this.setState({ hpBars: [] });
+        this.hpBars = [];
     }
 
     switchCamera() {
@@ -226,7 +224,8 @@ class App extends Component {
     restartGame() {
         this.scene.level.restartLevel();
         this.scene.camera.update();
-        this.setState({ hpBars: [], showRestart: false });
+        this.hpBars = [];
+        this.setState({ showRestart: false });
     }
 
     render() {
@@ -235,7 +234,6 @@ class App extends Component {
             hpMax,
             speed,
             damage,
-            hpBars,
             pause,
             money,
             unspentTalents,
@@ -246,7 +244,6 @@ class App extends Component {
             isThirdPerson,
             position,
             action,
-            cursor,
         } = this.state;
 
         return (
@@ -270,7 +267,10 @@ class App extends Component {
                             speed={speed}
                             damage={damage}
                         />
-                        {!isThirdPerson && cursor ? <Cursor x={cursor.x} y={cursor.y} /> : null}
+                        {!isThirdPerson && cursor
+                            ? <Cursor scene={this.scene} setUpdate={callback => this.updateCursor = callback} />
+                            : null
+                        }
                         {action && <ActionLabel action={action} />}
                         {pause && <Pause
                             isThirdPerson={isThirdPerson}
@@ -283,9 +283,10 @@ class App extends Component {
                             buy={this.buy}
                         />}
                         {this.scene.camera && <HpBars
-                            hpBars={hpBars}
+                            scene={this.scene}
                             camera={this.scene.camera.camera}
                             toScreenPosition={this.scene.camera.toScreenPosition}
+                            setUpdate={callback => this.updateHpBars = callback}
                         />}
                     </div>
                 )}
