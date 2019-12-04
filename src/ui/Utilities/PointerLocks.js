@@ -60,8 +60,8 @@ export const onFullscreenChange = (event) => {
 
 export const addPointerLockEvents = ({
     fullscreenButton,
-    onPointerLockChange,
-    onFullscreenChange,
+    onPointerLock,
+    onFullscreen,
 }) => {
     if (
         'pointerLockElement' in document
@@ -69,9 +69,9 @@ export const addPointerLockEvents = ({
         || 'mozRequestPointerLock' in document
         || 'webkitRequestPointerLock' in document
     ) {
-        document.addEventListener('pointerlockchange', onPointerLockChange, false);
-        document.addEventListener('mozpointerlockchange', onPointerLockChange, false );
-        document.addEventListener('webkitpointerlockchange', onPointerLockChange, false );
+        document.addEventListener('pointerlockchange', onPointerLock, false);
+        document.addEventListener('mozpointerlockchange', onPointerLock, false );
+        document.addEventListener('webkitpointerlockchange', onPointerLock, false );
     } else {
         throw 'Your browser doesn\'t seem to support Pointer Lock API';
     }
@@ -85,9 +85,9 @@ export const addPointerLockEvents = ({
             fullscreenButton.addEventListener(
                 'click',
                 () => {
-                    document.addEventListener('fullscreenchange', onFullscreenChange, false);
-                    document.addEventListener('mozfullscreenchange', onFullscreenChange, false);
-                    document.addEventListener('webkitfullscreenchange', onFullscreenChange, false);
+                    document.addEventListener('fullscreenchange', onFullscreen, false);
+                    document.addEventListener('mozfullscreenchange', onFullscreen, false);
+                    document.addEventListener('webkitfullscreenchange', onFullscreen, false);
 
                     document.body.requestFullscreen =
                         document.body.requestFullscreen ||

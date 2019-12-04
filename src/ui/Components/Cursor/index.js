@@ -6,8 +6,8 @@ class App extends Component {
             <div
                 id="cursor"
                 style={{
-                    left: `${this.props.left}px`,
-                    top: `${this.props.top}px`,
+                    left: `${this.props.x}px`,
+                    top: `${this.props.y}px`,
                 }}
             ></div>
         );

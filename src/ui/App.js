@@ -21,7 +21,7 @@ class App extends Component {
     constructor(props) {
         super(props);
 
-        this.initWebGL = this.initWebGL.bind(this);
+        this.initScene = this.initScene.bind(this);
         this.getAPI = this.getAPI.bind(this);
         this.update = this.update.bind(this);
         this.setPause = this.setPause.bind(this);
@@ -34,10 +34,17 @@ class App extends Component {
         this.render = this.render.bind(this);
 
         this.state = {
+            // UI
             pause: true,
             showRestart: false,
             hpBars: [],
+
+            // Input
+            cursor: { x: 0, y: 0 },
             isPointerLocked: false,
+
+            // Camera
+            isThirdPerson: true,
 
             // Player
             unspentTalents: 0,
@@ -48,17 +55,17 @@ class App extends Component {
             money: 0,
             experience: 0,
             levelExperience: 0,
-            position: new THREE.Vector3(),
+            position: { x: 0, y: 0, z: 0 },
         };
 
         this.container = React.createRef();
     }
 
     componentDidMount() {
-        this.initWebGL();
+        this.initScene();
     }
 
-    initWebGL() {
+    initScene() {
         if (this.container.current) {
             THREE.Cache.enabled = true;
 
@@ -75,12 +82,7 @@ class App extends Component {
             window.addEventListener('resize', onResize, false);
             document.body.addEventListener('click', nonPauseRequestPointerLock, false);
             addPointerLockEvents({
-                onPointerLockChange: onPointerLockChange((isPointerLocked) => {
-                    console.log('onPointerLockChange', {
-                        statePointerLock: this.state.isPointerLocked,
-                        isPointerLocked,
-                    });
-
+                onPointerLock: () => onPointerLockChange((isPointerLocked) => {
                     if (this.state.isPointerLocked === isPointerLocked) {
                         return;
                     }
@@ -90,10 +92,7 @@ class App extends Component {
                     if (isPointerLocked) {
                         this.scene.input.cursor.x = this.scene.input.mouse.x;
                         this.scene.input.cursor.y = this.scene.input.mouse.y;
-                        this.elements.blockerLabel.style.display = 'none';
                     } else {
-                        this.elements.blockerLabel.style.display = 'inline-block';
-                        this.elements.instructionsLabel.style.display = '';
                         this.setPause(true);
                     }
                 })
@@ -109,6 +108,7 @@ class App extends Component {
             setPause: this.setPause,
             restartGame: this.restartGame,
             isPause: () => this.state.pause,
+            isThirdPerson: () => this.state.isThirdPerson,
             update: this.update,
             updatePlayerParams: this.updatePlayerParams,
             clearHpBars: this.clearHpBars,
@@ -122,7 +122,8 @@ class App extends Component {
 
         this.setState({
             cursor: {
-                ...this.scene.input.cursor
+                x: this.scene.input.cursor.x,
+                y: this.scene.input.cursor.y,
             },
             hpBars: this.scene.gameObjectsService
                 .getUnits()
@@ -148,10 +149,9 @@ class App extends Component {
     switchCamera() {
         const { isThirdPerson } = this.state;
 
-        this.setState({ isThirdPerson: !isThirdPerson }, (state) => {
-            this.scene.input.isThirdPerson = state.isThirdPerson;
-            this.scene.camera.update();
-        });
+        this.setState({ isThirdPerson: !isThirdPerson });
+        this.scene.input.isThirdPerson = !isThirdPerson;
+        this.scene.camera.update();
     }
 
     buy(type) {
@@ -209,7 +209,11 @@ class App extends Component {
                     money: player.getMoney(),
                     experience: player.getExperience(),
                     levelExperience: player.getLevelExperience(),
-                    position: player.position,
+                    position: {
+                        x: player.position.x,
+                        y: player.position.y,
+                        z: player.position.z,
+                    },
                 });
             }
         }
@@ -222,7 +226,7 @@ class App extends Component {
     restartGame() {
         this.scene.level.restartLevel();
         this.scene.camera.update();
-        this.setState({ hpBars: [], showRestart: true });
+        this.setState({ hpBars: [], showRestart: false });
     }
 
     render() {
@@ -242,6 +246,7 @@ class App extends Component {
             isThirdPerson,
             position,
             action,
+            cursor,
         } = this.state;
 
         return (
@@ -265,7 +270,7 @@ class App extends Component {
                             speed={speed}
                             damage={damage}
                         />
-                        {isThirdPerson ? <Cursor x={cursor.x} y={cursor.y} /> : null}
+                        {!isThirdPerson && cursor ? <Cursor x={cursor.x} y={cursor.y} /> : null}
                         {action && <ActionLabel action={action} />}
                         {pause && <Pause
                             isThirdPerson={isThirdPerson}

@@ -14,6 +14,8 @@ class App extends Component {
             buy,
         } = this.props;
 
+        console.log('Render Pause', { showRestart });
+
         return (
             <React.Fragment>
                 <div id="shop">

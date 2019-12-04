@@ -41,6 +41,8 @@ export default class Scene extends AutoBindMethods {
         this.connection = new Connection(this, 'gohtml.ru');
         this.level = new LevelMap(this);
 
+        this.input.isThirdPerson = ui.isThirdPerson();
+
         this.clearScene();
         this.animate();
 
