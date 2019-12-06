@@ -10,14 +10,17 @@ export default class LevelMap extends AbstractLevel {
         super(scene);
 
         this.id = 'map';
+        this.shadowLightPosition = new THREE.Vector3(25, 50, 25);
         this.lastBadGuyCreated = Date.now();
         this.environment = this.createEnvironment();
-        this.skybox = this.createSkybox();
-        this.globalLight = this.createGlobalLight();
+        // this.skybox = this.createSkybox();
+        this.ambientLight = this.createAmbientLight();
+        this.shadowLight = this.createShadowLight();
 
         this.scene.add(this.environment);
-        this.scene.add(this.skybox);
-        this.scene.add(this.globalLight);
+        // this.scene.add(this.skybox);
+        this.scene.add(this.ambientLight);
+        this.scene.add(this.shadowLight);
 
         this.house1Positions = [
             { x: 15, z: 15 },
@@ -44,6 +47,20 @@ export default class LevelMap extends AbstractLevel {
         this.startLevel();
     }
 
+    update() {
+        super.update();
+
+        const player = this.scene.getPlayer();
+
+        this.shadowLight.position
+            .copy(player.position)
+            .add(this.shadowLightPosition);
+
+        if (this.shadowLight.target !== player.object) {
+            this.shadowLight.target = player.object;
+        }
+    }
+
     startLevel() {
         if (this.interval) {
             clearInterval(this.interval);
@@ -61,7 +78,8 @@ export default class LevelMap extends AbstractLevel {
     stopLevel() {
         this.scene.remove(this.environment);
         this.scene.remove(this.skybox);
-        this.scene.remove(this.globalLight);
+        this.scene.remove(this.ambientLight);
+        this.scene.remove(this.shadowLight);
         this.scene.gameObjectsService.removeAllExceptPlayer();
         if (this.interval) {
             clearInterval(this.interval);
@@ -109,6 +127,7 @@ export default class LevelMap extends AbstractLevel {
         this.scene.models.loadGLTF({
             baseUrl: './assets/models/environment/hall/hall',
             noScene: true,
+            castShadow: false,
             callback: object => pivot.add(object.scene)
         });
 

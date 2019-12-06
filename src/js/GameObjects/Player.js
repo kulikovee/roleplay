@@ -33,8 +33,8 @@ export default class Player extends FiringUnit {
         });
     }
 
-    update() {
-        FiringUnit.prototype.update.call(this);
+    update(deltaTime) {
+        FiringUnit.prototype.update.call(this, deltaTime);
 
         if (this.isDead()) {
             return;
@@ -90,6 +90,10 @@ export default class Player extends FiringUnit {
 
     getFireInitialRotation() {
         return this.getChildRotation('Head');
+    }
+
+    addExperience(experience) {
+        this.params.experience += experience;
     }
 
     getExperience() {

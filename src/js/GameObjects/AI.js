@@ -20,8 +20,8 @@ export default class AI extends FiringUnit {
         this.isRunning = false;
     }
 
-    update() {
-        FiringUnit.prototype.update.call(this);
+    update(deltaTime) {
+        FiringUnit.prototype.update.call(this, deltaTime);
 
         if (this.isDead()) {
             return;

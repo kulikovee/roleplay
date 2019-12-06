@@ -110,16 +110,15 @@ export default class AnimatedGameObject extends GameObject {
         this.playingAnimations = {};
         this.legsRotationY = 0;
 
-        this.clock = new THREE.Clock();
         this.mixer = new THREE.AnimationMixer(this.params.object);
 
         this.initAnimations(this.params.animationNames);
     }
 
-    update() {
+    update(deltaTime) {
         GameObject.prototype.update.call(this);
 
-        if (this.mixer) this.mixer.update(this.clock.getDelta());
+        if (this.mixer) this.mixer.update(deltaTime);
 
         if (this.params.complexAnimations) {
             this.updateComplexAnimations();

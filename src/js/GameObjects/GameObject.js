@@ -48,14 +48,14 @@ export default class GameObject extends AutoBindMethods {
 
     getChildPosition(name) {
         const child = this.getChildByName(name);
-        child.updateMatrixWorld(true);
+        // child.updateMatrixWorld(true);
 
         return new THREE.Vector3().setFromMatrixPosition(child.matrixWorld);
     }
 
     getChildRotation(name) {
         const child = this.getChildByName(name);
-        child.updateMatrixWorld(true);
+        // child.updateMatrixWorld(true);
 
         let target = new THREE.Quaternion();
         child.getWorldQuaternion(target);

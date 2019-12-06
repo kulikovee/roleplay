@@ -20,8 +20,8 @@ export default class Unit extends MovingGameObject {
         });
     }
 
-    update() {
-        MovingGameObject.prototype.update.call(this);
+    update(deltaTime) {
+        MovingGameObject.prototype.update.call(this, deltaTime);
 
         if (this.position.y < -150) {
             this.die();

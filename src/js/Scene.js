@@ -20,6 +20,7 @@ export default class Scene extends AutoBindMethods {
      */
     constructor(renderer) {
         super();
+        this.clock = new THREE.Clock();
         this.intervals = new Intervals(this);
         this.renderer = renderer;
         this.models = new Models(this);
@@ -39,6 +40,7 @@ export default class Scene extends AutoBindMethods {
         this.particles = new Particles(this);
         this.connection = new Connection(this, 'gohtml.ru');
         this.level = new LevelMap(this);
+        this.intervals.setInterval(() => this.ui.updatePlayerLabels(), 1000);
 
         this.clearScene();
         this.animate();
@@ -70,10 +72,13 @@ export default class Scene extends AutoBindMethods {
     }
 
     animate() {
+        const deltaTime = this.clock.getDelta();
+        console.log('animate', deltaTime);
+
         this.intervals.update();
 
         if (!this.ui.pause) {
-            this.gameObjectsService.update();
+            this.gameObjectsService.update(deltaTime);
             this.camera.update();
             this.ui.update();
             this.input.update();
@@ -83,6 +88,7 @@ export default class Scene extends AutoBindMethods {
         }
 
         this.renderer.render(this.scene, this.camera.camera);
+
         requestAnimationFrame(this.animate);
     }
 

@@ -25,8 +25,8 @@ export default class GameObjectsService extends AutoBindMethods {
         this.scene = scene;
     }
 
-    update() {
-        this.gameObjects.forEach(gameObject => gameObject.update());
+    update(deltaTime) {
+        this.gameObjects.forEach(gameObject => gameObject.update(deltaTime));
     }
 
     /**

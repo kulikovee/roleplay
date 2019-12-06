@@ -14,8 +14,8 @@ export default class MovingGameObject extends AnimatedGameObject {
         });
     }
 
-    update() {
-        AnimatedGameObject.prototype.update.call(this);
+    update(deltaTime) {
+        AnimatedGameObject.prototype.update.call(this, deltaTime);
         const { params: { acceleration, throttling } } = this;
 
         if (this.params.mas) {
@@ -40,7 +40,7 @@ export default class MovingGameObject extends AnimatedGameObject {
         acceleration.y *= throttling.y;
         acceleration.z *= throttling.z;
 
-        this.position.add(acceleration);
+        this.position.add(acceleration); // acceleration.multiplyScalar(deltaTime * 60)
     }
 
     checkWay(x = 0, y = 0, z = 0) {
