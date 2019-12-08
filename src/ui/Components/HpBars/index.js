@@ -6,6 +6,7 @@ class App extends Component {
         super(props);
         this.update = this.update.bind(this);
         this.state = { hpBars: [] };
+        this.minDistance = 20;
 
         if (props.setUpdate) {
             props.setUpdate(this.update);
@@ -13,10 +14,15 @@ class App extends Component {
     }
 
     update() {
+        const { camera } = this.props;
+
         this.setState({
             hpBars: this.props.scene.gameObjectsService
                 .getUnits()
-                .filter(unit => unit.isAlive())
+                .filter(unit => (
+                    unit.isAlive()
+                    && camera.position.distanceTo(unit.position) < this.minDistance
+                ))
                 .map(unit => ({ id: unit.__game_object_id, unit }))
         });
     }
@@ -31,11 +37,11 @@ class App extends Component {
         return (
             <div id="hp-bars">
                 {hpBars.map((hpBar) => {
-                    const unitPosition = new THREE.Vector3()
+                    const unitHpBarPosition = new THREE.Vector3()
                             .setFromMatrixPosition(hpBar.unit.object.matrixWorld)
                             .add(new THREE.Vector3(0, 1.8, 0)),
-                        distance = cameraPosition.distanceTo(unitPosition),
-                        screenBarPosition = toScreenPosition(unitPosition),
+                        distance = cameraPosition.distanceTo(unitHpBarPosition),
+                        screenBarPosition = toScreenPosition(unitHpBarPosition),
                         width = Math.min(70, 1000 / distance);
 
                     return (
@@ -43,7 +49,7 @@ class App extends Component {
                             key={`hp-bars-gameobject-${hpBar.id}`}
                             className="hp-bar"
                             style={{
-                                display: screenBarPosition.z > 1 || distance > 20 ? 'none' : 'block',
+                                display: screenBarPosition.z > 1 ? 'none' : 'block',
                                 left: `${screenBarPosition.x}px`,
                                 top: `${screenBarPosition.y}px`,
                                 width: `${width}px`,
