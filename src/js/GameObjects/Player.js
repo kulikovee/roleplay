@@ -4,7 +4,7 @@ import FiringUnit from './FiringUnit';
 export default class Player extends FiringUnit {
     constructor(params = {}) {
         super({
-            speed: 0.055,
+            speed: 0.058,
             fireRate: 0.5,
             damage: 50,
             hp: 100,
@@ -33,8 +33,8 @@ export default class Player extends FiringUnit {
         });
     }
 
-    update() {
-        FiringUnit.prototype.update.call(this);
+    update(deltaTime) {
+        FiringUnit.prototype.update.call(this, deltaTime);
 
         if (this.isDead()) {
             return;
@@ -90,6 +90,10 @@ export default class Player extends FiringUnit {
 
     getFireInitialRotation() {
         return this.getChildRotation('Head');
+    }
+
+    addExperience(experience) {
+        this.params.experience += experience;
     }
 
     getExperience() {

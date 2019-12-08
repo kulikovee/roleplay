@@ -25,41 +25,48 @@ export default class GameObjectsService extends AutoBindMethods {
         this.scene = scene;
     }
 
-    update() {
-        this.gameObjects.forEach(gameObject => gameObject.update());
+    update(deltaTime) {
+        this.gameObjects.forEach(gameObject => gameObject.update(deltaTime));
     }
 
     /**
-     * @param {GameObject} attackingUnit
+     * @param {Unit} attackingUnit
      */
     attack(attackingUnit) {
         if (attackingUnit.isDead()) {
             return;
         }
 
-        const attackedUnits = this.gameObjects.filter(gameObject => (
-            gameObject !== attackingUnit
-            && gameObject instanceof Unit
-            && gameObject.isAlive()
-            && gameObject.position.distanceTo(attackingUnit.position) < 2
-        ));
+        this.scene.intervals.setTimeout(() => {
+            if (attackingUnit.isAttackInterrupted()) {
+                attackingUnit.releaseAttack();
+                return;
+            }
 
-        attackedUnits.forEach((collisionGameObject) => {
-            collisionGameObject.damageTaken({
-                params: {
-                    damage: attackingUnit.params.damage,
-                    parent: attackingUnit
-                }
-            })
-        });
+            const attackedUnits = this.gameObjects.filter(gameObject => (
+                gameObject !== attackingUnit
+                && gameObject instanceof Unit
+                && gameObject.isAlive()
+                && gameObject.position.distanceTo(attackingUnit.position) < 2
+            ));
 
-        if (attackedUnits.length) {
-            this.scene.audio.playSound(attackingUnit.position, 'Attack Soft');
-        }
+            attackedUnits.forEach((collisionGameObject) => {
+                collisionGameObject.damageTaken({
+                    params: {
+                        damage: attackingUnit.params.damage,
+                        parent: attackingUnit
+                    }
+                })
+            });
+
+            // if (attackedUnits.length) {
+            //     this.scene.audio.playSound(attackingUnit.position, 'Attack Soft');
+            // }
+        }, attackingUnit.getAttackTimeout());
     }
 
     /**
-     * @param {GameObject} firingGameObject
+     * @param {Unit} firingGameObject
      */
     fire(firingGameObject) {
         if (firingGameObject.isDead()) {
@@ -103,7 +110,7 @@ export default class GameObjectsService extends AutoBindMethods {
 
         this.scene.intervals.setTimeout(() => this.destroyGameObject(fireGameObject), 2000);
 
-        this.scene.audio.playSound(firingGameObject.position, 'Lasers');
+        // this.scene.audio.playSound(firingGameObject.position, 'Lasers');
     }
 
     /**
