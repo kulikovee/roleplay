@@ -31,6 +31,7 @@ class App extends Component {
         this.setRestartButtonVisible = this.setRestartButtonVisible.bind(this);
         this.restartGame = this.restartGame.bind(this);
         this.updatePlayerParams = this.updatePlayerParams.bind(this);
+        this.setFps = this.setFps.bind(this);
         this.render = this.render.bind(this);
 
         this.state = {
@@ -38,6 +39,10 @@ class App extends Component {
             pause: true,
             showRestart: false,
             hpBars: [],
+
+            // Renderer
+            fps: 0,
+            targetFps: 0,
 
             // Input
             cursor: { x: 0, y: 0 },
@@ -112,6 +117,7 @@ class App extends Component {
             update: this.update,
             updatePlayerParams: this.updatePlayerParams,
             clearHpBars: this.clearHpBars,
+            setFps: this.setFps,
         };
     }
 
@@ -130,6 +136,10 @@ class App extends Component {
                 .filter(unit => unit.isAlive())
                 .map(unit => ({ id: unit.__game_object_id, unit })),
         });
+    }
+
+    setFps(fps, targetFps) {
+        this.setState({ fps, targetFps });
     }
 
     setPause(pause = !this.state.pause) {
@@ -244,6 +254,8 @@ class App extends Component {
             experience,
             levelExperience,
             isThirdPerson,
+            fps,
+            targetFps,
             position,
             action,
             cursor,
@@ -257,6 +269,8 @@ class App extends Component {
                         <TopRight
                             money={money}
                             position={position}
+                            fps={fps}
+                            targetFps={targetFps}
                         />
                         <BottomRight
                             unspentTalents={unspentTalents}

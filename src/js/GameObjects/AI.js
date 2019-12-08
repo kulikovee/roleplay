@@ -20,8 +20,8 @@ export default class AI extends FiringUnit {
         this.isRunning = false;
     }
 
-    update() {
-        FiringUnit.prototype.update.call(this);
+    update(deltaTime) {
+        FiringUnit.prototype.update.call(this, deltaTime);
 
         if (this.isDead()) {
             return;
@@ -41,16 +41,17 @@ export default class AI extends FiringUnit {
 
         // this.fire();
 
-        if (object.position.distanceTo(target.position) > 1.75) {
-            if (Date.now() - this.lastRun > this.lastRunTimeout) {
-                this.isRunning = true;
-            }
-        } else {
-            this.isRunning = false;
+        const isTargetNear = object.position.distanceTo(target.position) < 1.75;
 
-            if (target.isAlive()) {
-                this.attack();
-            }
+        this.isRunning = (
+            !isTargetNear
+            && (this.isRunning || this.isRunReleased())
+            && this.isAttackReleased()
+            && this.isHitReleased()
+        );
+
+        if (isTargetNear && target.isAlive()) {
+            this.attack();
         }
 
         this.animationState.isMovingForward = this.isRunning;
@@ -59,5 +60,9 @@ export default class AI extends FiringUnit {
             this.lastRun = Date.now();
             acceleration.add(this.getForward().multiplyScalar(speed));
         }
+    }
+
+    isRunReleased(time = Date.now()) {
+        return time - this.lastRun > this.lastRunTimeout;
     }
 }

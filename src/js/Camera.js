@@ -96,23 +96,15 @@ export default class Camera extends AutoBindMethods {
         this.camera.position.sub(cameraForward.multiplyScalar(this.distance));
     }
 
-    toScreenPosition(vector) {
+    toScreenPosition(position) {
         const widthHalf = 0.5 * this.getWidth();
         const heightHalf = 0.5 * this.getHeight();
-        const copiedProjectVector = vector.clone().project(this.camera);
+        const copiedProjectVector = position.clone().project(this.camera);
 
         return {
             x: Math.round((copiedProjectVector.x + 1) * widthHalf),
             y: Math.round((-copiedProjectVector.y + 1) * heightHalf),
             z: copiedProjectVector.z
         }
-    }
-
-    objectToScreenPosition(obj) {
-        const vector = new THREE.Vector3();
-        obj.updateMatrixWorld();
-        vector.setFromMatrixPosition(obj.matrixWorld);
-
-        return this.toScreenPosition(vector);
     }
 }

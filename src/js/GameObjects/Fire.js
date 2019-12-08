@@ -9,8 +9,8 @@ export default class Fire extends MovingGameObject {
         );
     }
 
-    update() {
-        MovingGameObject.prototype.update.call(this);
+    update(deltaTime) {
+        MovingGameObject.prototype.update.call(this, deltaTime);
 
         if (this.params.getCollisions) {
             const collisions = this.params.getCollisions(this);

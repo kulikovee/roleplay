@@ -20,6 +20,7 @@ export default class UI extends AutoBindMethods {
         this.elements.restartButton.onclick = () => this.restart();
         this.elements.switchCameraModeButton.onclick = () => this.switchCamera();
         this.elements.godModeHpButton.onclick = () => this.buy('god-hp');
+        this.elements.godModeLvlButton.onclick = () => this.buy('god-lvl');
 
         this.addPointerLockEvents(this.elements.blockerLabel, this.elements.instructionsLabel);
     }
@@ -38,6 +39,8 @@ export default class UI extends AutoBindMethods {
     updateHPBars() {
         const { units, camera } = this.scene;
 
+        // const cameraPosition = camera.camera.position;
+
         camera.camera.updateMatrixWorld(true);
         const cameraPosition = new THREE.Vector3().setFromMatrixPosition(camera.camera.matrixWorld);
 
@@ -45,18 +48,20 @@ export default class UI extends AutoBindMethods {
             const element = this.getUnitHpBar(unit);
 
             if (unit.isAlive()) {
-                camera.camera.updateMatrixWorld(true);
-                const unitPosition = new THREE.Vector3()
-                        .setFromMatrixPosition(unit.object.matrixWorld)
-                        .add(new THREE.Vector3(0, 1.8, 0)),
+                const unitPosition = unit.position.clone().add(new THREE.Vector3(0, 1.8, 0)),
                     distance = cameraPosition.distanceTo(unitPosition),
-                    screenBarPosition = camera.toScreenPosition(unitPosition),
+                    isNearEnough = distance < 20,
+                    screenBarPosition = isNearEnough && camera.toScreenPosition(unitPosition),
                     width = Math.min(70, 1000 / distance);
 
-                element.style.display = screenBarPosition.z > 1 || distance > 20 ? 'none' : 'block';
-                element.style.left = `${screenBarPosition.x}px`;
-                element.style.top = `${screenBarPosition.y}px`;
-                element.style.width = `${width}px`;
+                element.style.display = screenBarPosition.z > 1 || !isNearEnough ? 'none' : 'block';
+
+                if (isNearEnough) {
+                    element.style.left = `${screenBarPosition.x}px`;
+                    element.style.top = `${screenBarPosition.y}px`;
+                    element.style.width = `${width}px`;
+                }
+
                 element.children[0].style.width = `${Math.round(100 * unit.params.hp / unit.params.hpMax)}%`;
             } else if (element) {
                 element.remove();
@@ -96,7 +101,10 @@ export default class UI extends AutoBindMethods {
                 | Talents: ${player.params.unspentTalents}\
                 | Level: ${player.getLevel()}`;
 
-            this.elements.rightTopLabel.innerHTML = `$${Math.round(player.params.money)} <br> Position: ${Math.round(player.position.x * 100) / 100}, ${Math.round(player.position.z * 100) / 100}`;
+            this.elements.rightTopLabel.innerHTML = `\
+                $${Math.round(player.params.money)} <br>\
+                Position: ${Math.round(player.position.x * 100) / 100}, ${Math.round(player.position.z * 100) / 100} <br>\
+                FPS: ${Math.round(this.scene.renderer.fps)} (${Math.round(this.scene.renderer.targetFps)})`;
             this.elements.shopTalentLabel.innerHTML = `Talents (${Math.round(player.params.unspentTalents)} unspent talents left):`;
             this.elements.shopMoneyLabel.innerHTML = `Shop ($${Math.round(player.params.money)} left):`;
 
@@ -172,6 +180,11 @@ export default class UI extends AutoBindMethods {
                 break;
             case 'god-hp':
                 player.addMaxHP(9999);
+
+                break;
+            case 'god-lvl':
+                player.addExperience(player.getLevelExperience() - player.getExperience());
+                player.params.onLevelUp();
 
                 break;
             default:
@@ -337,7 +350,8 @@ export default class UI extends AutoBindMethods {
             buyTalentDamageButton: document.getElementById('buy-talent-damage'),
             restartButton: document.getElementById('restart-button'),
             switchCameraModeButton: document.getElementById('switch-third-person'),
-            godModeHpButton: document.getElementById('god-mode-enable'),
+            godModeHpButton: document.getElementById('god-mode-hp'),
+            godModeLvlButton: document.getElementById('god-mode-lvl'),
 
             // Labels
             leftBottomLabel: document.getElementById('hp'),
