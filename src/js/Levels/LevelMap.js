@@ -134,6 +134,7 @@ export default class LevelMap extends AbstractLevel {
         this.scene.models.loadGLTF({
             baseUrl: './assets/models/environment/tree',
             noScene: true,
+            receiveShadow: false,
             callback: (loadedModel) => treePositions.forEach((position) => {
                 const model = loadedModel.scene.clone();
                 model.name = 'Tree';
@@ -150,6 +151,7 @@ export default class LevelMap extends AbstractLevel {
 
         this.scene.models.loadGLTF({
             baseUrl: './assets/models/environment/house1',
+            receiveShadow: false,
             noScene: true,
             callback: (loadedModel) => this.house1Positions.forEach((position) => {
                 const model = loadedModel.scene.clone();

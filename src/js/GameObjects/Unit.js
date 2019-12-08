@@ -7,11 +7,14 @@ export default class Unit extends MovingGameObject {
             hpMax: params.hp || 100,
             damage: 10,
             attackRate: 0.9,
+            hitTime: 0.3,
+            attackDamageTimeout: 0.3,
             ...params,
         });
 
         this.shouldAttack = false;
         this.latestAttackTimestamp = Date.now() - this.params.attackRate * 1000;
+        this.latestHitTimestamp = Date.now() - this.params.hitTime * 1000;
 
         ['onDamageTaken', 'onDamageDeal', 'onKill', 'onDie'].forEach((eventName) => {
             if (typeof params[eventName] === 'function') {
@@ -31,7 +34,11 @@ export default class Unit extends MovingGameObject {
             return;
         }
 
-        if (this.isAttackReleased()) {
+        const hitReleased = this.isHitReleased();
+
+        this.animationState.isHit = !hitReleased;
+
+        if (this.isAttackReleased() && hitReleased) {
             this.animationState.isAttack = false;
 
             if (this.shouldAttack) {
@@ -44,8 +51,21 @@ export default class Unit extends MovingGameObject {
         }
     }
 
-    isAttackReleased() {
-        return (Date.now() - this.latestAttackTimestamp >= this.params.attackRate * 1000);
+    releaseAttack() {
+        this.latestAttackTimestamp = Date.now() - this.params.attackRate * 1000;
+        this.animationState.isAttack = false;
+    }
+
+    isAttackReleased(time = Date.now()) {
+        return (time - this.latestAttackTimestamp >= this.params.attackRate * 1000);
+    }
+
+    isAttackInterrupted(time = Date.now()) {
+        return (time - this.latestHitTimestamp <= this.params.attackDamageTimeout * 1000);
+    }
+
+    isHitReleased(time = Date.now()) {
+        return (time - this.latestHitTimestamp >= this.params.hitTime * 1000);
     }
 
     attack() {
@@ -60,6 +80,10 @@ export default class Unit extends MovingGameObject {
         return !this.isDead();
     }
 
+    getAttackTimeout() {
+        return this.params.attackDamageTimeout * 1000;
+    }
+
     damageTaken(attackParams) {
         if (attackParams) {
             this.params.hp -= attackParams.params.damage;
@@ -70,6 +94,8 @@ export default class Unit extends MovingGameObject {
             if (damageDealerUnit) {
                 damageDealerUnit.dispatchEvent('onDamageDeal', this);
             }
+
+            this.latestHitTimestamp = Date.now();
 
             if (this.isDead()) {
                 this.die(damageDealerUnit);

@@ -4,7 +4,7 @@ import FiringUnit from './FiringUnit';
 export default class Player extends FiringUnit {
     constructor(params = {}) {
         super({
-            speed: 0.055,
+            speed: 0.058,
             fireRate: 0.5,
             damage: 50,
             hp: 100,

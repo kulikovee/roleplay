@@ -44,11 +44,11 @@ export default class Renderer extends AutoBindMethods {
             this.renderer.render(scene, camera);
         }
 
-        if (this.fps < 35) {
+        if (this.fps < 30) {
             this.targetFps = 35;
-        } else if (this.fps < 45) {
+        } else if (this.fps < 40) {
             this.targetFps = 45;
-        } else if (this.fps < 55) {
+        } else if (this.fps < 50) {
             this.targetFps = 55;
         }
     }

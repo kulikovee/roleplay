@@ -12,6 +12,7 @@ const animationNames = {
     runRight: 'Run Right',
     walkBack: 'Walk Back',
     die: 'Die',
+    hit: 'Hit',
 
     // Complex animimations
     topRun: 'Top Run',
@@ -25,9 +26,11 @@ const animationNames = {
     topRunRight: 'Top Run Right',
     topRunLeft: 'Top Run Left',
     topJump: 'Top Jump',
+    topHit: 'Top Hit',
     bottomRunRight: 'Bottom Run Right',
     bottomRunLeft: 'Bottom Run Left',
     bottomJump: 'Bottom Jump',
+    bottomHit: 'Bottom Hit',
     topDie: 'Top Die',
     bottomDie: 'Bottom Die',
 };
@@ -40,6 +43,7 @@ const topAnimations = [
     'topRunRight',
     'topRunLeft',
     'topJump',
+    'topHit',
     'topDie',
 ];
 
@@ -51,6 +55,7 @@ const bottomAnimations = [
     'bottomRunRight',
     'bottomRunLeft',
     'bottomJump',
+    'bottomHit',
     'bottomDie',
 ];
 
@@ -105,6 +110,7 @@ export default class AnimatedGameObject extends GameObject {
             isAttack: false,
             isJump: false,
             isDie: false,
+            isHit: false,
         };
 
         this.playingAnimations = {};
@@ -255,6 +261,7 @@ export default class AnimatedGameObject extends GameObject {
                 topRunLeft,
                 topStand, bottomStand,
                 topJump, bottomJump,
+                topHit, bottomHit,
                 topDie, bottomDie,
             } = {}
         } = this;
@@ -267,11 +274,13 @@ export default class AnimatedGameObject extends GameObject {
             isMovingForward,
             isJump,
             isDie,
+            isHit,
         } = this.animationState;
 
         const playingAnimations = {
             top: (
                 (isDie && topDie)
+                || (isHit && topHit)
                 || (isAttack && topAttack)
                 || (isJump && topJump)
                 || (isMovingBackward && isMovingRight && topRunLeft)
@@ -292,6 +301,7 @@ export default class AnimatedGameObject extends GameObject {
                 || (isMovingLeft && bottomRun)
                 || (isMovingForward && bottomRun)
                 || (isAttack && bottomAttack)
+                || (isHit && bottomHit)
                 || (bottomStand)
             ),
         };
@@ -353,6 +363,7 @@ export default class AnimatedGameObject extends GameObject {
                 runRight,
                 run,
                 jump,
+                hit,
                 rotateLeft,
                 rotateRight,
                 die,
@@ -369,10 +380,12 @@ export default class AnimatedGameObject extends GameObject {
             isRotateLeft,
             isRotateRight,
             isDie,
+            isHit,
         } = this.animationState;
 
         return (
             (isDie && die)
+            || (isHit && hit)
             || (isAttack && attack)
             || (isJump && jump)
             || (isMovingBackward && walkBack)
