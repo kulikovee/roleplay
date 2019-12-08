@@ -195,6 +195,10 @@ class App extends Component {
                 player.addMaxHP(9999);
 
                 break;
+            case 'god-lvl':
+                player.addExperience(player.getLevelExperience() - player.getExperience());
+
+                break;
             default:
                 break;
         }

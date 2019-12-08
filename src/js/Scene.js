@@ -66,8 +66,8 @@ export default class Scene extends AutoBindMethods {
             }, 2500),
             onKill: (object) => {
                 const player = this.getPlayer();
-                player.params.experience += object.params.bounty;
-                player.params.money += object.params.bounty;
+                player.addExperience(object.params.bounty);
+                player.addMoney(object.params.bounty);
             },
             onDamageTaken: () => this.ui.updatePlayerParams(),
             onLevelUp: () => this.ui.updatePlayerParams(),

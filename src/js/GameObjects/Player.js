@@ -20,17 +20,6 @@ export default class Player extends FiringUnit {
         console.log('Player', this);
 
         params.onLevelUp && this.addEventListener('onLevelUp', params.onLevelUp);
-
-        this.addEventListener('onKill', () => {
-            const level = this.getLevel();
-
-            if (this.params.level !== level) {
-                this.params.level = level;
-                this.params.unspentTalents += 3;
-                this.params.hp = this.params.hpMax;
-                params.onLevelUp && this.dispatchEvent('onLevelUp', params.onLevelUp);
-            }
-        });
     }
 
     update(deltaTime) {
@@ -102,6 +91,17 @@ export default class Player extends FiringUnit {
 
     addExperience(experience) {
         this.params.experience += experience;
+
+        const level = this.getLevel();
+
+        if (this.params.level !== level) {
+            const levelsUp = level - this.params.level;
+
+            this.params.level = level;
+            this.params.unspentTalents += 3 * levelsUp;
+            this.params.hp = this.params.hpMax;
+            this.dispatchEvent('onLevelUp', level);
+        }
     }
 
     getExperience() {

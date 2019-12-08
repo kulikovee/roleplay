@@ -184,7 +184,6 @@ export default class UI extends AutoBindMethods {
                 break;
             case 'god-lvl':
                 player.addExperience(player.getLevelExperience() - player.getExperience());
-                player.params.onLevelUp();
 
                 break;
             default:

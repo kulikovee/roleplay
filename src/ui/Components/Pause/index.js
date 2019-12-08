@@ -78,6 +78,9 @@ class App extends Component {
                     <div className="row">
                         <div><input id="god-mode-enable" type="button" value="Add 9999 HP" onClick={() => buy('god-hp')} /></div>
                     </div>
+                    <div className="row">
+                        <div><input id="god-mode-lvl" type="button" value="Level Up" onClick={() => buy('god-lvl')} /></div>
+                    </div>
                 </div>
                 <div id="blocker">
                     <div id="instructions">
