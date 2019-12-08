@@ -20,8 +20,8 @@ export default class FiringUnit extends Unit {
         );
     }
 
-    update() {
-        Unit.prototype.update.call(this);
+    update(deltaTime) {
+        Unit.prototype.update.call(this, deltaTime);
 
         if (this.isDead()) {
             return;

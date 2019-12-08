@@ -2,12 +2,13 @@ import React, { Component } from 'react';
 
 class App extends Component {
     render() {
-        const { position, money } = this.props;
+        const { position, money, fps, targetFps } = this.props;
 
         return (
             <div id="money">
                 ${money}<br />
-                {position && `${this.getFormattedValue(position.x)}, ${this.getFormattedValue(position.z)}`}
+                Position: {position && `${this.getFormattedValue(position.x)}, ${this.getFormattedValue(position.z)}`}<br />
+                FPS: {Math.round(fps)} (Target: {Math.round(targetFps)})
             </div>
         );
     }

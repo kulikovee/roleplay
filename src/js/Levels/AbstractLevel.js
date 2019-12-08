@@ -13,6 +13,7 @@ export default class AbstractLevel extends AutoBindMethods {
     }
 
     update() {}
+
     startLevel() {}
     restartLevel() {}
     stopLevel() {}
@@ -22,32 +23,29 @@ export default class AbstractLevel extends AutoBindMethods {
         return this.id;
     }
 
-    createGlobalLight() {
-        const pivot = new THREE.Object3D();
-
+    createAmbientLight() {
         var ambientLight = new THREE.AmbientLight(0x888888);
         ambientLight.castShadow = false;
-        pivot.add(ambientLight);
+        return ambientLight;
+    }
 
-
-        const light = new THREE.DirectionalLight(0xffffff, 1, 100);
-        light.position.set(25, 50, 25);
-        light.shadow.bias = -0.000018;
-        const shadowSize = 45;
+    createShadowLight() {
+        const light = new THREE.DirectionalLight(0xffffff, 10, 150);
+        light.intensity = 1;
+        light.shadow.bias = -0.00001;
+        const shadowSize = 25;
         light.castShadow = true;
         light.shadow.camera.left = -shadowSize;
         light.shadow.camera.right = shadowSize;
         light.shadow.camera.top = shadowSize;
         light.shadow.camera.bottom = -shadowSize;
-        light.shadow.mapSize.width = 8192;
-        light.shadow.mapSize.height = 8192;
-        light.shadow.camera.near = 1;
-        light.shadow.camera.far = 1000;
+        light.shadow.mapSize.width = 512;
+        light.shadow.mapSize.height = 512;
+        light.shadow.camera.near = 10;
+        light.shadow.camera.far = 150;
         light.shadow.camera.visible = true;
 
-        pivot.add(light);
-
-        return pivot;
+        return light;
     }
 
 

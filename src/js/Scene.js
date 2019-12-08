@@ -10,7 +10,6 @@ import LevelMap from './Levels/LevelMap';
 import Colliders from './Colliders';
 import Models from './Models';
 import Particles from './Particles';
-import UI from './UI';
 import Units from './Units';
 
 
@@ -20,6 +19,7 @@ export default class Scene extends AutoBindMethods {
      */
     constructor(renderer, ui) {
         super();
+        this.clock = new THREE.Clock();
         this.intervals = new Intervals(this);
         this.renderer = renderer;
         this.ui = ui;
@@ -36,10 +36,14 @@ export default class Scene extends AutoBindMethods {
             onSwitchCamera: () => this.ui.switchCamera(),
         });
         this.gameObjectsService = new GameObjectsService(this);
-        // this.ui = new UI(this);
         this.particles = new Particles(this);
         this.connection = new Connection(this, 'gohtml.ru');
         this.level = new LevelMap(this);
+
+        this.intervals.setInterval(() => {
+            this.ui.setFps(this.renderer.fps, this.renderer.targetFps);
+            this.ui.updatePlayerParams()
+        }, 1000);
 
         this.input.isThirdPerson = ui.isThirdPerson();
 
@@ -71,10 +75,11 @@ export default class Scene extends AutoBindMethods {
     }
 
     animate() {
+        const deltaTime = this.clock.getDelta();
         this.intervals.update();
 
         if (!this.ui.isPause()) {
-            this.gameObjectsService.update();
+            this.gameObjectsService.update(deltaTime);
             this.camera.update();
             this.ui.update();
             this.input.update();
