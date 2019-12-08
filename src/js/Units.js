@@ -141,7 +141,7 @@ export default class Units extends AutoBindMethods {
                     }),
                     onDie: () => this.scene.intervals.setTimeout(() => (
                         badGuy.isDead() && gameObjectsService.destroyGameObject(badGuy)
-                    ), 30000),
+                    ), 10000),
                 }));
 
                 badGuy.position.set(x, y, z);

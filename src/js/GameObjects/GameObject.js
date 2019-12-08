@@ -4,7 +4,7 @@ import AutoBindMethods from '../AutoBindMethods';
 export default class GameObject extends AutoBindMethods {
     constructor(params = {}) {
         super();
-        this.params = params;
+        this.params = { ...params };
         this.object = params.object;
 
         if (params.object) {

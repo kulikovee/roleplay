@@ -14,23 +14,15 @@ export default class Player extends FiringUnit {
             isFire: false,
             mas: 1,
             level: 1,
+            jumpTimeout: 0.1,
             ...params,
         });
+
+        this.lastJumpTimestamp = Date.now() - this.params.jumpTimeout * 1000;
 
         console.log('Player', this);
 
         params.onLevelUp && this.addEventListener('onLevelUp', params.onLevelUp);
-
-        this.addEventListener('onKill', () => {
-            const level = this.getLevel();
-
-            if (this.params.level !== level) {
-                this.params.level = level;
-                this.params.unspentTalents += 3;
-                this.params.hp = this.params.hpMax;
-                params.onLevelUp && this.dispatchEvent('onLevelUp', params.onLevelUp);
-            }
-        });
     }
 
     update(deltaTime) {
@@ -78,6 +70,14 @@ export default class Player extends FiringUnit {
         }
     }
 
+    getUnspentTalents() {
+        return this.params.unspentTalents;
+    }
+
+    decreaseUnspentTalents() {
+        return this.params.unspentTalents--;
+    }
+
     getFireInitialPosition() {
         const head = this.getChildByName('Head');
         const headForward = Player.prototype.getForward.call({ params: { object: head } });
@@ -94,6 +94,17 @@ export default class Player extends FiringUnit {
 
     addExperience(experience) {
         this.params.experience += experience;
+
+        const level = this.getLevel();
+
+        if (this.params.level !== level) {
+            const levelsUp = level - this.params.level;
+
+            this.params.level = level;
+            this.params.unspentTalents += 3 * levelsUp;
+            this.params.hp = this.params.hpMax;
+            this.dispatchEvent('onLevelUp', level);
+        }
     }
 
     getExperience() {
@@ -108,7 +119,7 @@ export default class Player extends FiringUnit {
         return Math.floor(Math.sqrt(this.params.experience / 100)) + 1;
     }
 
-    getMovingAcceleration() {
+    getMovingAcceleration(time = Date.now()) {
         const { input: { horizontal, vertical, jump } } = this.params;
 
         const speed = vertical && horizontal
@@ -123,8 +134,16 @@ export default class Player extends FiringUnit {
             ? (-horizontal * speed * 0.6)
             : (-horizontal * speed);
 
-        const addUp = Number(jump && this.params.isGrounded) * 0.25;
+        const isJump = (
+            time - this.lastJumpTimestamp > this.params.jumpTimeout * 1000
+            && jump
+            && this.params.isGrounded
+        );
 
-        return this.getDirection(new THREE.Vector3(addSide, addUp, addForward));
+        if (isJump) {
+            this.lastJumpTimestamp = Date.now();
+        }
+
+        return this.getDirection(new THREE.Vector3(addSide, Number(isJump) * 0.25, addForward));
     }
 }

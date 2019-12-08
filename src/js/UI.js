@@ -51,7 +51,7 @@ export default class UI extends AutoBindMethods {
                 const unitPosition = unit.position.clone().add(new THREE.Vector3(0, 1.8, 0)),
                     distance = cameraPosition.distanceTo(unitPosition),
                     isNearEnough = distance < 20,
-                    screenBarPosition = isNearEnough && camera.getScreenPosition(unitPosition),
+                    screenBarPosition = isNearEnough && camera.toScreenPosition(unitPosition),
                     width = Math.min(70, 1000 / distance);
 
                 element.style.display = screenBarPosition.z > 1 || !isNearEnough ? 'none' : 'block';
@@ -184,7 +184,6 @@ export default class UI extends AutoBindMethods {
                 break;
             case 'god-lvl':
                 player.addExperience(player.getLevelExperience() - player.getExperience());
-                player.params.onLevelUp();
 
                 break;
             default:

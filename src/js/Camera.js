@@ -96,7 +96,7 @@ export default class Camera extends AutoBindMethods {
         this.camera.position.sub(cameraForward.multiplyScalar(this.distance));
     }
 
-    getScreenPosition(position) {
+    toScreenPosition(position) {
         const widthHalf = 0.5 * this.getWidth();
         const heightHalf = 0.5 * this.getHeight();
         const copiedProjectVector = position.clone().project(this.camera);

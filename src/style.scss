@@ -54,10 +54,6 @@ input[type=button] {
   right: 8px;
 }
 
-#restart {
-  display: none;
-}
-
 #action {
   position: absolute;
   top: 150px;
@@ -119,4 +115,8 @@ input[type=button] {
     transition: width 0.2s;
     background: rgba(0, 255, 0, 0.5);
   }
+}
+
+.instructions-title {
+  font-size: 40px;
 }

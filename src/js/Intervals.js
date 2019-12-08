@@ -11,7 +11,7 @@ export default class Intervals extends AutoBindMethods {
     }
 
     update() {
-        if (this.scene.ui && !this.scene.ui.pause) {
+        if (this.scene.ui && !this.scene.ui.isPause()) {
             this.timePassed += Date.now() - this.lastFrame;
 
             this.intervals
