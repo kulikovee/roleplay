@@ -96,6 +96,7 @@ export default class LevelMap extends AbstractLevel {
                 || (Math.abs(z) < 0.8 && x > -41 && x < -40 && y < 0.7) // chair
                 || (Math.abs(z) > 0.8 && Math.abs(z) < 1.6 && x > -41 && x < -39 && y < 2) // chair
                 || (Math.abs(z) < 1.6 && x > -43 && x < -41 && y < 2) // chair
+                || (Math.abs(x) < 3 && z > -25 && z < -19 && y < Math.abs(z + 19)) // stairs
             ) {
                 return true;
             }

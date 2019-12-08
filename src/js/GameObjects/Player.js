@@ -14,8 +14,11 @@ export default class Player extends FiringUnit {
             isFire: false,
             mas: 1,
             level: 1,
+            jumpTimeout: 0.1,
             ...params,
         });
+
+        this.lastJumpTimestamp = Date.now() - this.params.jumpTimeout * 1000;
 
         console.log('Player', this);
 
@@ -116,7 +119,7 @@ export default class Player extends FiringUnit {
         return Math.floor(Math.sqrt(this.params.experience / 100)) + 1;
     }
 
-    getMovingAcceleration() {
+    getMovingAcceleration(time = Date.now()) {
         const { input: { horizontal, vertical, jump } } = this.params;
 
         const speed = vertical && horizontal
@@ -131,8 +134,16 @@ export default class Player extends FiringUnit {
             ? (-horizontal * speed * 0.6)
             : (-horizontal * speed);
 
-        const addUp = Number(jump && this.params.isGrounded) * 0.25;
+        const isJump = (
+            time - this.lastJumpTimestamp > this.params.jumpTimeout * 1000
+            && jump
+            && this.params.isGrounded
+        );
 
-        return this.getDirection(new THREE.Vector3(addSide, addUp, addForward));
+        if (isJump) {
+            this.lastJumpTimestamp = Date.now();
+        }
+
+        return this.getDirection(new THREE.Vector3(addSide, Number(isJump) * 0.25, addForward));
     }
 }

@@ -21,7 +21,7 @@ export default class MovingGameObject extends AnimatedGameObject {
         if (this.params.mas) {
             acceleration.y -= 0.01;
 
-            this.params.isGrounded = acceleration.y <= 0 && !this.checkWay(0, -0.1, 0);
+            this.params.isGrounded = !this.checkWay(0, -0.1, 0);
             this.animationState.isJump = !this.params.isGrounded;
         }
 
@@ -30,10 +30,32 @@ export default class MovingGameObject extends AnimatedGameObject {
         const isZ = acceleration.z && this.checkWay(0, 0, acceleration.z);
 
         if (!isX || !isY || !isZ) {
-            if (!this.params.mas) { acceleration.multiplyScalar(0.75); }
-            if (!isX) { acceleration.x = 0; }
+            if (!this.params.mas) {
+                // Stop object smoothly because of Collider hit
+                acceleration.multiplyScalar(0.75);
+            }
+
+            if (!isX) {
+                const isClimbing = (acceleration.x && acceleration.y <= 0 && this.checkWay(acceleration.x, 0.04, 0));
+
+                if (isClimbing) {
+                    acceleration.y = 0.04 / throttling.y;
+                } else {
+                    acceleration.x = 0;
+                }
+            }
+
             if (!isY) { acceleration.y = 0; }
-            if (!isZ) { acceleration.z = 0; }
+
+            if (!isZ) {
+                const isClimbing = (acceleration.z && acceleration.y <= 0 && this.checkWay(0, 0.04, acceleration.z));
+
+                if (isClimbing) {
+                    acceleration.y = 0.04 / throttling.y;
+                } else {
+                    acceleration.z = 0;
+                }
+            }
         }
 
         acceleration.x *= throttling.x;
