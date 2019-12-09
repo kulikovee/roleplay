@@ -81,19 +81,14 @@ export default class MovingGameObject extends AnimatedGameObject {
     }
 
     getForward() {
-        const vector = new THREE.Vector3();
-        this.params.object.getWorldDirection(vector);
-        return vector;
+        return this.getDirection(new THREE.Vector3(0, 0, 1));
     }
 
     /**
      * @param {THREE.Vector3} direction
      */
     getDirection(direction) {
-        const matrix = new THREE.Matrix4();
-        matrix.extractRotation(this.params.object.matrix);
-        direction.applyMatrix4(matrix);
-
+        direction.applyQuaternion(this.object.quaternion);
         return direction;
     }
 

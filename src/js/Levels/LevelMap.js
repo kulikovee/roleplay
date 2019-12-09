@@ -37,9 +37,9 @@ export default class LevelMap extends AbstractLevel {
 
         this.nextRespawnPoint = 0;
 
-        const color = 0xd5d5d5;
+        const color = 0x000000;
         const near = 10;
-        const far = 50;
+        const far = 100;
         this.scene.scene.fog = new THREE.Fog(color, near, far);
         // this.scene.audio.playMusic('Music');
 
@@ -114,7 +114,7 @@ export default class LevelMap extends AbstractLevel {
 
     createEnvironment() {
         const pivot = new THREE.Object3D();
-
+        pivot.matrixAutoUpdate = false;
         pivot.name = 'Level Environment';
 
         const treePositions = [
@@ -128,7 +128,11 @@ export default class LevelMap extends AbstractLevel {
             baseUrl: './assets/models/environment/hall/hall',
             noScene: true,
             castShadow: false,
-            callback: object => pivot.add(object.scene)
+            callback: object => {
+                pivot.add(object.scene);
+                object.scene.matrixAutoUpdate = false;
+                object.scene.updateMatrix();
+            }
         });
 
         this.scene.models.loadGLTF({
@@ -139,6 +143,9 @@ export default class LevelMap extends AbstractLevel {
                 const model = loadedModel.scene.clone();
                 model.name = 'Tree';
                 model.position.set(position.x, 0, position.z);
+                model.matrixAutoUpdate = false;
+                model.updateMatrix();
+
                 const { x, z } = model.position;
 
                 this.scene.colliders.addColliderFunction(
@@ -157,6 +164,9 @@ export default class LevelMap extends AbstractLevel {
                 const model = loadedModel.scene.clone();
                 model.name = 'House1';
                 model.position.set(position.x, 0, position.z);
+                model.matrixAutoUpdate = false;
+                model.updateMatrix();
+
                 const { x, z } = model.position;
 
                 this.scene.colliders.addColliderFunction(

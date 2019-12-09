@@ -66,15 +66,14 @@ export default class Camera extends AutoBindMethods {
             destination = this.camera.position,
             direction = new THREE.Vector3();
 
-        let intersectObjects = [children.find(c => c.name === 'Level Environment')];
-
         const getChildrenFlat = objects => [].concat(...objects.map(
             obj => obj.children
                 ? [obj, ...getChildrenFlat(obj.children)]
                 : [obj]
         ));
 
-        const flatChildrenMeshes = getChildrenFlat(intersectObjects).filter(obj => obj.type === 'Mesh');
+        const enviroment = [children.find(c => c.name === 'Level Environment')];
+        const flatChildrenMeshes = getChildrenFlat(enviroment).filter(obj => obj.type === 'Mesh');
 
         this.raycaster.set(origin, direction.subVectors(destination, origin).normalize());
         this.raycaster.far = deltaY * 1.5;
@@ -90,8 +89,8 @@ export default class Camera extends AutoBindMethods {
 
         this.camera.lookAt(playerHeadPosition);
 
-        const cameraForward = new THREE.Vector3();
-        this.camera.getWorldDirection(cameraForward);
+        const cameraForward = new THREE.Vector3(0, 0, -1);
+        cameraForward.applyQuaternion(this.camera.quaternion);
 
         this.camera.position.sub(cameraForward.multiplyScalar(this.distance));
     }

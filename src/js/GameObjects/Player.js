@@ -80,10 +80,11 @@ export default class Player extends FiringUnit {
 
     getFireInitialPosition() {
         const head = this.getChildByName('Head');
-        const headForward = Player.prototype.getForward.call({ params: { object: head } });
-        const headUp = Player.prototype.getDirection.call({ params: { object: head } }, new THREE.Vector3(0, 1, 0));
+        const headForward = this.getChildDirection(head, new THREE.Vector3(0, 0, 1));
+        const headUp = new THREE.Vector3(0, 1, 0);
+        headUp.applyQuaternion(head.quaternion);
 
-        return this.getChildPosition('Head')
+        return this.getChildPosition(head)
             .add(headUp.multiplyScalar(0.15))
             .add(headForward.multiplyScalar(0.25));
     }
