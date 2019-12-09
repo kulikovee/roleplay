@@ -5,14 +5,14 @@ export default class Intervals extends AutoBindMethods {
         super();
         this.scene = scene;
         this.timePassed = 0;
-        this.lastFrame = Date.now();
+        this.lastFrame = 0;
         this.intervals = [];
         this.intervalIndex = 0;
     }
 
-    update() {
+    update(now) {
         if (this.scene.ui && !this.scene.ui.isPause()) {
-            this.timePassed += Date.now() - this.lastFrame;
+            this.timePassed += now - this.lastFrame;
 
             this.intervals
                 .filter(i => this.timePassed - i.calledAt > i.interval)
@@ -26,7 +26,15 @@ export default class Intervals extends AutoBindMethods {
                 });
         }
 
-        this.lastFrame = Date.now();
+        this.lastFrame = now;
+    }
+
+    getTimePassed() {
+        return this.timePassed;
+    }
+
+    getDeltaTime(now) {
+        return now - this.lastFrame;
     }
 
     setInterval(fn, interval, immediately, loops) {

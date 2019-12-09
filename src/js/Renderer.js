@@ -17,7 +17,6 @@ export default class Renderer extends AutoBindMethods {
         // this.renderer.shadowMap.type = THREE.BasicShadowMap;
         this.fps = 60;
         this.targetFps = 70;
-        this.lastRender = Date.now();
         container.appendChild(this.renderer.domElement);
     }
 
@@ -33,23 +32,13 @@ export default class Renderer extends AutoBindMethods {
      * @param {THREE.Scene} scene
      * @param {THREE.Camera} camera
      */
-    render(scene, camera) {
-        const now = Date.now();
-        const deltaTime = now - this.lastRender;
-
+    render(scene, camera, deltaTime) {
         this.fps -= (this.fps - 1000 / deltaTime) / 60;
 
         if (deltaTime >= 1000 / this.targetFps) {
-            this.lastRender = now;
             this.renderer.render(scene, camera);
         }
 
-        if (this.fps < 30) {
-            this.targetFps = 35;
-        } else if (this.fps < 40) {
-            this.targetFps = 45;
-        } else if (this.fps < 50) {
-            this.targetFps = 55;
-        }
+        this.targetFps = this.fps + 10;
     }
 }

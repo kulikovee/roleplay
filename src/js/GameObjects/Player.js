@@ -18,15 +18,15 @@ export default class Player extends FiringUnit {
             ...params,
         });
 
-        this.lastJumpTimestamp = Date.now() - this.params.jumpTimeout * 1000;
+        this.lastJumpTimestamp = 0;
 
         console.log('Player', this);
 
         params.onLevelUp && this.addEventListener('onLevelUp', params.onLevelUp);
     }
 
-    update(deltaTime) {
-        FiringUnit.prototype.update.call(this, deltaTime);
+    update(time, deltaTime) {
+        super.update(time, deltaTime);
 
         if (this.isDead()) {
             return;
@@ -34,7 +34,7 @@ export default class Player extends FiringUnit {
 
         const { input, object, acceleration } = this.params;
 
-        acceleration.add(this.getMovingAcceleration());
+        acceleration.add(this.getMovingAcceleration(time));
 
         if (input.attack1) {
             this.attack();
@@ -120,7 +120,7 @@ export default class Player extends FiringUnit {
         return Math.floor(Math.sqrt(this.params.experience / 100)) + 1;
     }
 
-    getMovingAcceleration(time = Date.now()) {
+    getMovingAcceleration(time) {
         const { input: { horizontal, vertical, jump } } = this.params;
 
         const speed = vertical && horizontal
@@ -142,7 +142,7 @@ export default class Player extends FiringUnit {
         );
 
         if (isJump) {
-            this.lastJumpTimestamp = Date.now();
+            this.lastJumpTimestamp = time;
         }
 
         return this.getDirection(new THREE.Vector3(addSide, Number(isJump) * 0.25, addForward));

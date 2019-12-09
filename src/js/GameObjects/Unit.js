@@ -13,8 +13,8 @@ export default class Unit extends MovingGameObject {
         });
 
         this.shouldAttack = false;
-        this.latestAttackTimestamp = Date.now() - this.params.attackRate * 1000;
-        this.latestHitTimestamp = Date.now() - this.params.hitTime * 1000;
+        this.latestAttackTimestamp = 0;
+        this.latestHitTimestamp = 0;
 
         ['onDamageTaken', 'onDamageDeal', 'onKill', 'onDie'].forEach((eventName) => {
             if (typeof params[eventName] === 'function') {
@@ -23,8 +23,8 @@ export default class Unit extends MovingGameObject {
         });
     }
 
-    update(deltaTime) {
-        MovingGameObject.prototype.update.call(this, deltaTime);
+    update(time, deltaTime) {
+        super.update(time, deltaTime);
 
         if (this.position.y < -150) {
             this.die();
@@ -34,16 +34,16 @@ export default class Unit extends MovingGameObject {
             return;
         }
 
-        const hitReleased = this.isHitReleased();
+        const hitReleased = this.isHitReleased(time);
 
         this.animationState.isHit = !hitReleased;
 
-        if (this.isAttackReleased() && hitReleased) {
+        if (this.isAttackReleased(time) && hitReleased) {
             this.animationState.isAttack = false;
 
             if (this.shouldAttack) {
                 this.animationState.isAttack = true;
-                this.latestAttackTimestamp = Date.now();
+                this.latestAttackTimestamp = time;
                 this.params.attack && this.params.attack();
             }
         } else {
@@ -51,20 +51,20 @@ export default class Unit extends MovingGameObject {
         }
     }
 
-    releaseAttack() {
-        this.latestAttackTimestamp = Date.now() - this.params.attackRate * 1000;
+    releaseAttack(time) {
+        this.latestAttackTimestamp = time - this.params.attackRate * 1000;
         this.animationState.isAttack = false;
     }
 
-    isAttackReleased(time = Date.now()) {
+    isAttackReleased(time) {
         return (time - this.latestAttackTimestamp >= this.params.attackRate * 1000);
     }
 
-    isAttackInterrupted(time = Date.now()) {
+    isAttackInterrupted(time) {
         return (time - this.latestHitTimestamp <= this.params.attackDamageTimeout * 1000);
     }
 
-    isHitReleased(time = Date.now()) {
+    isHitReleased(time) {
         return (time - this.latestHitTimestamp >= this.params.hitTime * 1000);
     }
 
@@ -84,10 +84,10 @@ export default class Unit extends MovingGameObject {
         return this.params.attackDamageTimeout * 1000;
     }
 
-    damageTaken(attackParams) {
+    damageTaken(attackParams, time) {
         if (attackParams) {
-            this.params.hp -= attackParams.params.damage;
-            const damageDealerUnit = attackParams.params.parent;
+            this.params.hp -= attackParams.damage;
+            const damageDealerUnit = attackParams.unit;
 
             this.dispatchEvent('onDamageTaken', damageDealerUnit);
 
@@ -95,7 +95,7 @@ export default class Unit extends MovingGameObject {
                 damageDealerUnit.dispatchEvent('onDamageDeal', this);
             }
 
-            this.latestHitTimestamp = Date.now();
+            this.latestHitTimestamp = time;
 
             if (this.isDead()) {
                 this.die(damageDealerUnit);

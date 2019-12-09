@@ -75,11 +75,13 @@ export default class Scene extends AutoBindMethods {
     }
 
     animate() {
-        const deltaTime = this.clock.getDelta();
-        this.intervals.update();
+        const now = Date.now();
+        const deltaTime = this.intervals.getDeltaTime(now);
+        this.intervals.update(now);
+        const gameTime = this.intervals.getTimePassed();
 
         if (!this.ui.isPause()) {
-            this.gameObjectsService.update(deltaTime);
+            this.gameObjectsService.update(gameTime, deltaTime);
             this.camera.update();
             this.ui.update();
             this.input.update();
@@ -88,7 +90,7 @@ export default class Scene extends AutoBindMethods {
             this.connection.send(this.getPlayer());
         }
 
-        this.renderer.render(this.scene, this.camera.camera);
+        this.renderer.render(this.scene, this.camera.camera, deltaTime);
         requestAnimationFrame(this.animate);
     }
 

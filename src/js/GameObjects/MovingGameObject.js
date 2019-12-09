@@ -14,8 +14,8 @@ export default class MovingGameObject extends AnimatedGameObject {
         });
     }
 
-    update(deltaTime) {
-        AnimatedGameObject.prototype.update.call(this, deltaTime);
+    update(time, deltaTime) {
+        super.update(time, deltaTime);
         const { params: { acceleration, throttling } } = this;
 
         if (this.params.mas) {

@@ -15,13 +15,13 @@ export default class AI extends FiringUnit {
         const { hp, damage, speed } = this.params;
 
         this.params.bounty = hp / 4 + damage + speed * 300;
-        this.lastRun = Date.now();
+        this.lastRun = 0;
         this.lastRunTimeout = 1000;
         this.isRunning = false;
     }
 
-    update(deltaTime) {
-        FiringUnit.prototype.update.call(this, deltaTime);
+    update(time, deltaTime) {
+        super.update(time, deltaTime);
 
         if (this.isDead()) {
             return;
@@ -45,9 +45,9 @@ export default class AI extends FiringUnit {
 
         this.isRunning = (
             !isTargetNear
-            && (this.isRunning || this.isRunReleased())
-            && this.isAttackReleased()
-            && this.isHitReleased()
+            && (this.isRunning || this.isRunReleased(time))
+            && this.isAttackReleased(time)
+            && this.isHitReleased(time)
         );
 
         if (isTargetNear && target.isAlive()) {
@@ -57,12 +57,12 @@ export default class AI extends FiringUnit {
         this.animationState.isMovingForward = this.isRunning;
 
         if (this.isRunning) {
-            this.lastRun = Date.now();
+            this.lastRun = time;
             acceleration.add(this.getForward().multiplyScalar(speed));
         }
     }
 
-    isRunReleased(time = Date.now()) {
+    isRunReleased(time) {
         return time - this.lastRun > this.lastRunTimeout;
     }
 }

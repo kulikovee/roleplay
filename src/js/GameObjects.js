@@ -25,8 +25,8 @@ export default class GameObjectsService extends AutoBindMethods {
         this.scene = scene;
     }
 
-    update(deltaTime) {
-        this.gameObjects.forEach(gameObject => gameObject.update(deltaTime));
+    update(time, deltaTime) {
+        this.gameObjects.forEach(gameObject => gameObject.update(time, deltaTime));
     }
 
     /**
@@ -38,8 +38,10 @@ export default class GameObjectsService extends AutoBindMethods {
         }
 
         this.scene.intervals.setTimeout(() => {
-            if (attackingUnit.isAttackInterrupted()) {
-                attackingUnit.releaseAttack();
+            const gameTime = this.scene.intervals.getTimePassed();
+
+            if (attackingUnit.isAttackInterrupted(gameTime)) {
+                attackingUnit.releaseAttack(gameTime);
                 return;
             }
 
@@ -52,11 +54,9 @@ export default class GameObjectsService extends AutoBindMethods {
 
             attackedUnits.forEach((collisionGameObject) => {
                 collisionGameObject.damageTaken({
-                    params: {
-                        damage: attackingUnit.params.damage,
-                        parent: attackingUnit
-                    }
-                })
+                    damage: attackingUnit.params.damage,
+                    unit: attackingUnit,
+                }, gameTime)
             });
 
             // if (attackedUnits.length) {

@@ -121,10 +121,10 @@ export default class AnimatedGameObject extends GameObject {
         this.initAnimations(this.params.animationNames);
     }
 
-    update(deltaTime) {
-        GameObject.prototype.update.call(this);
+    update(time, deltaTime) {
+        super.update(time, deltaTime);
 
-        if (this.mixer) this.mixer.update(deltaTime);
+        if (this.mixer) this.mixer.update(deltaTime / 1000);
 
         if (this.params.complexAnimations) {
             this.updateComplexAnimations();

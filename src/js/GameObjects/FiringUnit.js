@@ -9,7 +9,7 @@ export default class FiringUnit extends Unit {
         });
 
         this.shouldFire = false;
-        this.latestFire = Date.now();
+        this.latestFire = 0;
     }
 
     getFireInitialPosition() {
@@ -20,8 +20,8 @@ export default class FiringUnit extends Unit {
         );
     }
 
-    update(deltaTime) {
-        Unit.prototype.update.call(this, deltaTime);
+    update(time, deltaTime) {
+        super.update(time, deltaTime);
 
         if (this.isDead()) {
             return;
@@ -29,18 +29,18 @@ export default class FiringUnit extends Unit {
 
         this.isFire = false;
 
-        if (this.shouldFire && this.params.fire && this.isFireReleased()) {
+        if (this.shouldFire && this.params.fire && this.isFireReleased(time)) {
             this.isFire = true;
             this.shouldFire = false;
-            this.latestFire = Date.now();
+            this.latestFire = time;
             this.params.fire();
         } else {
             this.shouldFire = false;
         }
     }
 
-    isFireReleased() {
-        return Date.now() - this.latestFire >= this.params.fireRate * 1000;
+    isFireReleased(time) {
+        return time - this.latestFire >= this.params.fireRate * 1000;
     }
 
     fire() {

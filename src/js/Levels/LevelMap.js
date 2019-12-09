@@ -11,7 +11,7 @@ export default class LevelMap extends AbstractLevel {
 
         this.id = 'map';
         this.shadowLightPosition = new THREE.Vector3(25, 50, 25);
-        this.lastBadGuyCreated = Date.now();
+        this.lastBadGuyCreated = 0;
         this.environment = this.createEnvironment();
         // this.skybox = this.createSkybox();
         this.ambientLight = this.createAmbientLight();
@@ -208,13 +208,14 @@ export default class LevelMap extends AbstractLevel {
             return;
         }
 
-        const level = player.getLevel(),
+        const time = this.scene.intervals.getTimePassed(),
+            level = player.getLevel(),
             badGuyTimeout = 5000 - level * 500,
-            isBadGuyReleased = Date.now() - this.lastBadGuyCreated >= badGuyTimeout,
+            isBadGuyReleased = time - this.lastBadGuyCreated >= badGuyTimeout,
             badGuysCount = this.getBadGuys().length;
 
         if (badGuysCount < level && isBadGuyReleased) {
-            this.lastBadGuyCreated = Date.now();
+            this.lastBadGuyCreated = time;
             this.scene.units.createAI({ position: this.respawnPoints[this.nextRespawnPoint++] });
 
             if (this.nextRespawnPoint > this.respawnPoints.length - 1) {
