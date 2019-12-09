@@ -1,3 +1,4 @@
+import * as THREE from 'three';
 import FiringUnit from './FiringUnit';
 
 export default class AI extends FiringUnit {
@@ -37,7 +38,9 @@ export default class AI extends FiringUnit {
         this.animationState.isRotateLeft = rotationToTargetRadians > object.rotation.y;
         this.animationState.isRotateRight = rotationToTargetRadians < object.rotation.y;
 
-        object.rotation.set(0, rotationToTargetRadians, 0);
+        const targetQuaternion = new THREE.Quaternion();
+        targetQuaternion.setFromEuler(object.rotation.clone().set(0, rotationToTargetRadians, 0));
+        object.quaternion.slerp(targetQuaternion, 0.1);
 
         // this.fire();
 

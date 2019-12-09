@@ -34,8 +34,6 @@ class App extends Component {
         this.setFps = this.setFps.bind(this);
         this.render = this.render.bind(this);
 
-        this.cursor = { x: 0, y: 0 };
-
         this.state = {
             // UI
             pause: true,
@@ -285,7 +283,7 @@ class App extends Component {
                             speed={speed}
                             damage={damage}
                         />
-                        {!isThirdPerson && cursor
+                        {!isThirdPerson
                             ? <Cursor scene={this.scene} setUpdate={callback => this.updateCursor = callback} />
                             : null
                         }

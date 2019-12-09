@@ -35,6 +35,13 @@ export default class LevelMap extends AbstractLevel {
             z: z + 4.03,
         }));
 
+        this.elevator = this.createElevator({
+            position: { x: -48, y: 100, z: 0 },
+            x: 4,
+            y: 1,
+            z: 4,
+        });
+
         this.nextRespawnPoint = 0;
 
         const color = 0x000000;
@@ -51,6 +58,7 @@ export default class LevelMap extends AbstractLevel {
         super.update();
 
         const player = this.scene.getPlayer();
+        this.elevator.update();
 
         this.shadowLight.position
             .copy(player.position)
@@ -77,7 +85,7 @@ export default class LevelMap extends AbstractLevel {
 
     stopLevel() {
         this.scene.remove(this.environment);
-        this.scene.remove(this.skybox);
+        // this.scene.remove(this.skybox);
         this.scene.remove(this.ambientLight);
         this.scene.remove(this.shadowLight);
         this.scene.gameObjectsService.removeAllExceptPlayer();
@@ -91,11 +99,11 @@ export default class LevelMap extends AbstractLevel {
             const { x, y, z } = position;
 
             if (
-                (y < 0.1 && Math.abs(x) < 50 && Math.abs(z) < 50) // flat
-                || (Math.abs(z) < 5 && x > -39 && x < -28 && y < 1.2) // table
-                || (Math.abs(z) < 0.8 && x > -41 && x < -40 && y < 0.7) // chair
-                || (Math.abs(z) > 0.8 && Math.abs(z) < 1.6 && x > -41 && x < -39 && y < 2) // chair
-                || (Math.abs(z) < 1.6 && x > -43 && x < -41 && y < 2) // chair
+                (y < 0.1 && Math.abs(x) < 50 && Math.abs(z) < 50) // floor 0
+                || (((y < (Math.abs(x) - 50) / 1.5) && Math.abs(x) > 50) || ((y < (Math.abs(z) - 50) / 1.5) && Math.abs(z) > 50)) // out of floor 0
+                || (y > 90 && y < 100 && (Math.abs(x) > 50 || Math.abs(z) > 50)) // floor 1
+                || (y > 190 && y < 200 && (Math.abs(x) > 50 || Math.abs(z) > 50)) // floor 2
+                || this.elevator.isCarrying(position) // elevator
             ) {
                 return true;
             }
@@ -125,7 +133,7 @@ export default class LevelMap extends AbstractLevel {
         ];
 
         this.scene.models.loadGLTF({
-            baseUrl: './assets/models/environment/hall/hall',
+            baseUrl: './assets/models/environment/enviroment',
             noScene: true,
             castShadow: false,
             callback: object => {
@@ -194,6 +202,66 @@ export default class LevelMap extends AbstractLevel {
         const skyMaterial = new THREE.MeshFaceMaterial(materialArray);
 
         return new THREE.Mesh(skyGeometry, skyMaterial);
+    }
+
+    createElevator(params) {
+        return {
+            currentFloor: 1,
+            target: 0,
+            direction: -1,
+            speed: 0.3,
+            standTime: 10,
+            standAt: this.scene.intervals.getTimePassed(),
+            isReleased: () => this.scene.intervals.getTimePassed() - this.elevator.standAt > this.elevator.standTime * 1000,
+            isCarrying: ({ x, y, z }) => (
+                Math.abs(x - this.elevator.object.position.x) < this.elevator.object.scale.x / 2
+                && Math.abs(z - this.elevator.object.position.z) < this.elevator.object.scale.z / 2
+                && y - this.elevator.object.position.y < this.elevator.object.scale.y / 2
+                // && (y + 1.7) - this.elevator.object.position.y > -this.elevator.object.scale.y / 2
+            ),
+            getFloor: () => (
+                this.elevator.direction > 0
+                    ? (
+                        (this.elevator.object.position.y >= 200 && 2)
+                        || (this.elevator.object.position.y >= 100 && 1)
+                        || 0
+                    )
+                    : (
+                        (this.elevator.object.position.y > 100 && 2)
+                        || (this.elevator.object.position.y > 0 && 1)
+                        || 0
+                    )
+            ),
+            update: () => {
+                if (this.elevator.isReleased()) {
+                    const floor = this.elevator.getFloor();
+
+                    if (floor !== this.elevator.currentFloor) {
+                        this.elevator.standAt = this.scene.intervals.getTimePassed();
+                        this.elevator.currentFloor = floor;
+
+                        if (floor === 2) {
+                            this.elevator.direction = -1;
+                        } else if (floor === 0) {
+                            this.elevator.direction = 1;
+                        }
+
+                        this.elevator.target = floor + this.elevator.direction;
+                    } else {
+                        const carryingUnits = this.scene.gameObjectsService.getUnits().filter(unit => (
+                            this.elevator.isCarrying(
+                                new THREE.Vector3(unit.position.x, unit.position.y - 0.1, unit.position.z)
+                            )
+                        ));
+
+                        const elevatorAcceleration = this.elevator.speed * this.elevator.direction;
+                        carryingUnits.forEach((unit) => { unit.position.y += elevatorAcceleration; });
+                        this.elevator.object.position.y += elevatorAcceleration;
+                    }
+                }
+            },
+            object: this.scene.models.createCube(params),
+        };
     }
 
     getBadGuys() {

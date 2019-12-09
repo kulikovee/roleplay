@@ -26,10 +26,6 @@ export default class Unit extends MovingGameObject {
     update(time, deltaTime) {
         super.update(time, deltaTime);
 
-        if (this.position.y < -150) {
-            this.die();
-        }
-
         if (this.isDead()) {
             return;
         }

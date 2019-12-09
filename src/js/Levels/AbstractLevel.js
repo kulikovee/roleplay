@@ -24,7 +24,7 @@ export default class AbstractLevel extends AutoBindMethods {
     }
 
     createAmbientLight() {
-        var ambientLight = new THREE.AmbientLight(0x888888);
+        const ambientLight = new THREE.AmbientLight(0x888888);
         ambientLight.castShadow = false;
         return ambientLight;
     }

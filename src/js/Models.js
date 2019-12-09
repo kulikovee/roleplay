@@ -36,9 +36,11 @@ export default class Models extends AutoBindMethods {
         }
 
         const cube = new THREE.Mesh(
-            new THREE.CubeGeometry(params.x || 1, params.y || 1, params.z || 1),
+            new THREE.CubeGeometry(1, 1, 1),
             new THREE.MeshLambertMaterial(materialParams)
         );
+
+        cube.scale.set(params.x || 1, params.y || 1, params.z || 1);
 
         if (params.position) {
             cube.position.set(

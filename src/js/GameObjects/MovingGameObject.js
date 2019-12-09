@@ -21,7 +21,7 @@ export default class MovingGameObject extends AnimatedGameObject {
         if (this.params.mas) {
             acceleration.y -= 0.01;
 
-            this.params.isGrounded = !this.checkWay(0, -0.1, 0);
+            this.params.isGrounded = !this.checkWay(0, -0.2, 0);
             this.animationState.isJump = !this.params.isGrounded;
         }
 

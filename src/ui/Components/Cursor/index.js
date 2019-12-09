@@ -5,6 +5,7 @@ class App extends Component {
         super(props);
         this.update = this.update.bind(this);
         this.state = { x: 0, y: 0 };
+        this.props.setUpdate(this.update);
     }
 
     update() {
