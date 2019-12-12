@@ -6,7 +6,80 @@ export default class Colliders extends AutoBindMethods {
         this.scene = scene;
         this.colliders = [];
         this.nextId = 0;
+        this.waypoints = this.getWaypoints();
+
+        const startedAt = Date.now();
+        this.buildPaths(this.waypoints);
+        const finishedAt = Date.now();
+        console.log(`Paths Building is finished (${((finishedAt - startedAt) / 1000).toFixed(2)}s)`, this.waypoints);
     }
+
+    buildPaths(waypoints) {
+        waypoints.forEach((waypointFrom) => {
+            const waypointFromId = waypointFrom.getId();
+
+            waypoints.forEach((waypointTo) => {
+                const waypointToId = waypointTo.getId();
+
+                if (waypointToId === waypointFromId || waypointFrom.pathsTo[waypointToId]) {
+                    return;
+                }
+
+                const connections = Object.values(waypointFrom.connections);
+                const paths = connections
+                    .map(c => this.findPaths(c, waypointTo, [waypointFromId]))
+                    .flat()
+                    .sort((a, b) => (
+                        a.distance > b.distance
+                            ? 1
+                            : (
+                                a.distance < b.distance
+                                    ? -1
+                                    : (a.ids.length < b.ids.length ? 1 : -1) // More points = More specified path
+                            )
+                    ));
+
+                if (paths.length) {
+                    const path = paths[0];
+                    waypointFrom.pathsTo[waypointToId] = path;
+
+                    const reversePath = { ...path, ids: [...path.ids].reverse() };
+                    waypointTo.pathsTo[waypointFromId] = reversePath;
+                }
+            });
+        });
+    }
+
+    findPaths(connection, waypointTo, visited = [], distance = 0) {
+        const waypointToId = waypointTo.getId();
+        const connectionWaypointId = connection.waypoint.getId();
+
+        if (connection.waypoint.pathsTo[waypointToId]) {
+            return connection.waypoint.pathsTo[waypointToId];
+        }
+
+        const totalDistance = distance + connection.distance;
+        const isNew = visited.indexOf(connectionWaypointId) === -1;
+        const ids = isNew ? [...visited, connectionWaypointId] : visited;
+        const isFinish = connectionWaypointId === waypointToId;
+        let result = [];
+
+        if (isNew) {
+            if (!isFinish) {
+                const connections = Object.values(connection.waypoint.connections);
+                const nodes = connections.map(c => this.findPaths(c, waypointTo, ids, totalDistance));
+                result = [...result, ...nodes.flat()];
+            } else {
+                result.push({
+                    ids,
+                    distance: totalDistance,
+                    success: isFinish,
+                });
+            }
+        }
+
+        return result;
+    };
 
     checkWay(position, gameObject) {
         for(let collider of this.colliders) {
@@ -16,6 +89,96 @@ export default class Colliders extends AutoBindMethods {
         }
 
         return true;
+    }
+
+    getWaypoints() {
+        function getWaypoints(points) {
+            // Update points to waypoints
+            points.forEach((w1) => {
+                w1.distanceTo = w2 => Math.sqrt(
+                    Math.pow(w2.z - w1.z, 2)
+                    + Math.pow(w2.y - w1.y, 2)
+                    + Math.pow(w2.x - w1.x, 2)
+                );
+                w1.getId = () => `${w1.x}, ${w1.y}, ${w1.z}`;
+                w1.connections = {};
+                w1.pathsTo = {};
+            });
+
+            // Create Graph connections
+            points.forEach((from) => {
+                var idFrom = from.getId();
+
+                points.forEach((to) => {
+                    var idTo = to.getId();
+
+                    if (idFrom === idTo || from.distanceTo(to) > 1) {
+                        return;
+                    }
+
+                    from.connections[idTo] = { waypoint: to, distance: from.distanceTo(to) };
+                });
+            });
+
+            return points;
+        }
+
+
+        return getWaypoints([
+            { x: 0, y: 0.25, z: 0 },
+            { x: 1, y: 0.25, z: 0 },
+            { x: 2, y: 0.25, z: 0 },
+            { x: 3, y: 0.25, z: 0 },
+            { x: 4, y: 0.25, z: 0 },
+            { x: 5, y: 0.25, z: 0 },
+            { x: 6, y: 0.25, z: 0 },
+            { x: 7, y: 0.25, z: 0 },
+            { x: 8, y: 0.25, z: 0 }, // Paths building took 0.00s
+
+
+            // Add 7 points
+            { x: 1, y: 0.25, z: 1 },
+            { x: 2, y: 0.25, z: 1 },
+            { x: 3, y: 0.25, z: 1 },
+            { x: 4, y: 0.25, z: 1 },
+            { x: 5, y: 0.25, z: 1 },
+            { x: 6, y: 0.25, z: 1 },
+            { x: 7, y: 0.25, z: 1 },
+            { x: 8, y: 0.25, z: 1 }, // Paths building took 0.07s
+
+            // Add 7 points
+            { x: 1, y: 0.25, z: -1 },
+            { x: 2, y: 0.25, z: -1 },
+            { x: 3, y: 0.25, z: -1 },
+            { x: 4, y: 0.25, z: -1 },
+            { x: 5, y: 0.25, z: -1 },
+            { x: 6, y: 0.25, z: -1 },
+            { x: 7, y: 0.25, z: -1 },
+            { x: 8, y: 0.25, z: -1 }, // Paths building took 2.53s
+
+
+            // Add a point
+            { x: 1, y: 0.25, z: -2 }, // Paths building took 2.82s
+
+            // Add a point
+            { x: 2, y: 0.25, z: -2 }, // Paths building took 3.82s
+
+            // Add a point
+            // { x: 3, y: 0.25, z: -2 }, // Paths building took 6.99s
+        ]);
+    }
+
+    getPathFromTo(from, to) {
+        const getClosestWaypoint = point => this.waypoints.reduce((closestWaypoint, waypoint) => (
+            waypoint.distanceTo(point) < closestWaypoint.distanceTo(point)
+                ? waypoint
+                : closestWaypoint
+        ));
+
+        const fromWaypoint = getClosestWaypoint(from);
+        const toWaypoint = getClosestWaypoint(to);
+
+        return fromWaypoint.pathsTo[toWaypoint.getId()];
     }
 
     resetColliders() {
