@@ -116,6 +116,7 @@ class App extends Component {
             update: this.update,
             updatePlayerParams: this.updatePlayerParams,
             clearHpBars: this.clearHpBars,
+            switchCamera: this.switchCamera,
             setFps: this.setFps,
         };
     }

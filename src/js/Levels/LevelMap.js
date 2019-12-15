@@ -213,12 +213,16 @@ export default class LevelMap extends AbstractLevel {
             standTime: 10,
             standAt: this.scene.intervals.getTimePassed(),
             isReleased: () => this.scene.intervals.getTimePassed() - this.elevator.standAt > this.elevator.standTime * 1000,
-            isCarrying: ({ x, y, z }) => (
-                Math.abs(x - this.elevator.object.position.x) < this.elevator.object.scale.x / 2
-                && Math.abs(z - this.elevator.object.position.z) < this.elevator.object.scale.z / 2
-                && y - this.elevator.object.position.y < this.elevator.object.scale.y / 2
-                // && (y + 1.7) - this.elevator.object.position.y > -this.elevator.object.scale.y / 2
-            ),
+            isCarrying: ({ x, y, z }) => {
+                const { object: { position, scale } } = this.elevator;
+
+                return (
+                    Math.abs(x - position.x) < scale.x / 2
+                    && Math.abs(z - position.z) < scale.z / 2
+                    && (y - position.y < scale.y / 2)
+                    // && (y + 1.7) - position.y > -scale.y / 2
+                );
+            },
             getFloor: () => (
                 this.elevator.direction > 0
                     ? (
@@ -248,11 +252,10 @@ export default class LevelMap extends AbstractLevel {
 
                         this.elevator.target = floor + this.elevator.direction;
                     } else {
-                        const carryingUnits = this.scene.gameObjectsService.getUnits().filter(unit => (
-                            this.elevator.isCarrying(
-                                new THREE.Vector3(unit.position.x, unit.position.y - 0.1, unit.position.z)
-                            )
-                        ));
+                        const getCarryingPosition = unit => ({ ...unit.position, y: unit.position.y - (this.elevator.direction > 0 ? 2 : 0.1) });
+                        const carryingUnits = this.scene.gameObjectsService.getUnits().filter(
+                            unit => (this.elevator.isCarrying(getCarryingPosition(unit))),
+                        );
 
                         const elevatorAcceleration = this.elevator.speed * this.elevator.direction;
                         carryingUnits.forEach((unit) => { unit.position.y += elevatorAcceleration; });

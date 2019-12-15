@@ -14,7 +14,7 @@ export default class Player extends FiringUnit {
             isFire: false,
             mas: 1,
             level: 1,
-            jumpTimeout: 0.1,
+            jumpTimeout: 0.9,
             ...params,
         });
 
