@@ -1,4 +1,5 @@
 import AutoBindMethods from './AutoBindMethods';
+import AStar from './Utils/AStar';
 
 export default class Colliders extends AutoBindMethods {
     constructor(scene) {
@@ -8,10 +9,37 @@ export default class Colliders extends AutoBindMethods {
         this.nextId = 0;
         this.waypoints = this.getWaypoints();
 
+        // const startedAt = Date.now();
+        // this.buildPaths(this.waypoints);
+        // const finishedAt = Date.now();
+        // console.log(`Paths Building is finished (${((finishedAt - startedAt) / 1000).toFixed(2)}s)`, this.waypoints);
+
+        console.log({ AStar });
+        this.test();
+    }
+
+    test() {
+        const length = 100;
+        const data = new Array(length).fill(null).map(
+            (n1, y) => new Array(length).fill(null).map(
+                (n2, x) => Number(
+                     y % 4 === 0
+                        ? (x === length - 1)
+                        : ((y - 3) % 4 === 0 || (y - 1) % 4 === 0|| x === 0)
+                )
+            )
+        );
+
+        data[1][1] = 1;
+        data[length - 2][length - 2] = 1;
+
+        let graph = new AStar.Graph(data, { diagonal: true });
+        let start = graph.grid[1][1];
+        let end = graph.grid[length - 2][length - 2];
         const startedAt = Date.now();
-        this.buildPaths(this.waypoints);
+        let result = AStar.astar.search(graph, start, end, { heuristic: AStar.astar.heuristics.diagonal });
         const finishedAt = Date.now();
-        console.log(`Paths Building is finished (${((finishedAt - startedAt) / 1000).toFixed(2)}s)`, this.waypoints);
+        console.log(`Paths Finding is finished (${((finishedAt - startedAt) / 1000).toFixed(2)}s)`, result, { graph, data });
     }
 
     buildPaths(waypoints) {
@@ -107,10 +135,10 @@ export default class Colliders extends AutoBindMethods {
 
             // Create Graph connections
             points.forEach((from) => {
-                var idFrom = from.getId();
+                let idFrom = from.getId();
 
                 points.forEach((to) => {
-                    var idTo = to.getId();
+                    let idTo = to.getId();
 
                     if (idFrom === idTo || from.distanceTo(to) > 1) {
                         return;
