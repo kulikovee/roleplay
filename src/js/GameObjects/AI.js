@@ -8,8 +8,11 @@ export default class AI extends FiringUnit {
             damage: 10,
             mas: 1,
             hp: 100,
-            fireRate: 1.5,
-            attackRate: 1.5,
+            fireTimeout: 1.5,
+            attackTimeout: 1.5,
+            jumpTimeout: 1.5,
+            startRunTimeout: 1,
+            nextPointUpdateTimeout: 0.1,
             ...params,
         });
 
@@ -17,9 +20,8 @@ export default class AI extends FiringUnit {
 
         this.params.bounty = hp / 4 + damage + speed * 300;
         this.lastRun = 0;
-        this.lastRunTimeout = 1000;
         this.lastNextPointUpdate = 0;
-        this.nextPointUpdateTimeout = 100;
+        this.lastJumpTimestamp = 0;
         this.isRunning = false;
     }
 
@@ -73,14 +75,28 @@ export default class AI extends FiringUnit {
         if (this.isRunning) {
             this.lastRun = time;
             acceleration.add(this.getForward().multiplyScalar(speed));
+
+            const isJump = (
+                time - this.lastJumpTimestamp > this.params.jumpTimeout * 1000
+                && target.position.y - this.position.y > 0.1
+                && target.position.y - this.position.y < 1
+                && this.params.isGrounded
+                && target.params.isGrounded
+            );
+
+            if (isJump) {
+                console.log('jump', this.params.isGrounded, target.params.isGrounded, target.position.y.toFixed(2), this.position.y.toFixed(2));
+                this.lastJumpTimestamp = time;
+                acceleration.y += 0.25;
+            }
         }
     }
 
     isRunReleased(time) {
-        return time - this.lastRun > this.lastRunTimeout;
+        return time - this.lastRun > this.params.startRunTimeout * 1000;
     }
 
     isNextPointUpdateReleased(time) {
-        return time - this.lastNextPointUpdate > this.nextPointUpdateTimeout;
+        return time - this.lastNextPointUpdate > this.params.nextPointUpdateTimeout * 1000;
     }
 }

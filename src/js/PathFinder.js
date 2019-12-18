@@ -6,12 +6,17 @@ export default class Colliders extends AutoBindMethods {
     constructor(scene) {
         super();
         this.scene = scene;
-        this.length = 100;
+        this.length = 150;
     }
 
     getNextPoint(from, to) {
-        let start = this.getFreeGraphPoint(this.toGraphCoords(from.x), this.toGraphCoords(from.z));
-        let end = this.getFreeGraphPoint(this.toGraphCoords(to.x), this.toGraphCoords(to.z));
+        const fromX = this.toGraphCoords(from.x),
+            fromY = this.toGraphCoords(from.z),
+            toX = this.toGraphCoords(to.x),
+            toY = this.toGraphCoords(to.z);
+
+        let start = this.getFreeGraphPoint(fromX, fromY);
+        let end = this.getFreeGraphPoint(toX, toY);
 
         let result = AStar.astar.search(
             this.graph,
@@ -57,7 +62,9 @@ export default class Colliders extends AutoBindMethods {
     }
 
     toGraphCoords(worldPosition) {
-        return Math.round(worldPosition + this.length / 2);
+        const value = Math.round(worldPosition + this.length / 2);
+
+        return Math.min(Math.max(value, 4), this.length - 5);
     }
 
     toWorldCoords(graphPosition) {
@@ -81,6 +88,10 @@ export default class Colliders extends AutoBindMethods {
                         && checkWay(getVector(x - 1, y))
                         && checkWay(getVector(x, y + 1))
                         && checkWay(getVector(x, y - 1))
+                        && checkWay(getVector(x + 1, y + 1))
+                        && checkWay(getVector(x + 1, y - 1))
+                        && checkWay(getVector(x - 1, y + 1))
+                        && checkWay(getVector(x - 1, y - 1))
                         && checkWay(getVector(x + 2, y))
                         && checkWay(getVector(x - 2, y))
                         && checkWay(getVector(x, y + 2))

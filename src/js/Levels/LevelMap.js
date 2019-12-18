@@ -95,14 +95,21 @@ export default class LevelMap extends AbstractLevel {
     }
 
     createLevelColliders() {
+        const isBetween = (v, min, max) => v > min && v < max;
+
         this.scene.colliders.addColliderFunction((position, gameObject) => {
             const { x, y, z } = position;
+            const absX = Math.abs(x);
+            const absZ = Math.abs(z);
 
             if (
-                (y < 0.1 && Math.abs(x) < 50 && Math.abs(z) < 50) // floor 0
-                || (((y < (Math.abs(x) - 50) / 1.5) && Math.abs(x) > 50) || ((y < (Math.abs(z) - 50) / 1.5) && Math.abs(z) > 50)) // out of floor 0
-                || (y > 90 && y < 100 && (Math.abs(x) > 50 || Math.abs(z) > 50)) // floor 1
-                || (y > 190 && y < 200 && (Math.abs(x) > 50 || Math.abs(z) > 50)) // floor 2
+                (y < 0.1 && absX < 50 && absZ < 50) // floor 0
+                || (((y < (absX - 50) / 1.5) && absX > 50) || ((y < (absZ - 50) / 1.5) && absZ > 50)) // out of floor 0
+                || (y < 90 && absX > 96 && absZ > 96) // out of floor 0
+                || (isBetween(y, 90, 100) && (absX > 50 || absZ > 50)) // floor 1
+                || (isBetween(y, 90, 190) && (absX > 135 || absZ > 135)) // out of floor 1
+                || (isBetween(y, 190, 200) && (absX > 50 || absZ > 50)) // floor 2
+                || (y > 190 && (absX > 133 || absZ > 133)) // out of floor 2
                 || this.elevator.isCarrying(position) // elevator
             ) {
                 return true;

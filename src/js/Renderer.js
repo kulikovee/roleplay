@@ -7,7 +7,7 @@ export default class Renderer extends AutoBindMethods {
      */
     constructor(container) {
         super();
-        this.renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'high-performance' });
+        this.renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         // this.renderer.setClearColor(0xffffff);
         this.renderer.autoClear = false;

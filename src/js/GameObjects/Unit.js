@@ -6,7 +6,7 @@ export default class Unit extends MovingGameObject {
             hp: 100,
             hpMax: params.hp || 100,
             damage: 10,
-            attackRate: 0.9,
+            attackTimeout: 0.9,
             hitTime: 0.3,
             attackDamageTimeout: 0.3,
             ...params,
@@ -48,12 +48,12 @@ export default class Unit extends MovingGameObject {
     }
 
     releaseAttack(time) {
-        this.latestAttackTimestamp = time - this.params.attackRate * 1000;
+        this.latestAttackTimestamp = time - this.params.attackTimeout * 1000;
         this.animationState.isAttack = false;
     }
 
     isAttackReleased(time) {
-        return (time - this.latestAttackTimestamp >= this.params.attackRate * 1000);
+        return (time - this.latestAttackTimestamp >= this.params.attackTimeout * 1000);
     }
 
     isAttackInterrupted(time) {
