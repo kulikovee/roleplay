@@ -18,6 +18,8 @@ export default class AI extends FiringUnit {
         this.params.bounty = hp / 4 + damage + speed * 300;
         this.lastRun = 0;
         this.lastRunTimeout = 1000;
+        this.lastNextPointUpdate = 0;
+        this.nextPointUpdateTimeout = 100;
         this.isRunning = false;
     }
 
@@ -28,11 +30,20 @@ export default class AI extends FiringUnit {
             return;
         }
 
-        const { object, target, acceleration, speed } = this.params;
+        const { object, target, acceleration, speed, getNextPoint } = this.params;
+
+        if (getNextPoint) {
+            if (this.isNextPointUpdateReleased(time)) {
+                this.lastNextPointUpdate = time;
+                this.nextPoint = getNextPoint(this.position, target.position);
+            }
+        } else {
+            this.nextPoint = target.position;
+        }
 
         const rotationToTargetRadians = Math.atan2(
-            target.position.x - object.position.x,
-            target.position.z - object.position.z
+            this.nextPoint.x - object.position.x,
+            this.nextPoint.z - object.position.z
         );
 
         this.animationState.isRotateLeft = rotationToTargetRadians > object.rotation.y;
@@ -67,5 +78,9 @@ export default class AI extends FiringUnit {
 
     isRunReleased(time) {
         return time - this.lastRun > this.lastRunTimeout;
+    }
+
+    isNextPointUpdateReleased(time) {
+        return time - this.lastNextPointUpdate > this.nextPointUpdateTimeout;
     }
 }

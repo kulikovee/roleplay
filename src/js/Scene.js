@@ -10,6 +10,7 @@ import LevelMap from './Levels/LevelMap';
 import Colliders from './Colliders';
 import Models from './Models';
 import Particles from './Particles';
+import PathFinder from './PathFinder';
 import Units from './Units';
 
 
@@ -25,6 +26,7 @@ export default class Scene extends AutoBindMethods {
         this.ui = ui;
         this.models = new Models(this);
         this.scene = new THREE.Scene();
+        this.pathFinder = new PathFinder(this);
         this.colliders = new Colliders(this);
         this.units = new Units(this);
         this.camera = new Camera(this);
