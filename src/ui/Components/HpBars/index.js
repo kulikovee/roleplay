@@ -5,17 +5,26 @@ class App extends Component {
     constructor(props) {
         super(props);
         this.update = this.update.bind(this);
+        this.clearHpBars = this.clearHpBars.bind(this);
+
         this.state = { hpBars: [] };
-        this.minDistance = 20;
         this.container = React.createRef();
 
         if (props.setUpdate) {
             props.setUpdate(this.update);
         }
+
+        if (props.setClearHpBars) {
+            props.setClearHpBars(this.clearHpBars);
+        }
     }
 
     shouldComponentUpdate () {
         return false;
+    }
+
+    clearHpBars() {
+        this.container.current.innerHTML = '';
     }
 
     update() {
@@ -63,6 +72,7 @@ class App extends Component {
                     element.children[0].style.width = `${Math.round(100 * unit.getHP() / unit.getMaxHP())}%`;
                 } else if (element) {
                     element.remove();
+                    unit.__unit_hp_bar = null;
                 }
             });
         }

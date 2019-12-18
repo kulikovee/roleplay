@@ -26,7 +26,7 @@ export default class Camera extends AutoBindMethods {
 
         const rotateY = this.rotateY + this.scene.input.look.vertical / 5000;
 
-        if (rotateY > -0.5 && rotateY < 0.5) {
+        if (rotateY > -0.75 && rotateY < 1.25) {
             this.rotateY = rotateY;
         }
 
@@ -82,7 +82,7 @@ export default class Camera extends AutoBindMethods {
         let distance = Math.min(deltaY, ...intersects.map(i => i.distance - this.distance * 0.5));
         this.distance += (distance - this.distance) / 2;
 
-        const playerForward = player.getForward().multiplyScalar(-1);
+        const playerForward = player.getForward().multiplyScalar(this.scene.input.look.back ? 1 : -1);
 
         playerForward.y = this.rotateY;
         this.camera.position.copy(playerHeadPosition.clone().add(playerForward));

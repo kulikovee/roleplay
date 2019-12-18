@@ -25,7 +25,6 @@ class App extends Component {
         this.getAPI = this.getAPI.bind(this);
         this.update = this.update.bind(this);
         this.setPause = this.setPause.bind(this);
-        this.clearHpBars = this.clearHpBars.bind(this);
         this.switchCamera = this.switchCamera.bind(this);
         this.buy = this.buy.bind(this);
         this.setRestartButtonVisible = this.setRestartButtonVisible.bind(this);
@@ -33,6 +32,7 @@ class App extends Component {
         this.updatePlayerParams = this.updatePlayerParams.bind(this);
         this.setFps = this.setFps.bind(this);
         this.render = this.render.bind(this);
+        this.clearHpBars = () => {};
 
         this.state = {
             // UI
@@ -116,6 +116,7 @@ class App extends Component {
             update: this.update,
             updatePlayerParams: this.updatePlayerParams,
             clearHpBars: this.clearHpBars,
+            switchCamera: this.switchCamera,
             setFps: this.setFps,
         };
     }
@@ -146,10 +147,6 @@ class App extends Component {
         } else {
             requestPointerLock();
         }
-    }
-
-    clearHpBars() {
-        this.hpBars = [];
     }
 
     switchCamera() {
@@ -236,7 +233,7 @@ class App extends Component {
     restartGame() {
         this.scene.level.restartLevel();
         this.scene.camera.update();
-        this.hpBars = [];
+        this.clearHpBars();
         this.setState({ showRestart: false });
     }
 
@@ -303,6 +300,7 @@ class App extends Component {
                             camera={this.scene.camera.camera}
                             toScreenPosition={this.scene.camera.toScreenPosition}
                             setUpdate={callback => this.updateHpBars = callback}
+                            setClearHpBars={callback => this.clearHpBars = callback}
                         />}
                     </div>
                 )}

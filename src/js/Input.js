@@ -1,20 +1,29 @@
 import AutoBindMethods from './AutoBindMethods';
 
 const KEYS = {
-  MOUSE_LEFT: 1,
-  MOUSE_RIGHT: 3,
-  SPACE: 32,
-  ENTER: 13,
-  ESC: 27,
-  C: 67,
-  W: 87,
-  A: 65,
-  S: 83,
-  D: 68,
-  ARROW_LEFT: 37,
-  ARROW_RIGHT: 39,
-  ARROW_UP: 38,
-  ARROW_DOWN: 40,
+    MOUSE_LEFT: 1,
+    MOUSE_RIGHT: 3,
+    SPACE: 32,
+    ENTER: 13,
+    ESC: 27,
+    C: 67,
+    W: 87,
+    A: 65,
+    S: 83,
+    D: 68,
+    X: 88,
+    Z: 90,
+    Q: 81,
+    E: 69,
+    R: 82,
+    F: 70,
+    V: 86,
+    1: 49,
+    2: 50,
+    ARROW_LEFT: 37,
+    ARROW_RIGHT: 39,
+    ARROW_UP: 38,
+    ARROW_DOWN: 40,
 };
 
 export default class Input extends AutoBindMethods {
@@ -27,7 +36,8 @@ export default class Input extends AutoBindMethods {
         this.attack2 = false;
         this.look = {
             vertical: 0,
-            horizontal: 0
+            horizontal: 0,
+            back: false,
         };
         this.isThirdPerson = true;
 
@@ -102,6 +112,7 @@ export default class Input extends AutoBindMethods {
                 case KEYS.S: case KEYS.ARROW_DOWN: this.vertical = -1; break;
                 case KEYS.A: case KEYS.ARROW_LEFT: this.horizontal = -1; break;
                 case KEYS.D: case KEYS.ARROW_RIGHT: this.horizontal = 1; break;
+                case KEYS.X: this.look.back = true; break;
                 case KEYS.SPACE: this.jump = 1; break;
             }
         });
@@ -123,6 +134,9 @@ export default class Input extends AutoBindMethods {
                 case KEYS.D:
                 case KEYS.ARROW_RIGHT:
                     if (this.horizontal === 1) { this.horizontal = 0; }
+                    break;
+                case KEYS.X:
+                    this.look.back = false;
                     break;
                 case KEYS.SPACE:
                     this.jump = 0;
