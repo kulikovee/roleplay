@@ -18,46 +18,47 @@ export default class Colliders extends AutoBindMethods {
         let start = this.getFreeGraphPoint(fromX, fromY);
         let end = this.getFreeGraphPoint(toX, toY);
 
-        let result = AStar.astar.search(
-            this.graph,
-            start,
-            end,
-            { heuristic: AStar.astar.heuristics.diagonal }
-        );
+        if (start && end) {
+            let result = AStar.astar.search(
+                this.graph,
+                start,
+                end,
+                { heuristic: AStar.astar.heuristics.diagonal }
+            );
 
-        const nextGraphPoint = result.length > 1 ? result[1] : null;
+            const nextGraphPoint = result.length > 1 ? result[1] : null;
 
-        return nextGraphPoint
-            ? new THREE.Vector3(
-                this.toWorldCoords(nextGraphPoint.x),
-                to.y,
-                this.toWorldCoords(nextGraphPoint.y)
-            )
-            : to;
+            if (nextGraphPoint) {
+                return new THREE.Vector3(
+                    this.toWorldCoords(nextGraphPoint.x),
+                    to.y,
+                    this.toWorldCoords(nextGraphPoint.y)
+                );
+            }
+        }
+
+        return to;
     }
 
     getFreeGraphPoint(x, y) {
         const grid = this.graph.grid;
 
+        const getWeight = (x, y) => grid[x] && grid[x][y] && grid[x][y].weight;
+
+        const getNearFreePoint = range => (
+            (getWeight(x + range, y) && grid[x + range][y])
+            || (getWeight(x - range, y) && grid[x - range][y])
+            || (getWeight(x, y + range) && grid[x][y + range])
+            || (getWeight(x, y - range) && grid[x][y - range])
+        );
+
         return (
-            (grid[x][y].weight && grid[x][y])
-            || (grid[x + 1][y].weight && grid[x + 1][y])
-            || (grid[x - 1][y].weight && grid[x - 1][y])
-            || (grid[x][y + 1].weight && grid[x][y + 1])
-            || (grid[x][y - 1].weight && grid[x][y - 1])
-            || (grid[x + 2][y].weight && grid[x + 2][y])
-            || (grid[x - 2][y].weight && grid[x - 2][y])
-            || (grid[x][y + 2].weight && grid[x][y + 2])
-            || (grid[x][y - 2].weight && grid[x][y - 2])
-            || (grid[x + 3][y].weight && grid[x + 3][y])
-            || (grid[x - 3][y].weight && grid[x - 3][y])
-            || (grid[x][y + 3].weight && grid[x][y + 3])
-            || (grid[x][y - 3].weight && grid[x][y - 3])
-            || (grid[x + 4][y].weight && grid[x + 4][y])
-            || (grid[x - 4][y].weight && grid[x - 4][y])
-            || (grid[x][y + 4].weight && grid[x][y + 4])
-            || (grid[x][y - 4].weight && grid[x][y - 4])
-            || grid[x][y]
+            (getWeight(grid[x][y]) && grid[x][y])
+            || getNearFreePoint(1)
+            || getNearFreePoint(2)
+            || getNearFreePoint(3)
+            || getNearFreePoint(4)
+            || null
         );
     }
 

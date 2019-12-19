@@ -77,15 +77,14 @@ export default class AI extends FiringUnit {
             acceleration.add(this.getForward().multiplyScalar(speed));
 
             const isJump = (
-                time - this.lastJumpTimestamp > this.params.jumpTimeout * 1000
-                && target.position.y - this.position.y > 0.1
-                && target.position.y - this.position.y < 1
-                && this.params.isGrounded
-                && target.params.isGrounded
+                this.params.isGrounded
+                && (acceleration.x || acceleration.z)
+                && time - this.lastJumpTimestamp > this.params.jumpTimeout * 1000
+                && !this.checkWayForJump(0.1)
+                && this.checkWayForJump(0.75)
             );
 
             if (isJump) {
-                console.log('jump', this.params.isGrounded, target.params.isGrounded, target.position.y.toFixed(2), this.position.y.toFixed(2));
                 this.lastJumpTimestamp = time;
                 acceleration.y += 0.25;
             }
@@ -98,5 +97,10 @@ export default class AI extends FiringUnit {
 
     isNextPointUpdateReleased(time) {
         return time - this.lastNextPointUpdate > this.params.nextPointUpdateTimeout * 1000;
+    }
+
+    checkWayForJump(jumpHeight) {
+        const { params: { acceleration: { x: dx, y: dy, z: dz } } } = this;
+        return this.checkWay(dx, dy + jumpHeight, dz);
     }
 }
