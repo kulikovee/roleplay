@@ -115,10 +115,10 @@ export default class LevelMap extends AbstractLevel {
                 return true;
             }
 
-            const badGuys = this.getBadGuys();
+            const units = this.scene.units.getAliveUnits();
 
-            for(let badGuy of badGuys) {
-                if (badGuy !== gameObject && badGuy.position.distanceTo(position) < 1) {
+            for(let unit of units) {
+                if (unit !== gameObject && unit.getCollider(position)) {
                     return true;
                 }
             }

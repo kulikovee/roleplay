@@ -47,6 +47,19 @@ export default class Unit extends MovingGameObject {
         }
     }
 
+    getCollider(position) {
+        const diffY = position.y - this.position.y;
+
+        return (
+            Math.sqrt(
+                Math.pow(position.x - this.position.x, 2)
+                + Math.pow(position.z - this.position.z, 2)
+            ) < 1
+            && diffY >= 0
+            && diffY < 1.7
+        );
+    }
+
     releaseAttack(time) {
         this.latestAttackTimestamp = time - this.params.attackTimeout * 1000;
         this.animationState.isAttack = false;
