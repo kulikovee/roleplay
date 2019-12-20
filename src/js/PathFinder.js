@@ -43,11 +43,9 @@ export default class Colliders extends AutoBindMethods {
                 { heuristic: AStar.astar.heuristics.diagonal }
             );
 
-            if (result.length < 2) {
-                return null;
-            }
+            const nextGraphPoint = result[2] || result[1];
 
-            const nextGraphPoint = result.length > 2 ? result[2] : (result.length > 1 ? result[1] : null);
+            console.log(result);
 
             if (nextGraphPoint) {
                 const nextWorldPoint = new THREE.Vector3(
@@ -57,6 +55,8 @@ export default class Colliders extends AutoBindMethods {
                 );
 
                 return nextWorldPoint;
+            } else {
+                return null;
             }
         }
 

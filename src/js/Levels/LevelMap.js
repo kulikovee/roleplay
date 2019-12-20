@@ -69,12 +69,12 @@ const Areas = {
         getWorldWaypointByXY: (x, y) => ({ x: area.waypointXToWorldX(x), y: 100.2, z: area.waypointYToWorldZ(y) }),
         getWaypointPortals: () => [
             {
-                from: { x: area.worldXToWaypointX(-49), y: area.worldZToWaypointY(0) },
-                to: { x: area.worldXToWaypointX(-49), y: area.worldZToWaypointY(0), areaId: 'FLOOR_0' }
+                from: { x: area.worldXToWaypointX(-48), y: area.worldZToWaypointY(0) },
+                to: { x: area.worldXToWaypointX(-48), y: area.worldZToWaypointY(0), areaId: 'FLOOR_0' }
             },
             {
-                from: { x: area.worldXToWaypointX(-49), y: area.worldZToWaypointY(0) },
-                to: { x: area.worldXToWaypointX(-49), y: area.worldZToWaypointY(0), areaId: 'FLOOR_2' }
+                from: { x: area.worldXToWaypointX(-48), y: area.worldZToWaypointY(0) },
+                to: { x: area.worldXToWaypointX(-48), y: area.worldZToWaypointY(0), areaId: 'FLOOR_2' }
             }
         ],
     })),
@@ -85,12 +85,12 @@ const Areas = {
         getWorldWaypointByXY: (x, y) => ({ x: area.waypointXToWorldX(x), y: 200.2, z: area.waypointYToWorldZ(y) }),
         getWaypointPortals: () => [
             {
-                from: { x: area.worldXToWaypointX(-49), y: area.worldZToWaypointY(0) },
-                to: { x: area.worldXToWaypointX(-49), y: area.worldZToWaypointY(0), areaId: 'FLOOR_0' }
+                from: { x: area.worldXToWaypointX(-48), y: area.worldZToWaypointY(0) },
+                to: { x: area.worldXToWaypointX(-48), y: area.worldZToWaypointY(0), areaId: 'FLOOR_0' }
             },
             {
-                from: { x: area.worldXToWaypointX(-49), y: area.worldZToWaypointY(0) },
-                to: { x: area.worldXToWaypointX(-49), y: area.worldZToWaypointY(0), areaId: 'FLOOR_1' }
+                from: { x: area.worldXToWaypointX(-48), y: area.worldZToWaypointY(0) },
+                to: { x: area.worldXToWaypointX(-48), y: area.worldZToWaypointY(0), areaId: 'FLOOR_1' }
             }
         ],
     })),
@@ -427,7 +427,7 @@ export default class LevelMap extends AbstractLevel {
                 (x, y) => {
                     if (
                         // Elevator
-                        Math.abs(area.waypointXToWorldX(x) + 48) <= 4
+                        Math.abs(area.waypointXToWorldX(x) + 48) <= 5
                         && Math.abs(area.waypointYToWorldZ(y)) <= 1
                     ) {
                         return 1;
@@ -436,8 +436,16 @@ export default class LevelMap extends AbstractLevel {
                     if (
                         area.id !== 'FLOOR_0' && (
                             // Center hole
-                            Math.abs(area.waypointXToWorldX(x)) < 50
-                            && Math.abs(area.waypointYToWorldZ(y)) < 50
+                            (
+                                Math.abs(area.waypointXToWorldX(x)) < 51
+                                && Math.abs(area.waypointYToWorldZ(y)) < 51
+                            )
+                            || (
+                                Math.abs(area.waypointXToWorldX(x)) <= 51
+                                && Math.abs(area.waypointYToWorldZ(y)) <= 51
+                                && Math.abs(area.waypointXToWorldX(x)) >= 50
+                                && Math.abs(area.waypointYToWorldZ(y)) >= 50
+                            )
                         )
                     ) {
                         return 0;
