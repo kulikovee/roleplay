@@ -6,7 +6,7 @@ import Connection from './Connection';
 import GameObjectsService from './GameObjects';
 import Input from './Input';
 import Intervals from './Intervals';
-import LevelMap from './Levels/LevelMap';
+import Level from './Levels/DreamCity';
 import Colliders from './Colliders';
 import Models from './Models';
 import Particles from './Particles';
@@ -40,7 +40,7 @@ export default class Scene extends AutoBindMethods {
         this.gameObjectsService = new GameObjectsService(this);
         this.particles = new Particles(this);
         this.connection = new Connection(this, 'gohtml.ru');
-        this.level = new LevelMap(this);
+        this.level = new Level(this);
 
         this.intervals.setInterval(() => {
             this.ui.setFps(this.renderer.fps, this.renderer.targetFps);

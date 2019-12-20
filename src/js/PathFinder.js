@@ -45,8 +45,6 @@ export default class Colliders extends AutoBindMethods {
 
             const nextGraphPoint = result[2] || result[1];
 
-            console.log(result);
-
             if (nextGraphPoint) {
                 const nextWorldPoint = new THREE.Vector3(
                     area.waypointXToWorldX(nextGraphPoint.x),
