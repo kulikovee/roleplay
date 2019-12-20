@@ -411,9 +411,9 @@ export default class LevelMap extends AbstractLevel {
         const areas = Object.values(Areas);
 
         const generateWaypoints = (width, height, map) => {
-            return new Array(height).fill(null).map(
-                (null1, y) => new Array(width).fill(null).map(
-                    (null2, x) => map(x, y),
+            return new Array(width).fill(null).map(
+                (null1, x) => new Array(height).fill(null).map(
+                    (null2, y) => map(x, y),
                 ),
             );
         };
@@ -427,8 +427,8 @@ export default class LevelMap extends AbstractLevel {
                 (x, y) => {
                     if (
                         // Elevator
-                        Math.abs(area.waypointYToWorldZ(y)) < 1
-                        && Math.abs(area.waypointXToWorldX(x) + 48) <= 4
+                        Math.abs(area.waypointXToWorldX(x) + 48) <= 4
+                        && Math.abs(area.waypointYToWorldZ(y)) <= 1
                     ) {
                         return 1;
                     }
@@ -437,7 +437,7 @@ export default class LevelMap extends AbstractLevel {
                         area.id !== 'FLOOR_0' && (
                             // Center hole
                             Math.abs(area.waypointXToWorldX(x)) < 50
-                            || Math.abs(area.waypointYToWorldZ(y)) < 50
+                            && Math.abs(area.waypointYToWorldZ(y)) < 50
                         )
                     ) {
                         return 0;
@@ -447,8 +447,8 @@ export default class LevelMap extends AbstractLevel {
                         area.id === 'FLOOR_0'
                         && (
                             // Floor out
-                            Math.abs(area.waypointXToWorldX(x)) >= 45
-                            || Math.abs(area.waypointYToWorldZ(y)) >= 45
+                            Math.abs(area.waypointXToWorldX(x)) >= 49
+                            || Math.abs(area.waypointYToWorldZ(y)) >= 49
                         )
                     ) {
                         return 1;

@@ -35,8 +35,6 @@ export default class Colliders extends AutoBindMethods {
         let start = this.getFreeGraphPoint(area.graph, fromX, fromY);
         let end = this.getFreeGraphPoint(area.graph, toX, toY);
 
-        console.log({ area, fromX, fromY, toX, toY, start, end, portal });
-
         if (start && end) {
             let result = AStar.astar.search(
                 area.graph,
@@ -57,8 +55,6 @@ export default class Colliders extends AutoBindMethods {
                     to.y,
                     area.waypointYToWorldZ(nextGraphPoint.y)
                 );
-
-                console.log({ result, nextGraphPoint, nextWorldPoint });
 
                 return nextWorldPoint;
             }
