@@ -6,42 +6,69 @@ export default class Colliders extends AutoBindMethods {
     constructor(scene) {
         super();
         this.scene = scene;
-        this.length = 150;
     }
 
     getNextPoint(from, to) {
-        const fromX = this.toGraphCoords(from.x),
-            fromY = this.toGraphCoords(from.z),
-            toX = this.toGraphCoords(to.x),
-            toY = this.toGraphCoords(to.z);
+        const area = this.getAreaByPosition(from),
+            fromX = area.worldXToWaypointX(from.x),
+            fromY = area.worldZToWaypointY(from.z),
+            areaTo = this.getAreaByPosition(to);
 
-        let start = this.getFreeGraphPoint(fromX, fromY);
-        let end = this.getFreeGraphPoint(toX, toY);
+        let toX;
+        let toY;
+        let portal;
+
+        if (area.id === areaTo.id) {
+            toX = area.worldXToWaypointX(to.x);
+            toY = area.worldZToWaypointY(to.z);
+        } else {
+            portal = area.getWaypointPortals().find(portal => portal.to.areaId === areaTo.id);
+
+            if (portal) {
+                toX = portal.from.x;
+                toY = portal.from.y;
+            } else {
+                return to;
+            }
+        }
+
+        let start = this.getFreeGraphPoint(area.graph, fromX, fromY);
+        let end = this.getFreeGraphPoint(area.graph, toX, toY);
+
+        console.log({ area, fromX, fromY, toX, toY, start, end, portal });
 
         if (start && end) {
             let result = AStar.astar.search(
-                this.graph,
+                area.graph,
                 start,
                 end,
                 { heuristic: AStar.astar.heuristics.diagonal }
             );
 
-            const nextGraphPoint = result.length > 1 ? result[1] : null;
+            if (result.length < 2) {
+                return null;
+            }
+
+            const nextGraphPoint = result.length > 2 ? result[2] : (result.length > 1 ? result[1] : null);
 
             if (nextGraphPoint) {
-                return new THREE.Vector3(
-                    this.toWorldCoords(nextGraphPoint.x),
+                const nextWorldPoint = new THREE.Vector3(
+                    area.waypointXToWorldX(nextGraphPoint.x),
                     to.y,
-                    this.toWorldCoords(nextGraphPoint.y)
+                    area.waypointYToWorldZ(nextGraphPoint.y)
                 );
+
+                console.log({ result, nextGraphPoint, nextWorldPoint });
+
+                return nextWorldPoint;
             }
         }
 
         return to;
     }
 
-    getFreeGraphPoint(x, y) {
-        const grid = this.graph.grid;
+    getFreeGraphPoint(graph, x, y) {
+        const grid = graph.grid;
 
         const getWeight = (x, y) => grid[x] && grid[x][y] && grid[x][y].weight;
 
@@ -62,44 +89,16 @@ export default class Colliders extends AutoBindMethods {
         );
     }
 
-    toGraphCoords(worldPosition) {
-        const value = Math.round(worldPosition + this.length / 2);
-
-        return Math.min(Math.max(value, 4), this.length - 5);
+    rebuildAreas() {
+        if (this.scene.level) {
+            this.areas = this.scene.level.getAreas().map(area => ({
+                ...area,
+                graph: new AStar.Graph(area.getWaypoints(), { diagonal: true }),
+            }));
+        }
     }
 
-    toWorldCoords(graphPosition) {
-        return graphPosition - this.length / 2;
-    }
-
-    rebuildGraph() {
-        this.graph = new AStar.Graph(this.getWaypoints(), { diagonal: true });
-    }
-
-    getWaypoints(length = this.length) {
-        const checkWay = this.scene.colliders.checkWay;
-        const getVector = (x, z) => new THREE.Vector3(this.toWorldCoords(x), 0.1, this.toWorldCoords(z));
-
-        return new Array(length).fill(null).map(
-            (n1, y) => new Array(length).fill(null).map(
-                (n2, x) => (
-                    Number(
-                        checkWay(getVector(x, y))
-                        && checkWay(getVector(x + 1, y))
-                        && checkWay(getVector(x - 1, y))
-                        && checkWay(getVector(x, y + 1))
-                        && checkWay(getVector(x, y - 1))
-                        && checkWay(getVector(x + 1, y + 1))
-                        && checkWay(getVector(x + 1, y - 1))
-                        && checkWay(getVector(x - 1, y + 1))
-                        && checkWay(getVector(x - 1, y - 1))
-                        && checkWay(getVector(x + 2, y))
-                        && checkWay(getVector(x - 2, y))
-                        && checkWay(getVector(x, y + 2))
-                        && checkWay(getVector(x, y - 2))
-                    )
-                )
-            )
-        );
+    getAreaByPosition(position) {
+        return this.areas.find(area => area.includesPosition(position));
     }
 }

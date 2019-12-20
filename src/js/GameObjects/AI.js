@@ -43,24 +43,26 @@ export default class AI extends FiringUnit {
             this.nextPoint = target.position;
         }
 
-        const rotationToTargetRadians = Math.atan2(
-            this.nextPoint.x - object.position.x,
-            this.nextPoint.z - object.position.z
-        );
+        if (this.nextPoint) {
+            const rotationToTargetRadians = Math.atan2(
+                this.nextPoint.x - object.position.x,
+                this.nextPoint.z - object.position.z
+            );
 
-        this.animationState.isRotateLeft = rotationToTargetRadians > object.rotation.y;
-        this.animationState.isRotateRight = rotationToTargetRadians < object.rotation.y;
+            this.animationState.isRotateLeft = rotationToTargetRadians > object.rotation.y;
+            this.animationState.isRotateRight = rotationToTargetRadians < object.rotation.y;
 
-        const targetQuaternion = new THREE.Quaternion();
-        targetQuaternion.setFromEuler(object.rotation.clone().set(0, rotationToTargetRadians, 0));
-        object.quaternion.slerp(targetQuaternion, 0.1);
-
-        // this.fire();
+            const targetQuaternion = new THREE.Quaternion();
+            targetQuaternion.setFromEuler(object.rotation.clone().set(0, rotationToTargetRadians, 0));
+            object.quaternion.slerp(targetQuaternion, 0.1);
+        }
 
         const isTargetNear = object.position.distanceTo(target.position) < 1.75;
+        const isNextPointNear = !this.nextPoint;
 
         this.isRunning = (
             !isTargetNear
+            && !isNextPointNear
             && (this.isRunning || this.isRunReleased(time))
             && this.isAttackReleased(time)
             && this.isHitReleased(time)
@@ -70,7 +72,7 @@ export default class AI extends FiringUnit {
             this.attack();
         }
 
-        this.animationState.isMovingForward = this.isRunning;
+        this.animationState.isMovingForward = this.isRunning && this.isAcceleration();
 
         if (this.isRunning) {
             this.lastRun = time;
@@ -81,7 +83,7 @@ export default class AI extends FiringUnit {
                 && (acceleration.x || acceleration.z)
                 && time - this.lastJumpTimestamp > this.params.jumpTimeout * 1000
                 && !this.checkWayForJump(0.1)
-                && this.checkWayForJump(0.75)
+                && this.checkWayForJump(1.5)
             );
 
             if (isJump) {
@@ -89,6 +91,14 @@ export default class AI extends FiringUnit {
                 acceleration.y += 0.25;
             }
         }
+    }
+
+    isAcceleration() {
+        return (
+            Math.abs(this.params.acceleration.x)
+            + Math.abs(this.params.acceleration.y)
+            + Math.abs(this.params.acceleration.z)
+        ) > 0.01;
     }
 
     isRunReleased(time) {

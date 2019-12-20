@@ -113,6 +113,7 @@ export default class Input extends AutoBindMethods {
                 case KEYS.A: case KEYS.ARROW_LEFT: this.horizontal = -1; break;
                 case KEYS.D: case KEYS.ARROW_RIGHT: this.horizontal = 1; break;
                 case KEYS.X: this.look.back = true; break;
+                case KEYS.F: this.look.cinematic = true; break;
                 case KEYS.SPACE: this.jump = 1; break;
             }
         });
@@ -137,6 +138,9 @@ export default class Input extends AutoBindMethods {
                     break;
                 case KEYS.X:
                     this.look.back = false;
+                    break;
+                case KEYS.F:
+                    this.look.cinematic = false;
                     break;
                 case KEYS.SPACE:
                     this.jump = 0;

@@ -1,6 +1,100 @@
 import * as THREE from 'three';
 import AbstractLevel from './AbstractLevel';
-import { AI } from '../GameObjects';
+import { AI, Fire } from '../GameObjects';
+
+const AreaSizes = {
+    FLOOR_0: {
+        width: 150,
+        height: 150,
+    },
+    FLOOR_1: {
+        width: 270,
+        height: 270,
+    },
+    FLOOR_2: {
+        width: 270,
+        height: 270,
+    }
+};
+
+const buildArea = (areaId, map) => {
+    const { width, height } = AreaSizes[areaId];
+
+    const waypointXToWorldX = position => position - width / 2;
+    const waypointYToWorldZ = position => position - height / 2;
+
+    const worldXToWaypointX = (position) => {
+        const graphX = Math.round(position + width / 2);
+        return Math.min(Math.max(graphX, 4), width - 5);
+    };
+
+    const worldZToWaypointY = (position) => {
+        const graphY = Math.round(position + height / 2);
+        return Math.min(Math.max(graphY, 4), height - 5);
+    };
+
+    const area = {
+        id: areaId,
+        waypointXToWorldX,
+        waypointYToWorldZ,
+        worldXToWaypointX,
+        worldZToWaypointY,
+        width,
+        height,
+    };
+
+    return map(area);
+};
+
+const Areas = {
+    FLOOR_0: buildArea('FLOOR_0', area => ({
+        ...area,
+        includesPosition: position => position.y < 100,
+        getWorldWaypointByXY: (x, y) => ({ x: area.waypointXToWorldX(x), y: 0.2, z: area.waypointYToWorldZ(y) }),
+        getWaypointPortals: () => [
+            {
+                from: { x: area.worldXToWaypointX(-49), y: area.worldZToWaypointY(0) },
+                to: { x: area.worldXToWaypointX(-49), y: area.worldZToWaypointY(0), areaId: 'FLOOR_1' }
+            },
+            {
+                from: { x: area.worldXToWaypointX(-49), y: area.worldZToWaypointY(0) },
+                to: { x: area.worldXToWaypointX(-49), y: area.worldZToWaypointY(0), areaId: 'FLOOR_2' }
+            }
+        ],
+    })),
+
+    FLOOR_1: buildArea('FLOOR_1', area => ({
+        ...area,
+        includesPosition: position => position.y < 200,
+        getWorldWaypointByXY: (x, y) => ({ x: area.waypointXToWorldX(x), y: 100.2, z: area.waypointYToWorldZ(y) }),
+        getWaypointPortals: () => [
+            {
+                from: { x: area.worldXToWaypointX(-49), y: area.worldZToWaypointY(0) },
+                to: { x: area.worldXToWaypointX(-49), y: area.worldZToWaypointY(0), areaId: 'FLOOR_0' }
+            },
+            {
+                from: { x: area.worldXToWaypointX(-49), y: area.worldZToWaypointY(0) },
+                to: { x: area.worldXToWaypointX(-49), y: area.worldZToWaypointY(0), areaId: 'FLOOR_2' }
+            }
+        ],
+    })),
+
+    FLOOR_2: buildArea('FLOOR_2', area => ({
+        ...area,
+        includesPosition: position => position.y >= 200,
+        getWorldWaypointByXY: (x, y) => ({ x: area.waypointXToWorldX(x), y: 200.2, z: area.waypointYToWorldZ(y) }),
+        getWaypointPortals: () => [
+            {
+                from: { x: area.worldXToWaypointX(-49), y: area.worldZToWaypointY(0) },
+                to: { x: area.worldXToWaypointX(-49), y: area.worldZToWaypointY(0), areaId: 'FLOOR_0' }
+            },
+            {
+                from: { x: area.worldXToWaypointX(-49), y: area.worldZToWaypointY(0) },
+                to: { x: area.worldXToWaypointX(-49), y: area.worldZToWaypointY(0), areaId: 'FLOOR_1' }
+            }
+        ],
+    })),
+};
 
 export default class LevelMap extends AbstractLevel {
     /**
@@ -10,6 +104,7 @@ export default class LevelMap extends AbstractLevel {
         super(scene);
 
         this.id = 'map';
+
         this.shadowLightPosition = new THREE.Vector3(25, 50, 25);
         this.lastBadGuyCreated = 0;
         this.environment = this.createEnvironment();
@@ -58,14 +153,17 @@ export default class LevelMap extends AbstractLevel {
         super.update();
 
         const player = this.scene.getPlayer();
-        this.elevator.update();
 
-        this.shadowLight.position
-            .copy(player.position)
-            .add(this.shadowLightPosition);
+        if (player) {
+            this.elevator.update();
 
-        if (this.shadowLight.target !== player.object) {
-            this.shadowLight.target = player.object;
+            this.shadowLight.position
+                .copy(player.position)
+                .add(this.shadowLightPosition);
+
+            if (this.shadowLight.target !== player.object) {
+                this.shadowLight.target = player.object;
+            }
         }
     }
 
@@ -118,7 +216,14 @@ export default class LevelMap extends AbstractLevel {
             const units = this.scene.units.getAliveUnits();
 
             for(let unit of units) {
-                if (unit !== gameObject && unit.getCollider(position)) {
+                if (
+                    unit !== gameObject
+                    && (
+                        !(gameObject instanceof Fire)
+                        || gameObject.params.parent !== unit
+                    )
+                    && unit.getCollider(position)
+                ) {
                     return true;
                 }
             }
@@ -300,5 +405,84 @@ export default class LevelMap extends AbstractLevel {
                 this.nextRespawnPoint = 0;
             }
         }
+    }
+
+    getAreas() {
+        const areas = Object.values(Areas);
+
+        const generateWaypoints = (width, height, map) => {
+            return new Array(height).fill(null).map(
+                (null1, y) => new Array(width).fill(null).map(
+                    (null2, x) => map(x, y),
+                ),
+            );
+        };
+
+        return areas.map((area) => {
+            const result = { ...area };
+
+            result.getWaypoints = () => generateWaypoints(
+                area.width,
+                area.height,
+                (x, y) => {
+                    if (
+                        // Elevator
+                        Math.abs(area.waypointYToWorldZ(y)) < 1
+                        && Math.abs(area.waypointXToWorldX(x) + 48) <= 4
+                    ) {
+                        return 1;
+                    }
+
+                    if (
+                        area.id !== 'FLOOR_0' && (
+                            // Center hole
+                            Math.abs(area.waypointXToWorldX(x)) < 50
+                            || Math.abs(area.waypointYToWorldZ(y)) < 50
+                        )
+                    ) {
+                        return 0;
+                    }
+
+                    if (
+                        area.id === 'FLOOR_0'
+                        && (
+                            // Floor out
+                            Math.abs(area.waypointXToWorldX(x)) >= 45
+                            || Math.abs(area.waypointYToWorldZ(y)) >= 45
+                        )
+                    ) {
+                        return 1;
+                    }
+
+                    return Number(this.checkWayForWaypoint(area.getWorldWaypointByXY(x, y)))
+                },
+            );
+
+            return result;
+        });
+    }
+
+    checkWayForWaypoint({ x, y, z }) {
+        const checkWay = this.scene.colliders.checkWay;
+        const checkNear = (range, diagonal) => (
+            checkWay(new THREE.Vector3(x + range, y, z))
+            && (checkWay(new THREE.Vector3(x - range, y, z)))
+            && (checkWay(new THREE.Vector3(x, y, z + range)))
+            && (checkWay(new THREE.Vector3(x, y, z - range)))
+            && (
+                !diagonal || (
+                    checkWay(new THREE.Vector3(x + range, y, z + range))
+                    && checkWay(new THREE.Vector3(x - range, y, z - range))
+                    && checkWay(new THREE.Vector3(x - range, y, z + range))
+                    && checkWay(new THREE.Vector3(x + range, y, z - range))
+                )
+            )
+        );
+
+        return (
+            checkWay(new THREE.Vector3(x, y, z))
+            && checkNear(1, true)
+            && checkNear(2)
+        );
     }
 }

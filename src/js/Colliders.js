@@ -1,5 +1,4 @@
 import AutoBindMethods from './AutoBindMethods';
-import AStar from './Utils/AStar';
 
 export default class Colliders extends AutoBindMethods {
     constructor(scene) {
@@ -37,6 +36,6 @@ export default class Colliders extends AutoBindMethods {
             fn,
         });
 
-        this.scene.pathFinder.rebuildGraph();
+        this.scene.pathFinder.rebuildAreas();
     }
 }
