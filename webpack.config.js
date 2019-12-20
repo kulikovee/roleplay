@@ -42,6 +42,7 @@ module.exports = {
         }),
         new CopyWebpackPlugin([
             { from: 'src/assets', to: 'assets' },
+            { from: 'src/favicon.ico', to: './' },
         ]),
         new HtmlWebpackPlugin({
             hash: true,

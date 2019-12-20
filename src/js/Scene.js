@@ -6,10 +6,11 @@ import Connection from './Connection';
 import GameObjectsService from './GameObjects';
 import Input from './Input';
 import Intervals from './Intervals';
-import LevelMap from './Levels/LevelMap';
+import Level from './Levels/DreamCity';
 import Colliders from './Colliders';
 import Models from './Models';
 import Particles from './Particles';
+import PathFinder from './PathFinder';
 import Units from './Units';
 
 
@@ -25,6 +26,7 @@ export default class Scene extends AutoBindMethods {
         this.ui = ui;
         this.models = new Models(this);
         this.scene = new THREE.Scene();
+        this.pathFinder = new PathFinder(this);
         this.colliders = new Colliders(this);
         this.units = new Units(this);
         this.camera = new Camera(this);
@@ -38,7 +40,7 @@ export default class Scene extends AutoBindMethods {
         this.gameObjectsService = new GameObjectsService(this);
         this.particles = new Particles(this);
         this.connection = new Connection(this, 'gohtml.ru');
-        this.level = new LevelMap(this);
+        this.level = new Level(this);
 
         this.intervals.setInterval(() => {
             this.ui.setFps(this.renderer.fps, this.renderer.targetFps);

@@ -210,7 +210,7 @@ export default class AnimatedGameObject extends GameObject {
 
         [attack, topAttack, bottomAttack].forEach((attackAnimation) => {
             if (attackAnimation) {
-                attackAnimation.setDuration(this.params.attackRate);
+                attackAnimation.setDuration(this.params.attackTimeout);
             }
         });
     }

@@ -2,10 +2,6 @@ import * as THREE from 'three';
 import AutoBindMethods from './AutoBindMethods';
 import { Player, AI, AnimatedGameObject } from './GameObjects';
 
-const isPlayerHelperNeeded = false;
-
-// Extend from gameObjectsService
-// TBD: GameLogicService
 export default class Units extends AutoBindMethods {
     constructor(scene) {
         super();
@@ -135,6 +131,7 @@ export default class Units extends AutoBindMethods {
                     damage: 5 + level * 2.5,
                     hp: 70 + level * 30,
                     checkWay: this.scene.colliders.checkWay,
+                    getNextPoint: this.scene.pathFinder.getNextPoint,
                     attack: () => gameObjectsService.attack(badGuy),
                     onDamageTaken: () => this.scene.particles.loadEffect({
                         position: badGuy.position.clone().add(new THREE.Vector3(0, 0.75, 0))

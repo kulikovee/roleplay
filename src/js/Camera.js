@@ -19,18 +19,24 @@ export default class Camera extends AutoBindMethods {
     }
 
     update() {
-        const { scene: { input: { isThirdPerson } } } = this;
+        const { scene: { input } } = this;
         const player = this.scene.getPlayer();
 
         if (!player) return;
 
-        const rotateY = this.rotateY + this.scene.input.look.vertical / 5000;
+        if (input.look.cinematic) {
+            this.camera.position.set(-40, 15, 10);
+            this.camera.lookAt(new THREE.Vector3(-50, 0, 0));
+            return;
+        }
+
+        const rotateY = this.rotateY + input.look.vertical / 5000;
 
         if (rotateY > -0.75 && rotateY < 1.25) {
             this.rotateY = rotateY;
         }
 
-        if (isThirdPerson) {
+        if (input.isThirdPerson) {
             this.updateThirdPerson(player);
         } else {
             this.camera.position.copy(
@@ -40,7 +46,6 @@ export default class Camera extends AutoBindMethods {
 
             this.camera.lookAt(player.position);
         }
-
     }
 
     addY(y) {
