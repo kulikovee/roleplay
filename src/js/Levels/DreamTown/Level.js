@@ -1,6 +1,8 @@
 import * as THREE from 'three';
 import AbstractLevel from '../AbstractLevel';
 import { AI, Fire } from '../../GameObjects';
+import Elevator from './Elevator';
+import { createEnvironment } from './Enviroment';
 import Areas from './Areas';
 
 export default class Level extends AbstractLevel {
@@ -14,7 +16,27 @@ export default class Level extends AbstractLevel {
 
         this.shadowLightPosition = new THREE.Vector3(25, 50, 25);
         this.lastBadGuyCreated = 0;
-        this.environment = this.createEnvironment();
+
+        const houses = this.houses = [
+            { x: 15, z: 15 },
+            { x: -15, z: 15 },
+            { x: -15, z: -15 },
+            { x: 15, z: -15 },
+        ];
+        const trees = [
+            { x: 0, z: 15 },
+            { x: 0, z: -15 },
+            { x: 15, z: 0 },
+            { x: -15, z: 0 },
+        ];
+
+        this.environment = createEnvironment({
+            load: this.scene.models.loadGLTF,
+            addColliderFunction: this.scene.colliders.addColliderFunction,
+            trees,
+            houses,
+        });
+
         // this.skybox = this.createSkybox();
         this.ambientLight = this.createAmbientLight();
         this.shadowLight = this.createShadowLight();
@@ -24,20 +46,13 @@ export default class Level extends AbstractLevel {
         this.scene.add(this.ambientLight);
         this.scene.add(this.shadowLight);
 
-        this.house1Positions = [
-            { x: 15, z: 15 },
-            { x: -15, z: 15 },
-            { x: -15, z: -15 },
-            { x: 15, z: -15 },
-        ];
-
-        this.respawnPoints = this.house1Positions.map(({ x, z }) => ({
+        this.respawnPoints = this.houses.map(({ x, z }) => ({
             x: x + 0.63,
             y: 0.1,
             z: z + 4.03,
         }));
 
-        this.elevator = this.createElevator({
+        this.elevator = new Elevator(scene, {
             position: { x: -48, y: 100, z: 0 },
             x: 4,
             y: 1,
@@ -115,7 +130,7 @@ export default class Level extends AbstractLevel {
                 || (isBetween(y, 90, 190) && (absX > 135 || absZ > 135)) // out of floor 1
                 || (isBetween(y, 190, 200) && (absX > 50 || absZ > 50)) // floor 2
                 || (y > 190 && (absX > 133 || absZ > 133)) // out of floor 2
-                || this.elevator.isCarrying(position) // elevator
+                || this.elevator.isCarrying(position)
             ) {
                 return true;
             }
@@ -139,74 +154,6 @@ export default class Level extends AbstractLevel {
         });
     }
 
-    createEnvironment() {
-        const pivot = new THREE.Object3D();
-        pivot.matrixAutoUpdate = false;
-        pivot.name = 'Level Environment';
-
-        const treePositions = [
-            { x: 0, z: 15 },
-            { x: 0, z: -15 },
-            { x: 15, z: 0 },
-            { x: -15, z: 0 },
-        ];
-
-        this.scene.models.loadGLTF({
-            baseUrl: './assets/models/environment/enviroment',
-            noScene: true,
-            castShadow: false,
-            callback: object => {
-                pivot.add(object.scene);
-                object.scene.matrixAutoUpdate = false;
-                object.scene.updateMatrix();
-            }
-        });
-
-        this.scene.models.loadGLTF({
-            baseUrl: './assets/models/environment/tree',
-            noScene: true,
-            receiveShadow: false,
-            callback: (loadedModel) => treePositions.forEach((position) => {
-                const model = loadedModel.scene.clone();
-                model.name = 'Tree';
-                model.position.set(position.x, 0, position.z);
-                model.matrixAutoUpdate = false;
-                model.updateMatrix();
-
-                const { x, z } = model.position;
-
-                this.scene.colliders.addColliderFunction(
-                    (position) => Math.abs(position.x - x) < 2 && Math.abs(position.z - z) < 2
-                );
-
-                pivot.add(model);
-            })
-        });
-
-        this.scene.models.loadGLTF({
-            baseUrl: './assets/models/environment/house1',
-            receiveShadow: false,
-            noScene: true,
-            callback: (loadedModel) => this.house1Positions.forEach((position) => {
-                const model = loadedModel.scene.clone();
-                model.name = 'House1';
-                model.position.set(position.x, 0, position.z);
-                model.matrixAutoUpdate = false;
-                model.updateMatrix();
-
-                const { x, z } = model.position;
-
-                this.scene.colliders.addColliderFunction(
-                    (position) => Math.abs(position.x - x) < 4 && Math.abs(position.z - z) < 3
-                );
-
-                pivot.add(model);
-            })
-        });
-
-        return pivot;
-    }
-
     createSkybox() {
         const materialArray = ['RT', 'LF', 'UP', 'DN', 'FT', 'BK'].map(function (direction) {
             const url = `./assets/textures/sky-day/skybox${direction}.jpg`;
@@ -221,69 +168,6 @@ export default class Level extends AbstractLevel {
         const skyMaterial = new THREE.MeshFaceMaterial(materialArray);
 
         return new THREE.Mesh(skyGeometry, skyMaterial);
-    }
-
-    createElevator(params) {
-        return {
-            currentFloor: 1,
-            target: 0,
-            direction: -1,
-            speed: 0.3,
-            standTime: 10,
-            standAt: this.scene.intervals.getTimePassed(),
-            isReleased: () => this.scene.intervals.getTimePassed() - this.elevator.standAt > this.elevator.standTime * 1000,
-            isCarrying: ({ x, y, z }) => {
-                const { object: { position, scale } } = this.elevator;
-
-                return (
-                    Math.abs(x - position.x) < scale.x / 2
-                    && Math.abs(z - position.z) < scale.z / 2
-                    && (y - position.y < scale.y / 2)
-                    // && (y + 1.7) - position.y > -scale.y / 2
-                );
-            },
-            getFloor: () => (
-                this.elevator.direction > 0
-                    ? (
-                        (this.elevator.object.position.y >= 200 && 2)
-                        || (this.elevator.object.position.y >= 100 && 1)
-                        || 0
-                    )
-                    : (
-                        (this.elevator.object.position.y > 100 && 2)
-                        || (this.elevator.object.position.y > 0 && 1)
-                        || 0
-                    )
-            ),
-            update: () => {
-                if (this.elevator.isReleased()) {
-                    const floor = this.elevator.getFloor();
-
-                    if (floor !== this.elevator.currentFloor) {
-                        this.elevator.standAt = this.scene.intervals.getTimePassed();
-                        this.elevator.currentFloor = floor;
-
-                        if (floor === 2) {
-                            this.elevator.direction = -1;
-                        } else if (floor === 0) {
-                            this.elevator.direction = 1;
-                        }
-
-                        this.elevator.target = floor + this.elevator.direction;
-                    } else {
-                        const getCarryingPosition = unit => ({ ...unit.position, y: unit.position.y - (this.elevator.direction > 0 ? 2 : 0.1) });
-                        const carryingUnits = this.scene.gameObjectsService.getUnits().filter(
-                            unit => (this.elevator.isCarrying(getCarryingPosition(unit))),
-                        );
-
-                        const elevatorAcceleration = this.elevator.speed * this.elevator.direction;
-                        carryingUnits.forEach((unit) => { unit.position.y += elevatorAcceleration; });
-                        this.elevator.object.position.y += elevatorAcceleration;
-                    }
-                }
-            },
-            object: this.scene.models.createCube(params),
-        };
     }
 
     getBadGuys() {
@@ -334,8 +218,8 @@ export default class Level extends AbstractLevel {
                 (x, y) => {
                     if (
                         // Elevator
-                        Math.abs(area.waypointXToWorldX(x) + 48) <= 5
-                        && Math.abs(area.waypointYToWorldZ(y)) <= 1
+                        Math.abs(area.waypointXToWorldX(x) - this.elevator.params.position.x) <= 5
+                        && Math.abs(area.waypointYToWorldZ(y) - this.elevator.params.position.z) <= 1
                     ) {
                         return 1;
                     }

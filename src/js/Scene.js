@@ -6,7 +6,7 @@ import Connection from './Connection';
 import GameObjectsService from './GameObjects';
 import Input from './Input';
 import Intervals from './Intervals';
-import Level from './Levels/DreamCity';
+import Level from './Levels/DreamTown';
 import Colliders from './Colliders';
 import Models from './Models';
 import Particles from './Particles';
