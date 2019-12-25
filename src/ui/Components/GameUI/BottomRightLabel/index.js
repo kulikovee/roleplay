@@ -10,7 +10,7 @@ class App extends Component {
         } = this.props;
 
         return (
-            <div id="exp">
+            <div className="label--in-game bottom-right">
                 Exp: {Math.floor(experience)} / {Math.floor(levelExperience)}
                 &nbsp;| Talents: {unspentTalents}
                 &nbsp;| Level: {level}

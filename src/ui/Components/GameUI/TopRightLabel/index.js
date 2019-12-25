@@ -5,7 +5,7 @@ class App extends Component {
         const { position, money, fps, targetFps } = this.props;
 
         return (
-            <div id="money">
+            <div className="label--in-game top-right">
                 ${money}<br />
                 Position: {position && `${this.getFormattedValue(position.x)}, ${this.getFormattedValue(position.z)}`}<br />
                 FPS: {Math.round(fps)} (Target: {Math.round(targetFps)})

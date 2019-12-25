@@ -10,7 +10,7 @@ class App extends Component {
         } = this.props;
 
         return (
-            <div id="hp">
+            <div className="label--in-game bottom-left">
                 HP {Math.ceil(hp)} / {Math.ceil(hpMax)}
                 &nbsp;| Speed: {Math.floor(speed * 1000)}%
                 &nbsp;| Damage: {damage}

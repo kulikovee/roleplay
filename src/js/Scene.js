@@ -17,6 +17,19 @@ import Units from './Units';
 export default class Scene extends AutoBindMethods {
     /**
      * @param {Renderer} renderer
+     * @param {{
+     *  setRestartButtonVisible: function,
+     *  setPause: function,
+     *  restartGame: function,
+     *  isPause: function,
+     *  isThirdPerson: function,
+     *  update: function,
+     *  updatePlayerParams: function,
+     *  clearHpBars: function,
+     *  switchCamera: function,
+     *  setFps: function,
+     *  notify: function,
+     * }} ui
      */
     constructor(renderer, ui) {
         super();
@@ -112,5 +125,9 @@ export default class Scene extends AutoBindMethods {
      */
     remove(object) {
         this.scene.remove(object);
+    }
+
+    notify(text) {
+        this.ui.notify(text);
     }
 }

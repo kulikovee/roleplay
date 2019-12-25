@@ -5,11 +5,10 @@ export default class AbstractLevel extends AutoBindMethods {
     /**
      * @param {Scene} scene
      */
-    constructor(scene) {
+    constructor(scene, id = 'unknown-level') {
         super();
         this.scene = scene;
-        this.id = 'unknown-level';
-        this.actionElement = document.getElementById('action');
+        this.id = id;
     }
 
     update() {}

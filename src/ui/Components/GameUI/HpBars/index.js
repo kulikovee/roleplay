@@ -80,7 +80,7 @@ class App extends Component {
 
     render() {
         return (
-            <div id="hp-bars" ref={this.container}></div>
+            <div className="hp-bars" ref={this.container}></div>
         );
     }
 }

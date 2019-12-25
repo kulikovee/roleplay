@@ -11,8 +11,7 @@ export default class Level extends AbstractLevel {
      */
     constructor(scene) {
         super(scene);
-
-        this.id = 'map';
+        this.id = 'dream-town';
 
         this.shadowLightPosition = new THREE.Vector3(25, 50, 25);
         this.lastBadGuyCreated = 0;
@@ -30,19 +29,26 @@ export default class Level extends AbstractLevel {
             { x: -15, z: 0 },
         ];
 
+        this.scene.ui.setLoading(true);
+        this.scene.ui.setPause(true);
+
         this.environment = createEnvironment({
             load: this.scene.models.loadGLTF,
             addColliderFunction: this.scene.colliders.addColliderFunction,
             trees,
             houses,
+            onLoad: () => {
+                this.scene.ui.setLoading(false);
+                this.scene.ui.setPause(false);
+                this.scene.notify('Dream Town');
+                this.startLevel();
+            }
         });
 
-        // this.skybox = this.createSkybox();
         this.ambientLight = this.createAmbientLight();
         this.shadowLight = this.createShadowLight();
 
         this.scene.add(this.environment);
-        // this.scene.add(this.skybox);
         this.scene.add(this.ambientLight);
         this.scene.add(this.shadowLight);
 
@@ -65,10 +71,8 @@ export default class Level extends AbstractLevel {
         const near = 10;
         const far = 100;
         this.scene.scene.fog = new THREE.Fog(color, near, far);
-        // this.scene.audio.playMusic('Music');
 
         this.createLevelColliders();
-        this.startLevel();
     }
 
     update() {
@@ -96,7 +100,6 @@ export default class Level extends AbstractLevel {
 
         this.interval = this.scene.intervals.setInterval(this.createBadGuyByTimeout, 500);
         this.scene.ui.setRestartButtonVisible(false);
-        this.scene.ui.setPause(true);
     }
 
     restartLevel() {
@@ -152,22 +155,6 @@ export default class Level extends AbstractLevel {
 
             return false;
         });
-    }
-
-    createSkybox() {
-        const materialArray = ['RT', 'LF', 'UP', 'DN', 'FT', 'BK'].map(function (direction) {
-            const url = `./assets/textures/sky-day/skybox${direction}.jpg`;
-            return new THREE.MeshBasicMaterial({
-                map: new THREE.TextureLoader().load(url),
-                side: THREE.BackSide,
-                fog: false,
-            });
-        });
-
-        const skyGeometry = new THREE.CubeGeometry(75000, 75000, 75000);
-        const skyMaterial = new THREE.MeshFaceMaterial(materialArray);
-
-        return new THREE.Mesh(skyGeometry, skyMaterial);
     }
 
     getBadGuys() {

@@ -18,7 +18,7 @@ class App extends Component {
     render() {
         return (
             <div
-                id="cursor"
+                className="cursor"
                 style={{
                     left: `${this.state.x}px`,
                     top: `${this.state.y}px`,
