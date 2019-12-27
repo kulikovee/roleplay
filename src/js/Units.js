@@ -114,34 +114,50 @@ export default class Units extends AutoBindMethods {
         });
     }
 
-    createAI({ position: { x, y, z}}) {
-        const player = this.scene.getPlayer(),
-            level = player.getLevel(),
-            gameObjectsService = this.scene.gameObjectsService;
+    createAI({ fraction, level, position: { x, y, z} }) {
+        const gameObjectsService = this.scene.gameObjectsService;
+        const getPriority = (unit, target) => (
+            Number(target instanceof Player) * 0.75
+            + 1 / Math.ceil(target.position.distanceTo(unit.position))
+        );
 
         this.scene.models.loadGLTF({
-            baseUrl: './assets/models/units/enemy',
+            baseUrl: fraction === 'goats'
+                ? './assets/models/units/goat-warrior'
+                : './assets/models/units/enemy',
             callback: (gltf) => {
                 /** @type {AI} */
-                const badGuy = gameObjectsService.hookGameObject(new AI({
+                const ai = gameObjectsService.hookGameObject(new AI({
                     animations: gltf.animations,
                     object: gltf.scene,
-                    target: this.scene.getPlayer(),
                     speed: 0.04 + level * 0.005,
                     damage: 5 + level * 2.5,
                     hp: 70 + level * 30,
+                    fraction,
                     checkWay: this.scene.colliders.checkWay,
                     getNextPoint: this.scene.pathFinder.getNextPoint,
-                    attack: () => gameObjectsService.attack(badGuy),
+                    attack: () => gameObjectsService.attack(ai),
                     onDamageTaken: () => this.scene.particles.loadEffect({
-                        position: badGuy.position.clone().add(new THREE.Vector3(0, 0.75, 0))
+                        position: ai.position.clone().add(new THREE.Vector3(0, 0.75, 0))
                     }),
                     onDie: () => this.scene.intervals.setTimeout(() => (
-                        badGuy.isDead() && gameObjectsService.destroyGameObject(badGuy)
+                        ai.isDead() && gameObjectsService.destroyGameObject(ai)
                     ), 10000),
+                    isEnemy: unit => unit.fraction !== fraction,
+                    findTarget: () => {
+                        const priorityUnits = this.getAliveUnits()
+                            .filter(unit => (
+                                unit !== ai
+                                && unit.getFraction() !== fraction
+                                && unit.position.distanceTo(ai.position) < 20
+                            ))
+                            .sort((unitA, unitB) => getPriority(ai, unitB) - getPriority(ai, unitA));
+
+                        return priorityUnits.length ? priorityUnits[0] : null;
+                    },
                 }));
 
-                badGuy.position.set(x, y, z);
+                ai.position.set(x, y, z);
             }
         });
     }

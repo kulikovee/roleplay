@@ -48,7 +48,7 @@ const createEnvironment = function ({
             trees.forEach((position) => {
                 const model = loadedModel.scene.clone();
                 model.name = 'Tree';
-                model.position.set(position.x, 0, position.z);
+                model.position.set(position.x, position.y, position.z);
                 model.matrixAutoUpdate = false;
                 model.updateMatrix();
 
@@ -74,7 +74,7 @@ const createEnvironment = function ({
             houses.forEach((position) => {
                 const model = loadedModel.scene.clone();
                 model.name = 'House1';
-                model.position.set(position.x, 0, position.z);
+                model.position.set(position.x, position.y, position.z);
                 model.matrixAutoUpdate = false;
                 model.updateMatrix();
 

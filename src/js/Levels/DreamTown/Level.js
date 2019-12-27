@@ -14,20 +14,46 @@ export default class Level extends AbstractLevel {
         this.id = 'dream-town';
 
         this.shadowLightPosition = new THREE.Vector3(25, 50, 25);
-        this.lastBadGuyCreated = 0;
 
-        const houses = this.houses = [
-            { x: 15, z: 15 },
-            { x: -15, z: 15 },
-            { x: -15, z: -15 },
-            { x: 15, z: -15 },
-        ];
-        const trees = [
-            { x: 0, z: 15 },
-            { x: 0, z: -15 },
-            { x: 15, z: 0 },
-            { x: -15, z: 0 },
-        ];
+        this.units = [
+            { position: { x: -15 + 0.63, y: 0.2, z: -15 + 4.03 }, fraction: 'goats', level: 4 },
+            { position: { x: -15 + 1.63, y: 0.2, z: -15 + 4.03 }, fraction: 'friendly', level: 1 },
+
+            { position: { x: 15 + 0.63, y: 0.2, z: -15 + 4.03 }, fraction: 'goats', level: 3 },
+            { position: { x: 15 + 1.63, y: 0.2, z: -15 + 4.03 }, fraction: 'friendly', level: 1 },
+
+            { position: { x: -15 + 0.63, y: 0.2, z: 15 + 4.03 }, fraction: 'goats', level: 5 },
+            { position: { x: -15 + 1.63, y: 0.2, z: 15 + 4.03 }, fraction: 'friendly', level: 3 },
+
+            { position: { x: 15 + 0.63, y: 0.2, z: 15 + 4.03 }, fraction: 'goats', level: 3 },
+            { position: { x: 15 + 1.63, y: 0.2, z: 15 + 4.03 }, fraction: 'friendly', level: 2 },
+
+
+            { position: { x: -75 + 0.63, y: 100.2, z: -75 + 4.03 }, fraction: 'goats', level: 4 },
+            { position: { x: -75 + 1.63, y: 100.2, z: -75 + 4.03 }, fraction: 'friendly', level: 1 },
+
+            { position: { x: 75 + 0.63, y: 100.2, z: -75 + 4.03 }, fraction: 'goats', level: 3 },
+            { position: { x: 75 + 1.63, y: 100.2, z: -75 + 4.03 }, fraction: 'friendly', level: 1 },
+
+            { position: { x: -75 + 0.63, y: 100.2, z: 75 + 4.03 }, fraction: 'goats', level: 5 },
+            { position: { x: -75 + 1.63, y: 100.2, z: 75 + 4.03 }, fraction: 'friendly', level: 3 },
+
+            { position: { x: 75 + 0.63, y: 100.2, z: 75 + 4.03 }, fraction: 'goats', level: 3 },
+            { position: { x: 75 + 1.63, y: 100.2, z: 75 + 4.03 }, fraction: 'friendly', level: 2 },
+
+
+            { position: { x: -75 + 0.63, y: 200.2, z: -75 + 4.03 }, fraction: 'goats', level: 4 },
+            { position: { x: -75 + 1.63, y: 200.2, z: -75 + 4.03 }, fraction: 'friendly', level: 1 },
+
+            { position: { x: 75 + 0.63, y: 200.2, z: -75 + 4.03 }, fraction: 'goats', level: 3 },
+            { position: { x: 75 + 1.63, y: 200.2, z: -75 + 4.03 }, fraction: 'friendly', level: 1 },
+
+            { position: { x: -75 + 0.63, y: 200.2, z: 75 + 4.03 }, fraction: 'goats', level: 5 },
+            { position: { x: -75 + 1.63, y: 200.2, z: 75 + 4.03 }, fraction: 'friendly', level: 3 },
+
+            { position: { x: 75 + 0.63, y: 200.2, z: 75 + 4.03 }, fraction: 'goats', level: 3 },
+            { position: { x: 75 + 1.63, y: 200.2, z: 75 + 4.03 }, fraction: 'friendly', level: 2 },
+        ].forEach(this.scene.units.createAI);
 
         this.scene.ui.setLoading(true);
         this.scene.ui.setPause(true);
@@ -35,8 +61,28 @@ export default class Level extends AbstractLevel {
         this.environment = createEnvironment({
             load: this.scene.models.loadGLTF,
             addColliderFunction: this.scene.colliders.addColliderFunction,
-            trees,
-            houses,
+            trees: [
+                { x: 0, y: 0, z: 15 },
+                { x: 0, y: 0, z: -15 },
+                { x: 15, y: 0, z: 0 },
+                { x: -15, y: 0, z: 0 },
+            ],
+            houses: [
+                { x: 15, y: 0, z: 15 },
+                { x: -15, y: 0, z: 15 },
+                { x: -15, y: 0, z: -15 },
+                { x: 15, y: 0, z: -15 },
+
+                { x: 75, y: 100, z: 75 },
+                { x: -75, y: 100, z: 75 },
+                { x: -75, y: 100, z: -75 },
+                { x: 75, y: 100, z: -75 },
+
+                { x: 75, y: 200, z: 75 },
+                { x: -75, y: 200, z: 75 },
+                { x: -75, y: 200, z: -75 },
+                { x: 75, y: 200, z: -75 },
+            ],
             onLoad: () => {
                 this.scene.ui.setLoading(false);
                 this.scene.ui.setPause(false);
@@ -52,20 +98,12 @@ export default class Level extends AbstractLevel {
         this.scene.add(this.ambientLight);
         this.scene.add(this.shadowLight);
 
-        this.respawnPoints = this.houses.map(({ x, z }) => ({
-            x: x + 0.63,
-            y: 0.1,
-            z: z + 4.03,
-        }));
-
         this.elevator = new Elevator(scene, {
             position: { x: -48, y: 100, z: 0 },
             x: 4,
             y: 1,
             z: 4,
         });
-
-        this.nextRespawnPoint = 0;
 
         const color = 0x000000;
         const near = 10;
@@ -98,7 +136,6 @@ export default class Level extends AbstractLevel {
             clearInterval(this.interval);
         }
 
-        this.interval = this.scene.intervals.setInterval(this.createBadGuyByTimeout, 500);
         this.scene.ui.setRestartButtonVisible(false);
     }
 
@@ -155,34 +192,6 @@ export default class Level extends AbstractLevel {
 
             return false;
         });
-    }
-
-    getBadGuys() {
-        return this.scene.units.getAliveUnits().filter(unit => unit instanceof AI);
-    }
-
-    createBadGuyByTimeout() {
-        const { ui: { pause } } = this.scene;
-        const player = this.scene.getPlayer();
-
-        if (!player || pause) {
-            return;
-        }
-
-        const time = this.scene.intervals.getTimePassed(),
-            level = player.getLevel(),
-            badGuyTimeout = 5000 - level * 500,
-            isBadGuyReleased = time - this.lastBadGuyCreated >= badGuyTimeout,
-            badGuysCount = this.getBadGuys().length;
-
-        if (badGuysCount < level && isBadGuyReleased) {
-            this.lastBadGuyCreated = time;
-            this.scene.units.createAI({ position: this.respawnPoints[this.nextRespawnPoint++] });
-
-            if (this.nextRespawnPoint > this.respawnPoints.length - 1) {
-                this.nextRespawnPoint = 0;
-            }
-        }
     }
 
     getAreas() {

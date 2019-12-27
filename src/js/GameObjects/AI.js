@@ -8,11 +8,13 @@ export default class AI extends FiringUnit {
             damage: 10,
             mas: 1,
             hp: 100,
+            fraction: 'enemy',
             fireTimeout: 1.5,
             attackTimeout: 1.5,
             jumpTimeout: 1.5,
             startRunTimeout: 1,
             nextPointUpdateTimeout: 0.1,
+            updateTargetTimeout: 0.5,
             ...params,
         });
 
@@ -20,6 +22,7 @@ export default class AI extends FiringUnit {
 
         this.params.bounty = hp / 4 + damage + speed * 300;
         this.lastRun = 0;
+        this.lastTargetUpdate = 0;
         this.lastNextPointUpdate = 0;
         this.lastJumpTimestamp = 0;
         this.isRunning = false;
@@ -32,43 +35,51 @@ export default class AI extends FiringUnit {
             return;
         }
 
-        const { object, target, acceleration, speed, getNextPoint } = this.params;
+        if (this.params.findTarget && this.isUpdateTargetReleased(time)) {
+            this.params.target = this.params.findTarget();
+        }
 
-        if (getNextPoint) {
-            if (this.isNextPointUpdateReleased(time)) {
-                this.lastNextPointUpdate = time;
-                this.nextPoint = getNextPoint(this.position, target.position);
+        const { object, target, acceleration, speed, getNextPoint, isEnemy } = this.params;
+
+        if (target) {
+            if (getNextPoint) {
+                if (this.isNextPointUpdateReleased(time)) {
+                    this.lastNextPointUpdate = time;
+                    this.nextPoint = getNextPoint(this.position, target.position);
+                }
+            } else {
+                this.nextPoint = target.position;
             }
-        } else {
-            this.nextPoint = target.position;
         }
 
-        if (this.nextPoint) {
-            const rotationToTargetRadians = Math.atan2(
-                this.nextPoint.x - object.position.x,
-                this.nextPoint.z - object.position.z
-            );
+        const isTargetNear = target && object.position.distanceTo(target.position) < 1.75;
 
-            this.animationState.isRotateLeft = rotationToTargetRadians > object.rotation.y;
-            this.animationState.isRotateRight = rotationToTargetRadians < object.rotation.y;
+        const isAttack = (
+            target
+            && (!isEnemy || isEnemy(target))
+            && isTargetNear
+            && target.isAlive()
+            && target.getFraction() !== this.getFraction()
+        );
 
-            const targetQuaternion = new THREE.Quaternion();
-            targetQuaternion.setFromEuler(object.rotation.clone().set(0, rotationToTargetRadians, 0));
-            object.quaternion.slerp(targetQuaternion, 0.1);
+        if (isAttack) {
+            this.rotateToPosition(target.position);
+        } else if (this.nextPoint) {
+            this.rotateToPosition(this.nextPoint);
         }
 
-        const isTargetNear = object.position.distanceTo(target.position) < 1.75;
         const isNextPointNear = !this.nextPoint;
 
         this.isRunning = (
-            !isTargetNear
+            target
+            && !isTargetNear
             && !isNextPointNear
             && (this.isRunning || this.isRunReleased(time))
             && this.isAttackReleased(time)
             && this.isHitReleased(time)
         );
 
-        if (isTargetNear && target.isAlive()) {
+        if (isAttack) {
             this.attack();
         }
 
@@ -93,6 +104,23 @@ export default class AI extends FiringUnit {
         }
     }
 
+    rotateToPosition(position) {
+        const { object } = this.params;
+
+
+        const rotationToTargetRadians = Math.atan2(
+            position.x - object.position.x,
+            position.z - object.position.z
+        );
+
+        this.animationState.isRotateLeft = rotationToTargetRadians - object.rotation.y > 0.1;
+        this.animationState.isRotateRight = rotationToTargetRadians - object.rotation.y < -0.1;
+
+        const targetQuaternion = new THREE.Quaternion();
+        targetQuaternion.setFromEuler(object.rotation.clone().set(0, rotationToTargetRadians, 0));
+        object.quaternion.slerp(targetQuaternion, 0.1);
+    }
+
     isAcceleration() {
         return (
             Math.abs(this.params.acceleration.x)
@@ -107,6 +135,10 @@ export default class AI extends FiringUnit {
 
     isNextPointUpdateReleased(time) {
         return time - this.lastNextPointUpdate > this.params.nextPointUpdateTimeout * 1000;
+    }
+
+    isUpdateTargetReleased(time) {
+        return time - this.lastTargetUpdate > this.params.updateTargetTimeout * 1000;
     }
 
     checkWayForJump(jumpHeight) {

@@ -47,6 +47,10 @@ export default class Unit extends MovingGameObject {
         }
     }
 
+    getFraction() {
+        return this.params.fraction;
+    }
+
     getCollider(position) {
         const diffY = position.y - this.position.y;
 
