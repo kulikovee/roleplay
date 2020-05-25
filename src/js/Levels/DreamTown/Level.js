@@ -15,12 +15,34 @@ export default class Level extends AbstractLevel {
 
         this.shadowLightPosition = new THREE.Vector3(25, 50, 25);
 
+        const getGoatParams = (level, position) => {
+            return {
+                position,
+                level,
+                fraction: 'goats',
+                scale: 0.7 + level / 10,
+                onDie: () => this.scene.units.createAI(getGoatParams(
+                    level + 1 + Math.round(Math.random() * level),
+                    position,
+                )),
+            };
+        };
+
         this.units = [
-            { position: { x: -17, y: 0.2, z: -5 }, fraction: 'goats', level: 1 },
-            { position: { x: 17 , y: 0.2, z: -5 }, fraction: 'goats', level: 1 },
-            { position: { x: -15, y: 0.2, z: -30 }, fraction: 'goats', level: 1 },
-            { position: { x: 15, y: 0.2, z: -30 }, fraction: 'goats', level: 1 },
-            { position: { x: 0, y: 0.2, z: -0 }, fraction: 'goats', level: 25, scale: 3 },
+            getGoatParams(3, { x: -17, y: 0.2, z: -5 }),
+            getGoatParams(3, { x: 17 , y: 0.2, z: -5 }),
+            getGoatParams(2, { x: -15, y: 0.2, z: -30 }),
+            getGoatParams(2, { x: 15, y: 0.2, z: -30 }),
+
+            getGoatParams(5, { x: -30, y: 0.2, z: -9 }),
+            getGoatParams(5, { x: 30 , y: 0.2, z: -9 }),
+            getGoatParams(4, { x: -45, y: 0.2, z: -30 }),
+            getGoatParams(4, { x: 45, y: 0.2, z: -30 }),
+    
+            getGoatParams(1, { x: 45, y: 0.2, z: 45 }),
+            getGoatParams(1, { x: 45, y: 0.2, z: -45 }),
+
+            getGoatParams(25, { x: 0, y: 0.2, z: 0 }),
 
             {
                 rotation: { y: Math.PI },
@@ -53,6 +75,15 @@ export default class Level extends AbstractLevel {
                 { x: 0, y: 0, z: -15 },
                 { x: 15, y: 0, z: 0 },
                 { x: -15, y: 0, z: 0 },
+    
+    
+                { x: 15, y: 0, z: 15 },
+                { x: 15, y: 0, z: -15 },
+                { x: 30, y: 0, z: 20 },
+                { x: 30, y: 0, z: -20 },
+    
+                { x: 45, y: 0, z: -35 },
+                { x: 45, y: 0, z: 35 },
             ],
             houses: [
                 { x: 0, y: 0, z: 40, ry: -Math.PI },

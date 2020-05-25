@@ -114,7 +114,7 @@ export default class Units extends AutoBindMethods {
         });
     }
 
-    createAI({ fraction, level, position: { x, y, z }, rotation = {}, scale }) {
+    createAI({ fraction, level, position: { x, y, z }, rotation = {}, scale, onDie }) {
         const gameObjectsService = this.scene.gameObjectsService;
         const getPriority = (unit, target) => (
             Number(target instanceof Player) * 0.75
@@ -140,9 +140,15 @@ export default class Units extends AutoBindMethods {
                     onDamageTaken: () => this.scene.particles.loadEffect({
                         position: ai.position.clone().add(new THREE.Vector3(0, 0.75, 0))
                     }),
-                    onDie: () => this.scene.intervals.setTimeout(() => (
-                        ai.isDead() && gameObjectsService.destroyGameObject(ai)
-                    ), 10000),
+                    onDie: () => this.scene.intervals.setTimeout(() => {
+                        if (ai.isDead()) {
+                            gameObjectsService.destroyGameObject(ai);
+
+                            if (onDie) {
+                                onDie();
+                            }
+                        }
+                    }, 10000),
                     isEnemy: unit => unit.fraction !== fraction,
                     findTarget: () => {
                         const priorityUnits = this.getAliveUnits()
