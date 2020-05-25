@@ -70,23 +70,7 @@ export default class Scene extends AutoBindMethods {
 
     clearScene() {
         this.gameObjectsService.removeAll();
-        this.units.createPlayer({
-            onCreate: (player) => {
-                this.camera.player = player;
-                this.ui.updatePlayerParams();
-            },
-            onDie: () => window.setTimeout(() => {
-                this.ui.setRestartButtonVisible(true);
-                this.ui.setPause(true);
-            }, 2500),
-            onKill: (object) => {
-                const player = this.getPlayer();
-                player.addExperience(object.params.bounty);
-                player.addMoney(object.params.bounty);
-            },
-            onDamageTaken: () => this.ui.updatePlayerParams(),
-            onLevelUp: () => this.ui.updatePlayerParams(),
-        });
+        this.level.onClear();
     }
 
     animate() {

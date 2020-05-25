@@ -114,7 +114,7 @@ export default class Units extends AutoBindMethods {
         });
     }
 
-    createAI({ fraction, level, position: { x, y, z} }) {
+    createAI({ fraction, level, position: { x, y, z }, rotation = {}, scale }) {
         const gameObjectsService = this.scene.gameObjectsService;
         const getPriority = (unit, target) => (
             Number(target instanceof Player) * 0.75
@@ -157,8 +157,13 @@ export default class Units extends AutoBindMethods {
                     },
                 }));
 
-                ai.position.set(x, y, z);
-            }
+                ai.position.set(x || 0, y || 0, z || 0);
+                ai.rotation.set(rotation.x || 0, rotation.y || 0, rotation.z || 0);
+                
+                if (scale) {
+                    ai.object.scale.set(scale, scale, scale);
+                }
+            },
         });
     }
 }

@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import AbstractLevel from '../AbstractLevel';
-import { AI, Fire } from '../../GameObjects';
+import { Player, Fire } from '../../GameObjects';
 import Elevator from './Elevator';
 import { createEnvironment } from './Enviroment';
 import Areas from './Areas';
@@ -16,43 +16,30 @@ export default class Level extends AbstractLevel {
         this.shadowLightPosition = new THREE.Vector3(25, 50, 25);
 
         this.units = [
-            { position: { x: -15 + 0.63, y: 0.2, z: -15 + 4.03 }, fraction: 'goats', level: 4 },
-            { position: { x: -15 + 1.63, y: 0.2, z: -15 + 4.03 }, fraction: 'friendly', level: 1 },
+            { position: { x: -17, y: 0.2, z: -5 }, fraction: 'goats', level: 1 },
+            { position: { x: 17 , y: 0.2, z: -5 }, fraction: 'goats', level: 1 },
+            { position: { x: -15, y: 0.2, z: -30 }, fraction: 'goats', level: 1 },
+            { position: { x: 15, y: 0.2, z: -30 }, fraction: 'goats', level: 1 },
+            { position: { x: 0, y: 0.2, z: -0 }, fraction: 'goats', level: 25, scale: 3 },
 
-            { position: { x: 15 + 0.63, y: 0.2, z: -15 + 4.03 }, fraction: 'goats', level: 3 },
-            { position: { x: 15 + 1.63, y: 0.2, z: -15 + 4.03 }, fraction: 'friendly', level: 1 },
-
-            { position: { x: -15 + 0.63, y: 0.2, z: 15 + 4.03 }, fraction: 'goats', level: 5 },
-            { position: { x: -15 + 1.63, y: 0.2, z: 15 + 4.03 }, fraction: 'friendly', level: 3 },
-
-            { position: { x: 15 + 0.63, y: 0.2, z: 15 + 4.03 }, fraction: 'goats', level: 3 },
-            { position: { x: 15 + 1.63, y: 0.2, z: 15 + 4.03 }, fraction: 'friendly', level: 2 },
-
-
-            { position: { x: -75 + 0.63, y: 100.2, z: -75 + 4.03 }, fraction: 'goats', level: 4 },
-            { position: { x: -75 + 1.63, y: 100.2, z: -75 + 4.03 }, fraction: 'friendly', level: 1 },
-
-            { position: { x: 75 + 0.63, y: 100.2, z: -75 + 4.03 }, fraction: 'goats', level: 3 },
-            { position: { x: 75 + 1.63, y: 100.2, z: -75 + 4.03 }, fraction: 'friendly', level: 1 },
-
-            { position: { x: -75 + 0.63, y: 100.2, z: 75 + 4.03 }, fraction: 'goats', level: 5 },
-            { position: { x: -75 + 1.63, y: 100.2, z: 75 + 4.03 }, fraction: 'friendly', level: 3 },
-
-            { position: { x: 75 + 0.63, y: 100.2, z: 75 + 4.03 }, fraction: 'goats', level: 3 },
-            { position: { x: 75 + 1.63, y: 100.2, z: 75 + 4.03 }, fraction: 'friendly', level: 2 },
-
-
-            { position: { x: -75 + 0.63, y: 200.2, z: -75 + 4.03 }, fraction: 'goats', level: 4 },
-            { position: { x: -75 + 1.63, y: 200.2, z: -75 + 4.03 }, fraction: 'friendly', level: 1 },
-
-            { position: { x: 75 + 0.63, y: 200.2, z: -75 + 4.03 }, fraction: 'goats', level: 3 },
-            { position: { x: 75 + 1.63, y: 200.2, z: -75 + 4.03 }, fraction: 'friendly', level: 1 },
-
-            { position: { x: -75 + 0.63, y: 200.2, z: 75 + 4.03 }, fraction: 'goats', level: 5 },
-            { position: { x: -75 + 1.63, y: 200.2, z: 75 + 4.03 }, fraction: 'friendly', level: 3 },
-
-            { position: { x: 75 + 0.63, y: 200.2, z: 75 + 4.03 }, fraction: 'goats', level: 3 },
-            { position: { x: 75 + 1.63, y: 200.2, z: 75 + 4.03 }, fraction: 'friendly', level: 2 },
+            {
+                rotation: { y: Math.PI },
+                position: { x: -0.8, y: 0.2, z: 40 - 4.03 },
+                fraction: 'friendly',
+                level: 5,
+            },
+            {
+                rotation: { y: Math.PI / 2 },
+                position: { x: -10 + 3.5, y: 0.2, z: 29.2 },
+                fraction: 'friendly',
+                level: 5,
+            },
+            {
+                rotation: { y: -Math.PI / 2 },
+                position: { x: 10 - 3.5, y: 0.2, z: 30.8 },
+                fraction: 'friendly',
+                level: 5,
+            },
         ].forEach(this.scene.units.createAI);
 
         this.scene.ui.setLoading(true);
@@ -68,20 +55,11 @@ export default class Level extends AbstractLevel {
                 { x: -15, y: 0, z: 0 },
             ],
             houses: [
-                { x: 15, y: 0, z: 15 },
-                { x: -15, y: 0, z: 15 },
-                { x: -15, y: 0, z: -15 },
-                { x: 15, y: 0, z: -15 },
-
-                { x: 75, y: 100, z: 75 },
-                { x: -75, y: 100, z: 75 },
-                { x: -75, y: 100, z: -75 },
-                { x: 75, y: 100, z: -75 },
-
-                { x: 75, y: 200, z: 75 },
-                { x: -75, y: 200, z: 75 },
-                { x: -75, y: 200, z: -75 },
-                { x: 75, y: 200, z: -75 },
+                { x: 0, y: 0, z: 40, ry: -Math.PI },
+                { x: -10, y: 0, z: 30, ry: Math.PI / 2 },
+                { x: 10, y: 0, z: 30, ry: -Math.PI / 2 },
+                // { x: 75, y: 100, z: 75 },
+                // { x: 75, y: 200, z: 75 },
             ],
             onLoad: () => {
                 this.scene.ui.setLoading(false);
@@ -129,6 +107,30 @@ export default class Level extends AbstractLevel {
                 this.shadowLight.target = player.object;
             }
         }
+    }
+
+    onClear() {
+        this.scene.units.createPlayer({
+            /**
+             * @param {Player} player
+             */
+            onCreate: (player) => {
+                this.scene.camera.player = player;
+                this.scene.ui.updatePlayerParams();
+                player.position.set(0, 0.3, 30);
+            },
+            onDie: () => window.setTimeout(() => {
+                this.scene.ui.setRestartButtonVisible(true);
+                this.scene.ui.setPause(true);
+            }, 2500),
+            onKill: (object) => {
+                const player = this.scene.getPlayer();
+                player.addExperience(object.params.bounty);
+                player.addMoney(object.params.bounty);
+            },
+            onDamageTaken: () => this.scene.ui.updatePlayerParams(),
+            onLevelUp: () => this.scene.ui.updatePlayerParams(),
+        });
     }
 
     startLevel() {

@@ -75,14 +75,16 @@ const createEnvironment = function ({
                 const model = loadedModel.scene.clone();
                 model.name = 'House1';
                 model.position.set(position.x, position.y, position.z);
+                model.rotation.set(position.rx || 0, position.ry || 0, position.rz || 0);
                 model.matrixAutoUpdate = false;
                 model.updateMatrix();
 
                 const { x, z } = model.position;
 
-                addColliderFunction(
-                    (position) => Math.abs(position.x - x) < 4 && Math.abs(position.z - z) < 3
-                );
+                addColliderFunction(unitPosition => (
+                    Math.abs(unitPosition.x - x) < (position.ry < -3.13 ? 4 : 3)
+                    && Math.abs(unitPosition.z - z) < (position.ry < -3.13 ? 3 : 4)
+                ));
 
                 pivot.add(model);
             });
