@@ -69,37 +69,11 @@ export default class Units extends AutoBindMethods {
                     onKill: (object) => onKill(object),
                     onDie: (killer) => onDie(killer),
                     onLevelUp: () => {
-                        this.scene.models.loadGLTF({
-                            baseUrl: './assets/models/effects/level-up-alt/level-up',
-                            noScene: true,
-                            castShadow: false,
-                            receiveShadow: false,
-                            callback: loadedObject => {
-                                loadedObject.scene.scale.set(1.5, 1.5, 1.5);
-
-                                loadedObject.scene.traverse((child) => {
-                                    if (child.isMesh) {
-                                        child.material.transparent = true;
-                                        child.material.alphaTest = 0.5;
-                                    }
-                                });
-
-                                this.player.object.add(loadedObject.scene);
-
-                                const effect = new AnimatedGameObject({
-                                    object: loadedObject.scene,
-                                    animations: loadedObject.animations,
-                                });
-
-                                this.scene.gameObjectsService.hookGameObject(effect);
-
-                                this.scene.intervals.setTimeout(
-                                    () => this.scene.gameObjectsService.destroyGameObject(effect),
-                                    2080,
-                                );
-                            }
+                        this.scene.particles.createEffect({
+                            effect: 'level-up-alt/level-up',
+                            scale: 1.5,
+                            attachTo: this.player.object,
                         });
-
                         onLevelUp();
                     },
                     attack: () => gameObjectsService.attack(player),

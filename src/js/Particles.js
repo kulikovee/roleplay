@@ -33,6 +33,48 @@ export default class Particles extends AutoBindMethods {
             }
         });
     }
+    
+    createEffect({
+        scale = 1.5,
+        effect = 'level-up-alt/level-up',
+        position = {},
+        attachTo,
+    }) {
+        this.scene.models.loadGLTF({
+            baseUrl: './assets/models/effects/' + effect,
+            noScene: true,
+            castShadow: false,
+            receiveShadow: false,
+            callback: loadedObject => {
+                loadedObject.scene.scale.set(scale, scale, scale);
+            
+                loadedObject.scene.traverse((child) => {
+                    if (child.isMesh) {
+                        child.material.transparent = true;
+                        child.material.alphaTest = 0.5;
+                    }
+                });
+            
+                loadedObject.scene.position.set(position.x || 0, position.y || 0, position.z || 0);
+
+                if (attachTo) {
+                    attachTo.add(loadedObject.scene);
+                }
+            
+                const effect = new AnimatedGameObject({
+                    object: loadedObject.scene,
+                    animations: loadedObject.animations,
+                });
+            
+                this.scene.gameObjectsService.hookGameObject(effect);
+            
+                this.scene.intervals.setTimeout(
+                    () => this.scene.gameObjectsService.destroyGameObject(effect),
+                    2080,
+                );
+            }
+        });
+    }
 
     loadEffect({
         particleName = 'blood',
