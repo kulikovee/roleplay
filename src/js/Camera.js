@@ -18,19 +18,20 @@ export default class Camera extends AutoBindMethods {
         this.raycaster = new THREE.Raycaster();
     }
 
-    update() {
+    update(gameTime, deltaTime) {
         const { scene: { input } } = this;
         const player = this.scene.getPlayer();
 
         if (!player) return;
-
+    
+        // Enabled if "F" is pressed
         if (input.look.cinematic) {
             this.camera.position.set(-40, 15, 10);
             this.camera.lookAt(new THREE.Vector3(-50, 0, 0));
             return;
         }
-
-        const rotateY = this.rotateY + input.look.vertical / 5000;
+    
+        const rotateY = this.rotateY + (input.look.vertical / 5000) * (deltaTime * 0.06);
 
         if (rotateY > -0.75 && rotateY < 1.25) {
             this.rotateY = rotateY;

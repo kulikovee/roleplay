@@ -87,7 +87,7 @@ export default class AI extends FiringUnit {
 
         if (this.isRunning) {
             this.lastRun = time;
-            acceleration.add(this.getForward().multiplyScalar(speed));
+            acceleration.add(this.getForward().multiplyScalar(speed * (deltaTime * 0.06)));
 
             const isJump = (
                 this.params.isGrounded
@@ -106,7 +106,6 @@ export default class AI extends FiringUnit {
 
     rotateToPosition(position) {
         const { object } = this.params;
-
 
         const rotationToTargetRadians = Math.atan2(
             position.x - object.position.x,

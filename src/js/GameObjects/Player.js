@@ -35,7 +35,7 @@ export default class Player extends FiringUnit {
 
         const { input, object, acceleration } = this.params;
 
-        acceleration.add(this.getMovingAcceleration(time));
+        acceleration.add(this.getMovingAcceleration(time, deltaTime));
 
         if (input.attack1) {
             this.attack();
@@ -57,7 +57,7 @@ export default class Player extends FiringUnit {
             this.animationState.isRotateRight = horizontalLook > 0;
 
             if (horizontalLook) {
-                object.rotateOnWorldAxis(new THREE.Vector3(0, 1, 0), -horizontalLook / 5000);
+                object.rotateOnWorldAxis(new THREE.Vector3(0, 1, 0), (-horizontalLook / 3000) * (deltaTime * 0.06));
             }
         } else {
             const deltaX = window.innerWidth / 2 - input.cursor.x;
@@ -121,12 +121,12 @@ export default class Player extends FiringUnit {
         return Math.floor(Math.sqrt(this.params.experience / 100)) + 1;
     }
 
-    getMovingAcceleration(time) {
+    getMovingAcceleration(time, deltaTime) {
         const { input: { horizontal, vertical, jump } } = this.params;
 
         const speed = vertical && horizontal
-            ? this.params.speed * 0.7
-            : this.params.speed;
+            ? this.params.speed * 0.7 * (deltaTime * 0.06)
+            : this.params.speed * (deltaTime * 0.06);
 
         const addForward = vertical === 1
             ? speed

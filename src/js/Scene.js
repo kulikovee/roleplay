@@ -81,7 +81,7 @@ export default class Scene extends AutoBindMethods {
 
         if (!this.ui.isPause()) {
             this.gameObjectsService.update(gameTime, deltaTime);
-            this.camera.update();
+            this.camera.update(gameTime, deltaTime);
             this.ui.update();
             this.input.update();
             this.level.update();

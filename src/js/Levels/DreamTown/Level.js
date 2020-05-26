@@ -15,18 +15,26 @@ export default class Level extends AbstractLevel {
 
         this.shadowLightPosition = new THREE.Vector3(25, 50, 25);
 
-        const getGoatParams = (level, position) => {
+        const getAIParams = ({ level, ...params }) => {
             return {
-                position,
-                level,
-                fraction: 'goats',
+                ...params,
                 scale: 0.7 + level / 10,
-                onDie: () => this.scene.units.createAI(getGoatParams(
-                    level + 1 + Math.round(Math.random() * level),
-                    position,
-                )),
+                onDie: () => this.scene.units.createAI(getAIParams({
+                    ...params,
+                    level: level + 1 + Math.round(Math.random() * level),
+                })),
             };
         };
+        
+        const getGoatsParams = (level, position) => getAIParams({
+            level,
+            position,
+            fraction: 'goats'
+        });
+
+        const getFriendlyParams = (level, position, rotation) => getAIParams(
+            { level, position, rotation, fraction: 'friendly' },
+        );
     
         this.scene.intervals.setInterval(() => {
             const effectPosition = { x: 0, y: 0, z: 30 };
@@ -51,39 +59,25 @@ export default class Level extends AbstractLevel {
         }, 10000);
 
         this.units = [
-            getGoatParams(3, { x: -17, y: 0.2, z: -5 }),
-            getGoatParams(3, { x: 17 , y: 0.2, z: -5 }),
-            getGoatParams(2, { x: -15, y: 0.2, z: -30 }),
-            getGoatParams(2, { x: 15, y: 0.2, z: -30 }),
+            getGoatsParams(3, { x: -17, y: 0.2, z: -5 }),
+            getGoatsParams(3, { x: 17 , y: 0.2, z: -5 }),
+            getGoatsParams(2, { x: -15, y: 0.2, z: -30 }),
+            getGoatsParams(2, { x: 15, y: 0.2, z: -30 }),
 
-            getGoatParams(5, { x: -30, y: 0.2, z: -9 }),
-            getGoatParams(5, { x: 30 , y: 0.2, z: -9 }),
-            getGoatParams(4, { x: -45, y: 0.2, z: -30 }),
-            getGoatParams(4, { x: 45, y: 0.2, z: -30 }),
+            getGoatsParams(5, { x: -30, y: 0.2, z: -9 }),
+            getGoatsParams(5, { x: 30 , y: 0.2, z: -9 }),
+            getGoatsParams(4, { x: -45, y: 0.2, z: -30 }),
+            getGoatsParams(4, { x: 45, y: 0.2, z: -30 }),
     
-            getGoatParams(1, { x: 45, y: 0.2, z: 45 }),
-            getGoatParams(1, { x: 45, y: 0.2, z: -45 }),
+            getGoatsParams(1, { x: 45, y: 0.2, z: 45 }),
+            getGoatsParams(1, { x: 45, y: 0.2, z: -45 }),
 
-            getGoatParams(25, { x: 0, y: 0.2, z: 0 }),
+            getGoatsParams(25, { x: 0, y: 0.2, z: 0 }),
+            getGoatsParams(25, { x: 0, y: 0.2, z: 0 }),
 
-            {
-                rotation: { y: Math.PI },
-                position: { x: -0.8, y: 0.2, z: 40 - 4.03 },
-                fraction: 'friendly',
-                level: 5,
-            },
-            {
-                rotation: { y: Math.PI / 2 },
-                position: { x: -10 + 3.5, y: 0.2, z: 29.2 },
-                fraction: 'friendly',
-                level: 5,
-            },
-            {
-                rotation: { y: -Math.PI / 2 },
-                position: { x: 10 - 3.5, y: 0.2, z: 30.8 },
-                fraction: 'friendly',
-                level: 5,
-            },
+            getFriendlyParams(5, { x: -0.8, y: 0.2, z: 40 - 4.03 }, { y: Math.PI }),
+            getFriendlyParams(5, { x: -10 + 3.5, y: 0.2, z: 29.2 }, { y: Math.PI / 2 }),
+            getFriendlyParams(5, { x: 10 - 3.5, y: 0.2, z: 30.8 }, { y: -Math.PI / 2 }),
         ].forEach(this.scene.units.createAI);
 
         this.scene.ui.setLoading(true);
