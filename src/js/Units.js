@@ -104,9 +104,9 @@ export default class Units extends AutoBindMethods {
                 const ai = gameObjectsService.hookGameObject(new AI({
                     animations: gltf.animations,
                     object: gltf.scene,
-                    speed: 0.04 + level * 0.005,
-                    damage: 5 + level * 2.5,
-                    hp: 70 + level * 30,
+                    speed: 0.035 + level * 0.0025,
+                    damage: 5 + level * 1.5,
+                    hp: 70 + level * 20,
                     fraction,
                     checkWay: this.scene.colliders.checkWay,
                     getNextPoint: this.scene.pathFinder.getNextPoint,
@@ -123,6 +123,7 @@ export default class Units extends AutoBindMethods {
                             }
                         }
                     }, 10000),
+                    // TODO: Move to `Unit` class
                     isEnemy: unit => unit.fraction !== fraction,
                     findTarget: () => {
                         const priorityUnits = this.getAliveUnits()

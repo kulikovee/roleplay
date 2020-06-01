@@ -9,14 +9,14 @@ const createEnvironment = function ({
 }) {
     const pivot = new THREE.Object3D();
     pivot.matrixAutoUpdate = false;
-    pivot.name = 'Level Environment';
+    pivot.name = 'LEVEL_ENVIRONMENT';
 
-    let isEnviromentLoaded = false;
+    let isEnvironmentLoaded = false;
     let isTreeLoaded = false;
     let isHouseLoaded = false;
 
     const checkIsAllLoaded = () => {
-        if (isEnviromentLoaded
+        if (isEnvironmentLoaded
             && isTreeLoaded
             && isHouseLoaded
         ) {
@@ -32,7 +32,7 @@ const createEnvironment = function ({
             pivot.add(object.scene);
             object.scene.matrixAutoUpdate = false;
             object.scene.updateMatrix();
-            isEnviromentLoaded = true;
+            isEnvironmentLoaded = true;
             checkIsAllLoaded();
         }
     });

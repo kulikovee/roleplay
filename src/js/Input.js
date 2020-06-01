@@ -38,7 +38,9 @@ export default class Input extends AutoBindMethods {
             vertical: 0,
             horizontal: 0,
             back: false,
+            sensitivity: 1,
         };
+        this.resetHorizontalLook = () => this.look.horizontal = 0;
         this.isThirdPerson = true;
 
         this.cursor = {
@@ -99,7 +101,8 @@ export default class Input extends AutoBindMethods {
         });
 
         document.addEventListener('onmousemoveend', (e) => {
-            this.look.horizontal = 0;
+            // Horizontal look is cleaning by Player.update after rotation is applied
+            // this.look.horizontal = 0;
             this.look.vertical = 0;
         });
 

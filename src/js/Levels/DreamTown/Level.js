@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import AbstractLevel from '../AbstractLevel';
 import { Player, Fire } from '../../GameObjects';
 import Elevator from './Elevator';
-import { createEnvironment } from './Enviroment';
+import { createEnvironment } from './Environment';
 import Areas from './Areas';
 
 export default class Level extends AbstractLevel {

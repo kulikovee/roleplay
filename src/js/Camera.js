@@ -31,7 +31,7 @@ export default class Camera extends AutoBindMethods {
             return;
         }
     
-        const rotateY = this.rotateY + (input.look.vertical / 5000) * (deltaTime * 0.06);
+        const rotateY = this.rotateY + (input.look.sensitivity * input.look.vertical / 2000);
 
         if (rotateY > -0.75 && rotateY < 1.25) {
             this.rotateY = rotateY;
@@ -78,8 +78,8 @@ export default class Camera extends AutoBindMethods {
                 : [obj]
         ));
 
-        const enviroment = [children.find(c => c.name === 'Level Environment')];
-        const flatChildrenMeshes = getChildrenFlat(enviroment).filter(obj => obj.type === 'Mesh');
+        const environment = [children.find(c => c.name === 'LEVEL_ENVIRONMENT')];
+        const flatChildrenMeshes = getChildrenFlat(environment).filter(obj => obj.type === 'Mesh');
 
         this.raycaster.set(origin, direction.subVectors(destination, origin).normalize());
         this.raycaster.far = deltaY * 1.5;
