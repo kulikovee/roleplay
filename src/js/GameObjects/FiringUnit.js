@@ -4,7 +4,7 @@ export default class FiringUnit extends Unit {
     constructor(params = {}) {
         super({
             fireTimeout: 1.5,
-            fireFlySpeed: 0.3,
+            fireFlySpeed: 3,
             ...params
         });
 

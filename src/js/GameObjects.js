@@ -45,10 +45,10 @@ export default class GameObjectsService extends AutoBindMethods {
                 return;
             }
 
-            const attackedUnits = this.gameObjects.filter(gameObject => (
+            const attackedUnits = this.getUnits().filter(gameObject => (
                 gameObject !== attackingUnit
-                && gameObject instanceof Unit
                 && gameObject.isAlive()
+                && gameObject.isEnemy(attackingUnit)
                 && gameObject.position.distanceTo(attackingUnit.position) < 2
             ));
 

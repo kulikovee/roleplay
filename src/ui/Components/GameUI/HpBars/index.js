@@ -55,7 +55,7 @@ class App extends Component {
                 }
 
                 if (unit.isAlive()) {
-                    const unitPosition = unit.position.clone().add(new THREE.Vector3(0, 1.8, 0)),
+                    const unitPosition = unit.position.clone().add(new THREE.Vector3(0, 1.8 * unit.object.scale.y, 0)),
                         distance = cameraPosition.distanceTo(unitPosition),
                         isNearEnough = distance < 20,
                         screenBarPosition = isNearEnough && camera.toScreenPosition(unitPosition),

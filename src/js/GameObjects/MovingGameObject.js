@@ -4,11 +4,10 @@ import AnimatedGameObject from './AnimatedGameObject';
 export default class MovingGameObject extends AnimatedGameObject {
     constructor(params = {}) {
         super({
-            speed: 0.01,
+            speed: 0.1,
             throttling: new THREE.Vector3(0.5, 0.95, 0.5),
             acceleration: new THREE.Vector3(),
             mas: 0,
-            isGrounded: false,
             checkWay: () => true,
             ...params
         });
@@ -21,13 +20,13 @@ export default class MovingGameObject extends AnimatedGameObject {
         if (this.params.mas) {
             acceleration.y -= 0.01;
 
-            this.params.isGrounded = !this.checkWay(0, -0.2, 0);
-            this.animationState.isJump = !this.params.isGrounded;
+            this.isGrounded = !this.checkWay(0, -0.2, 0);
+            this.animationState.isJump = !this.isGrounded;
         }
-
-        const isX = acceleration.x && this.checkWay(acceleration.x, 0, 0);
-        const isY = acceleration.y && this.checkWay(0, acceleration.y, 0);
-        const isZ = acceleration.z && this.checkWay(0, 0, acceleration.z);
+        
+        const isX = Boolean(acceleration.x) && this.checkWay(acceleration.x, 0, 0);
+        const isY = Boolean(acceleration.y) && this.checkWay(0, acceleration.y, 0);
+        const isZ = Boolean(acceleration.z) && this.checkWay(0, 0, acceleration.z);
 
         if (!isX || !isY || !isZ) {
             if (!this.params.mas) {
@@ -62,12 +61,21 @@ export default class MovingGameObject extends AnimatedGameObject {
         acceleration.y *= throttling.y;
         acceleration.z *= throttling.z;
 
-        this.position.add(acceleration); // acceleration.multiplyScalar(deltaTime * 60)
+        const isMoving = (
+            Math.abs(acceleration.x) > 0.001
+            || Math.abs(acceleration.y) > 0.001
+            || Math.abs(acceleration.z) > 0.001
+        );
+
+        if (isMoving) {
+            // acceleration.multiplyScalar(deltaTime * 60)
+            this.position.add(acceleration);
+        }
     }
 
     checkWay(x = 0, y = 0, z = 0) {
         const { position, params: { checkWay } } = this;
-        const nextPosition = new THREE.Vector3(position.x + x, position.y + y, position.z + z);
+        const nextPosition = new THREE.Vector3(position.x + x, position.y + y + 0.1, position.z + z);
 
         return checkWay(nextPosition, this);
     }

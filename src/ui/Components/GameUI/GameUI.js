@@ -195,7 +195,7 @@ class App extends Component {
             case 'talent-speed':
                 if (unspentTalents > 0) {
                     player.decreaseUnspentTalents();
-                    player.addSpeed(0.005);
+                    player.addSpeed(0.05);
                 }
                 break;
             case 'talent-damage':

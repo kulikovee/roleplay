@@ -91,7 +91,7 @@ export default class Units extends AutoBindMethods {
     createAI({ fraction, level, position: { x, y, z }, rotation = {}, scale, onDie }) {
         const gameObjectsService = this.scene.gameObjectsService;
         const getPriority = (unit, target) => (
-            Number(target instanceof Player) * 0.75
+            (target instanceof Player ? 0.75 : 0)
             + 1 / Math.ceil(target.position.distanceTo(unit.position))
         );
 
@@ -104,7 +104,7 @@ export default class Units extends AutoBindMethods {
                 const ai = gameObjectsService.hookGameObject(new AI({
                     animations: gltf.animations,
                     object: gltf.scene,
-                    speed: 0.035 + level * 0.0025,
+                    speed: 0.4 + level * 0.02,
                     damage: 5 + level * 1.5,
                     hp: 70 + level * 20,
                     fraction,
@@ -123,10 +123,8 @@ export default class Units extends AutoBindMethods {
                             }
                         }
                     }, 10000),
-                    // TODO: Move to `Unit` class
-                    isEnemy: unit => unit.fraction !== fraction,
                     findTarget: () => {
-                        const priorityUnits = this.getAliveUnits()
+                        const nearEnemyUnits = this.getAliveUnits()
                             .filter(unit => (
                                 unit !== ai
                                 && unit.getFraction() !== fraction
@@ -134,7 +132,7 @@ export default class Units extends AutoBindMethods {
                             ))
                             .sort((unitA, unitB) => getPriority(ai, unitB) - getPriority(ai, unitA));
 
-                        return priorityUnits.length ? priorityUnits[0] : null;
+                        return nearEnemyUnits.length ? nearEnemyUnits[0] : null;
                     },
                 }));
 

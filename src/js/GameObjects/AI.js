@@ -4,23 +4,23 @@ import FiringUnit from './FiringUnit';
 export default class AI extends FiringUnit {
     constructor(params = {}) {
         super({
-            speed: 0.05,
+            speed: 0.5,
             damage: 10,
             mas: 1,
             hp: 100,
-            fraction: 'enemy',
+            fraction: 'neutral',
             fireTimeout: 1.5,
             attackTimeout: 1.5,
             jumpTimeout: 1.5,
             startRunTimeout: 1,
             nextPointUpdateTimeout: 0.1,
-            updateTargetTimeout: 0.5,
+            updateTargetTimeout: 3,
             ...params,
         });
 
         const { hp, damage, speed } = this.params;
 
-        this.params.bounty = hp / 4 + damage + speed * 300;
+        this.params.bounty = hp / 4 + damage + speed * 30;
         this.lastRun = 0;
         this.lastTargetUpdate = 0;
         this.lastNextPointUpdate = 0;
@@ -39,7 +39,7 @@ export default class AI extends FiringUnit {
             this.params.target = this.params.findTarget();
         }
 
-        const { object, target, acceleration, speed, getNextPoint, isEnemy } = this.params;
+        const { object, target, acceleration, speed, getNextPoint } = this.params;
 
         if (target) {
             if (getNextPoint) {
@@ -55,11 +55,9 @@ export default class AI extends FiringUnit {
         const isTargetNear = target && object.position.distanceTo(target.position) < 1.75;
 
         const isAttack = (
-            target
-            && (!isEnemy || isEnemy(target))
-            && isTargetNear
+            isTargetNear
+            && this.isEnemy(target)
             && target.isAlive()
-            && target.getFraction() !== this.getFraction()
         );
 
         if (isAttack) {
@@ -67,7 +65,7 @@ export default class AI extends FiringUnit {
         } else if (this.nextPoint) {
             this.rotateToPosition(this.nextPoint);
         }
-
+        
         const isNextPointNear = !this.nextPoint;
 
         this.isRunning = (
@@ -82,22 +80,27 @@ export default class AI extends FiringUnit {
         if (isAttack) {
             this.attack();
         }
-
+        
         this.animationState.isMovingForward = this.isRunning && this.isAcceleration();
 
         if (this.isRunning) {
-            this.lastRun = time;
-            acceleration.add(this.getForward().multiplyScalar(speed * (deltaTime * 0.06)));
+            const checkWay = (jumpHeight) => {
+                const { params: { acceleration: { x: dx, y: dy, z: dz } } } = this;
+                return this.checkWay(dx, dy + jumpHeight, dz);
+            };
 
-            const isJump = (
-                this.params.isGrounded
+            this.lastRun = time;
+            acceleration.add(this.getForward().multiplyScalar((speed * 0.1) * (deltaTime * 0.06)));
+
+            const isJumpNeeded = (
+                this.isGrounded
                 && (acceleration.x || acceleration.z)
                 && time - this.lastJumpTimestamp > this.params.jumpTimeout * 1000
-                && !this.checkWayForJump(0.1)
-                && this.checkWayForJump(1.5)
+                && !checkWay(0.1)
+                && checkWay(1.5)
             );
 
-            if (isJump) {
+            if (isJumpNeeded) {
                 this.lastJumpTimestamp = time;
                 acceleration.y += 0.25;
             }
@@ -138,10 +141,5 @@ export default class AI extends FiringUnit {
 
     isUpdateTargetReleased(time) {
         return time - this.lastTargetUpdate > this.params.updateTargetTimeout * 1000;
-    }
-
-    checkWayForJump(jumpHeight) {
-        const { params: { acceleration: { x: dx, y: dy, z: dz } } } = this;
-        return this.checkWay(dx, dy + jumpHeight, dz);
     }
 }

@@ -4,7 +4,7 @@ import FiringUnit from './FiringUnit';
 export default class Player extends FiringUnit {
     constructor(params = {}) {
         super({
-            speed: 0.054,
+            speed: 0.54,
             fireTimeout: 0.5,
             damage: 50,
             hp: 100,
@@ -133,8 +133,8 @@ export default class Player extends FiringUnit {
         const { input: { horizontal, vertical, jump } } = this.params;
 
         const speed = vertical && horizontal
-            ? this.params.speed * 0.7 * (deltaTime * 0.06)
-            : this.params.speed * (deltaTime * 0.06);
+            ? this.params.speed * 0.1 * 0.7 * (deltaTime * 0.06)
+            : this.params.speed * 0.1 * (deltaTime * 0.06);
 
         const addForward = vertical === 1
             ? speed
@@ -142,12 +142,12 @@ export default class Player extends FiringUnit {
 
         const addSide = vertical === -1
             ? (-horizontal * speed * 0.6)
-            : (-horizontal * speed);
+            : (-horizontal * speed );
 
         const isJump = (
             time - this.lastJumpTimestamp > this.params.jumpTimeout * 1000
             && jump
-            && this.params.isGrounded
+            && this.isGrounded
         );
 
         if (isJump) {

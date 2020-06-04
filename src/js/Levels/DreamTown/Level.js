@@ -18,6 +18,7 @@ export default class Level extends AbstractLevel {
         const getAIParams = ({ level, ...params }) => {
             return {
                 ...params,
+                level,
                 scale: 0.7 + level / 10,
                 onDie: () => this.scene.units.createAI(getAIParams({
                     ...params,
@@ -32,9 +33,9 @@ export default class Level extends AbstractLevel {
             fraction: 'goats'
         });
 
-        const getFriendlyParams = (level, position, rotation) => getAIParams(
-            { level, position, rotation, fraction: 'friendly' },
-        );
+        const getFriendlyParams = (level, position, rotation) => getAIParams({
+                level, position, rotation, fraction: 'friendly',
+        });
     
         this.scene.intervals.setInterval(() => {
             const effectPosition = { x: 0, y: 0, z: 30 };
@@ -55,7 +56,6 @@ export default class Level extends AbstractLevel {
             if (player && player.position.distanceTo(positionVector) < 5) {
                 player.addHP(25);
             }
-            
         }, 10000);
 
         this.units = [
@@ -72,7 +72,6 @@ export default class Level extends AbstractLevel {
             getGoatsParams(1, { x: 45, y: 0.2, z: 45 }),
             getGoatsParams(1, { x: 45, y: 0.2, z: -45 }),
 
-            getGoatsParams(25, { x: 0, y: 0.2, z: 0 }),
             getGoatsParams(25, { x: 0, y: 0.2, z: 0 }),
 
             getFriendlyParams(5, { x: -0.8, y: 0.2, z: 40 - 4.03 }, { y: Math.PI }),

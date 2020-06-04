@@ -92,6 +92,14 @@ export default class Unit extends MovingGameObject {
     isAlive() {
         return !this.isDead();
     }
+    
+    isEnemy(unit) {
+        return (
+            unit.params.fraction !== this.params.fraction
+            && unit.params.fraction !== 'neutral'
+            && this.params.fraction !== 'neutral'
+        );
+    }
 
     getAttackTimeout() {
         return this.params.attackDamageTimeout * 1000;
