@@ -12,6 +12,7 @@ const animationNames = {
     runRight: 'Run Right',
     walkBack: 'Walk Back',
     die: 'Die',
+    spawn: 'Spawn',
     hit: 'Hit',
 
     // Complex animimations
@@ -33,6 +34,8 @@ const animationNames = {
     bottomHit: 'Bottom Hit',
     topDie: 'Top Die',
     bottomDie: 'Bottom Die',
+    topSpawn: 'Top Spawn',
+    bottomSpawn: 'Bottom Spawn',
 };
 
 const topAnimations = [
@@ -97,6 +100,7 @@ export default class AnimatedGameObject extends GameObject {
             bottomBones: [...bottomBones],
             topAnimations: [...topAnimations],
             bottomAnimations: [...bottomAnimations],
+            spawnTimeout: 1,
             ...params
         });
 
@@ -111,10 +115,12 @@ export default class AnimatedGameObject extends GameObject {
             isJump: false,
             isDie: false,
             isHit: false,
+            isSpawn: true,
         };
 
         this.playingAnimations = {};
         this.legsRotationY = 0;
+        this.spawnTime = 0;
 
         this.mixer = new THREE.AnimationMixer(this.params.object);
 
@@ -123,8 +129,16 @@ export default class AnimatedGameObject extends GameObject {
 
     update(time, deltaTime) {
         super.update(time, deltaTime);
+        
+        if (!this.spawnTime) {
+            this.spawnTime = time;
+        } else if (this.animationState.isSpawn && this.isSpawnFinished(time)) {
+            this.animationState.isSpawn = false;
+        }
 
-        if (this.mixer) this.mixer.update(deltaTime / 1000);
+        if (this.mixer) {
+            this.mixer.update(deltaTime / 1000);
+        }
 
         if (this.params.complexAnimations) {
             this.updateComplexAnimations();
@@ -193,6 +207,7 @@ export default class AnimatedGameObject extends GameObject {
                 attack,
                 topAttack,
                 die,
+                spawn,
                 topDie,
                 bottomDie,
                 topJump,
@@ -201,7 +216,7 @@ export default class AnimatedGameObject extends GameObject {
             } = {}
         } = this;
 
-        [jump, die, topDie, bottomDie, topJump, bottomJump].forEach((clampAnimation) => {
+        [jump, die, spawn, topDie, bottomDie, topJump, bottomJump].forEach((clampAnimation) => {
             if (clampAnimation) {
                 clampAnimation.setLoop(THREE.LoopOnce, 0);
                 clampAnimation.clampWhenFinished = true;
@@ -240,6 +255,10 @@ export default class AnimatedGameObject extends GameObject {
         );
     }
 
+    isSpawnFinished(time) {
+        return time - this.spawnTime > this.params.spawnTimeout * 1000;
+    }
+
     clearAnimationBones(animation, bones) {
         if (animation) {
             const getBoneName = item => item.name.split('.')[0],
@@ -263,6 +282,7 @@ export default class AnimatedGameObject extends GameObject {
                 topJump, bottomJump,
                 topHit, bottomHit,
                 topDie, bottomDie,
+                topSpawn, bottomSpawn,
             } = {}
         } = this;
 
@@ -275,6 +295,7 @@ export default class AnimatedGameObject extends GameObject {
             isJump,
             isDie,
             isHit,
+            isSpawn,
         } = this.animationState;
 
         const playingAnimations = {
@@ -289,6 +310,7 @@ export default class AnimatedGameObject extends GameObject {
                 || (isMovingRight && topRunRight)
                 || (isMovingLeft && topRunLeft)
                 || (isMovingForward && topRun)
+                || (isSpawn && topSpawn)
                 || (topStand)
             ),
             bottom: (
@@ -302,6 +324,7 @@ export default class AnimatedGameObject extends GameObject {
                 || (isMovingForward && bottomRun)
                 || (isAttack && bottomAttack)
                 || (isHit && bottomHit)
+                || (isSpawn && bottomSpawn)
                 || (bottomStand)
             ),
         };
@@ -367,6 +390,7 @@ export default class AnimatedGameObject extends GameObject {
                 rotateLeft,
                 rotateRight,
                 die,
+                spawn,
             } = {}
         } = this;
 
@@ -381,6 +405,7 @@ export default class AnimatedGameObject extends GameObject {
             isRotateRight,
             isDie,
             isHit,
+            isSpawn,
         } = this.animationState;
 
         return (
@@ -394,6 +419,7 @@ export default class AnimatedGameObject extends GameObject {
             || (isMovingForward && run)
             || (isRotateLeft && rotateLeft)
             || (isRotateRight && rotateRight)
+            || (isSpawn && spawn)
             || stand
         );
     }

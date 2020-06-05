@@ -1,8 +1,12 @@
 import * as THREE from 'three';
+import Scene from './Scene';
 import AutoBindMethods from './AutoBindMethods';
 import AnimatedGameObject from './GameObjects/AnimatedGameObject';
 
 export default class Particles extends AutoBindMethods {
+    /**
+     * @param {Scene} scene
+     */
     constructor(scene) {
         super();
         this.scene = scene;
@@ -39,6 +43,7 @@ export default class Particles extends AutoBindMethods {
         effect = 'level-up-alt/level-up',
         position = {},
         attachTo,
+        lifeTime = 2080,
     }) {
         this.scene.models.loadGLTF({
             baseUrl: './assets/models/effects/' + effect,
@@ -70,11 +75,14 @@ export default class Particles extends AutoBindMethods {
             
                 this.scene.intervals.setTimeout(
                     () => this.scene.gameObjectsService.destroyGameObject(effect),
-                    2080,
+                    lifeTime,
                 );
             }
         });
     }
+    
+    
+    
 
     loadEffect({
         particleName = 'blood',

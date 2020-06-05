@@ -37,26 +37,23 @@ export default class Level extends AbstractLevel {
                 level, position, rotation, fraction: 'friendly',
         });
     
-        this.scene.intervals.setInterval(() => {
-            const effectPosition = { x: 0, y: 0, z: 30 };
-
-            this.scene.particles.createEffect({
-                effect: 'level-up/level-up',
-                scale: 1,
-                attachTo: this.scene.scene,
-                position: effectPosition,
-            });
-    
-            /**
-             * @type {Player} player
-             */
-            const player = this.scene.getPlayer();
-            const positionVector = new THREE.Vector3(effectPosition.x, effectPosition.y, effectPosition.z);
-
-            if (player && player.position.distanceTo(positionVector) < 5) {
-                player.addHP(25);
-            }
-        }, 10000);
+        const createHealItem = () => (
+            this.scene.intervals.setTimeout(() => {
+                const itemHealPosition = new THREE.Vector3(-6.5, 0.1, 32.8);
+        
+                this.scene.gameObjectsService.createItem({
+                    model: 'item-heal',
+                    position: itemHealPosition,
+                    canPickup: (unit) => (unit.getMaxHP() - unit.getHP() > 0),
+                    onPickup: (unit) => {
+                        unit.addHP(25);
+                        createHealItem();
+                    },
+                });
+            }, 10000)
+        );
+        
+        createHealItem();
 
         this.units = [
             getGoatsParams(3, { x: -17, y: 0.2, z: -5 }),

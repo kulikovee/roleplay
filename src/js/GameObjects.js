@@ -112,6 +112,73 @@ export default class GameObjectsService extends AutoBindMethods {
 
         // this.scene.audio.playSound(firingGameObject.position, 'Lasers');
     }
+    
+    createItem({
+        scale = 1.5,
+        model = 'item-heal',
+        position = {},
+        canPickup,
+        onPickup,
+    }) {
+        this.scene.models.loadGLTF({
+            baseUrl: './assets/models/items/' + model,
+            noScene: true,
+            callback: loadedObject => {
+                const positionVector = new THREE.Vector3(position.x || 0, position.y || 0, position.z || 0);
+                loadedObject.scene.scale.set(scale, scale, scale);
+            
+                loadedObject.scene.traverse((child) => {
+                    if (child.isMesh) {
+                        child.material.transparent = true;
+                        child.material.alphaTest = 0.5;
+                    }
+                });
+            
+                loadedObject.scene.position.set(positionVector.x, positionVector.y, positionVector.z);
+                this.scene.scene.add(loadedObject.scene);
+            
+                const gameItem = new AnimatedGameObject({
+                    object: loadedObject.scene,
+                    animations: loadedObject.animations,
+                });
+            
+                this.scene.gameObjectsService.hookGameObject(gameItem);
+            
+                const checkPickup = () => {
+                    this.scene.intervals.setTimeout(
+                        () => {
+                            const getPriority = unit => 1 / Math.ceil(positionVector.distanceTo(unit.position));
+                            const nearUnits = this.scene.units
+                                .getAliveUnits()
+                                .filter((unit) => (
+                                    (!canPickup || canPickup(unit))
+                                    && positionVector.distanceTo(unit.position) < 1
+                                ))
+                                .sort((unitA, unitB) => getPriority(unitB) - getPriority(unitA));
+                        
+                            if (nearUnits.length) {
+                                if (onPickup) {
+                                    onPickup(nearUnits[0]);
+                                }
+                            
+                                gameItem.animationState.isDie = true;
+                            
+                                this.scene.intervals.setTimeout(
+                                    () => this.scene.gameObjectsService.destroyGameObject(gameItem),
+                                    500,
+                                );
+                            } else {
+                                checkPickup();
+                            }
+                        },
+                        1000,
+                    );
+                };
+            
+                checkPickup();
+            }
+        });
+    }
 
     /**
      * @param {GameObject} gameObject
