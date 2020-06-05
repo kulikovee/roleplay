@@ -11,7 +11,7 @@ export default ({
             </div>
             <div className="row">
                 <div>
-                    <Button value="Start Offline Game" onClick={onStartGame} />
+                    <Button value="Join the Game" onClick={onStartGame} />
                 </div>
             </div>
         </div>

@@ -84,8 +84,8 @@ export default class Colliders extends AutoBindMethods {
     }
 
     rebuildAreas() {
-        if (this.scene.level) {
-            this.areas = this.scene.level.getAreas().map(area => ({
+        if (this.scene.location) {
+            this.areas = this.scene.location.getAreas().map(area => ({
                 ...area,
                 graph: new AStar.Graph(area.getWaypoints(), { diagonal: true }),
             }));

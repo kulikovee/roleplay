@@ -81,7 +81,7 @@ export default class AI extends FiringUnit {
         if (isAttack) {
             this.attack();
         }
-        
+
         this.animationState.isMovingForward = this.isRunning && this.isAcceleration();
 
         if (this.isRunning) {
@@ -116,8 +116,8 @@ export default class AI extends FiringUnit {
             position.z - object.position.z
         );
 
-        this.animationState.isRotateLeft = rotationToTargetRadians - object.rotation.y > 0.1;
-        this.animationState.isRotateRight = rotationToTargetRadians - object.rotation.y < -0.1;
+        // this.animationState.isRotateLeft = rotationToTargetRadians - object.rotation.y > 0.1;
+        // this.animationState.isRotateRight = rotationToTargetRadians - object.rotation.y < -0.1;
 
         const targetQuaternion = new THREE.Quaternion();
         targetQuaternion.setFromEuler(object.rotation.clone().set(0, rotationToTargetRadians, 0));
@@ -143,7 +143,7 @@ export default class AI extends FiringUnit {
     isUpdateTargetReleased(time) {
         return time - this.lastTargetUpdate > this.params.updateTargetTimeout * 1000;
     }
-    
+
     damageTaken({ damage, unit: attacker } = {}, time) {
         super.damageTaken({ damage, unit: attacker }, time);
 

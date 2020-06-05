@@ -6,7 +6,7 @@ import Connection from './Connection';
 import GameObjectsService from './GameObjects';
 import Input from './Input';
 import Intervals from './Intervals';
-import Level from './Levels/DreamTown';
+import Location from './Locations/DreamTown';
 import Colliders from './Colliders';
 import Models from './Models';
 import Particles from './Particles';
@@ -53,7 +53,7 @@ export default class Scene extends AutoBindMethods {
         this.gameObjectsService = new GameObjectsService(this);
         this.particles = new Particles(this);
         this.connection = new Connection(this, 'gohtml.ru');
-        this.level = new Level(this);
+        this.location = new Location(this);
 
         this.intervals.setInterval(() => {
             this.ui.setFps(this.renderer.fps, this.renderer.targetFps);
@@ -70,7 +70,7 @@ export default class Scene extends AutoBindMethods {
 
     clearScene() {
         this.gameObjectsService.removeAll();
-        this.level.afterClear();
+        this.location.afterClear();
     }
 
     animate() {
@@ -84,9 +84,9 @@ export default class Scene extends AutoBindMethods {
             this.camera.update(gameTime, deltaTime);
             this.ui.update();
             this.input.update();
-            this.level.update();
+            this.location.update();
             this.particles.update();
-            this.connection.send(this.getPlayer());
+            this.connection.update(gameTime, deltaTime);
         }
 
         this.renderer.render(this.scene, this.camera.camera, deltaTime);

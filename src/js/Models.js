@@ -75,7 +75,7 @@ export default class Models extends AutoBindMethods {
     }) {
         const loader = new GLTFLoader();
         const url = `${baseUrl}.glb${isGLTF ? '.gltf' : ''}`;
-
+        
         loader.load(url, (loadedModel) => {
             loadedModel.scene.traverse(function (child) {
                 if (child instanceof THREE.Mesh) {

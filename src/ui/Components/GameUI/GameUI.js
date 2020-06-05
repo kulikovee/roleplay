@@ -249,7 +249,7 @@ class App extends Component {
     }
 
     restartGame() {
-        this.scene.level.restartLevel();
+        this.scene.location.restartLevel();
         this.scene.camera.update();
         this.clearHpBars();
         this.setState({ showRestart: false });

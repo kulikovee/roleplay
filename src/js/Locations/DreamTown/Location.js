@@ -1,11 +1,11 @@
 import * as THREE from 'three';
-import AbstractLevel from '../AbstractLevel';
+import AbstractLocation from '../AbstractLocation';
 import { Player, Fire } from '../../GameObjects';
 import Elevator from './Elevator';
 import { createEnvironment } from './Environment';
 import Areas from './Areas';
 
-export default class Level extends AbstractLevel {
+export default class Location extends AbstractLocation {
     /**
      * @param {Scene} scene
      */
@@ -47,7 +47,7 @@ export default class Level extends AbstractLevel {
                 this.scene.ui.setLoading(false);
                 this.scene.ui.setPause(false);
                 this.scene.notify('Dream Town');
-                this.startLevel();
+                this.startLocation();
             }
         });
 
@@ -70,7 +70,7 @@ export default class Level extends AbstractLevel {
         const far = 100;
         this.scene.scene.fog = new THREE.Fog(color, near, far);
 
-        this.createLevelColliders();
+        this.createLocationColliders();
     }
 
     update() {
@@ -111,13 +111,13 @@ export default class Level extends AbstractLevel {
                 player.addMoney(object.params.bounty);
             },
             onDamageTaken: () => this.scene.ui.updatePlayerParams(),
-            onLevelUp: () => this.scene.ui.updatePlayerParams(),
+            onLocationUp: () => this.scene.ui.updatePlayerParams(),
         });
 
         this.createInteractiveGameObjects();
     }
 
-    startLevel() {
+    startLocation() {
         if (this.interval) {
             clearInterval(this.interval);
         }
@@ -125,11 +125,11 @@ export default class Level extends AbstractLevel {
         this.scene.ui.setRestartButtonVisible(false);
     }
 
-    restartLevel() {
+    restartLocation() {
         this.scene.clearScene();
     }
 
-    stopLevel() {
+    stopLocation() {
         this.scene.remove(this.environment);
         // this.scene.remove(this.skybox);
         this.scene.remove(this.ambientLight);
@@ -206,7 +206,7 @@ export default class Level extends AbstractLevel {
         ].forEach(this.scene.units.createAI);
     }
 
-    createLevelColliders() {
+    createLocationColliders() {
         const isBetween = (v, min, max) => v > min && v < max;
 
         this.scene.colliders.addColliderFunction((position, gameObject) => {
@@ -227,20 +227,21 @@ export default class Level extends AbstractLevel {
                 return true;
             }
 
-            const units = this.scene.units.getAliveUnits();
-
-            for(let unit of units) {
-                if (
-                    unit !== gameObject
-                    && (
-                        !(gameObject instanceof Fire)
-                        || gameObject.params.parent !== unit
-                    )
-                    && unit.getCollider(position)
-                ) {
-                    return true;
-                }
-            }
+            // TODO: Check if we need units colliders
+            // const units = this.scene.units.getAliveUnits();
+            //
+            // for(let unit of units) {
+            //     if (
+            //         unit !== gameObject
+            //         && (
+            //             !(gameObject instanceof Fire)
+            //             || gameObject.params.parent !== unit
+            //         )
+            //         && unit.getCollider(position)
+            //     ) {
+            //         return true;
+            //     }
+            // }
 
             return false;
         });

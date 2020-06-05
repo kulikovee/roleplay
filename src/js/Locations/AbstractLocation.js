@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import AutoBindMethods from '../AutoBindMethods';
 
-export default class AbstractLevel extends AutoBindMethods {
+export default class AbstractLocation extends AutoBindMethods {
     /**
      * @param {Scene} scene
      */
@@ -13,12 +13,12 @@ export default class AbstractLevel extends AutoBindMethods {
 
     update() {}
 
-    startLevel() {}
-    restartLevel() {}
-    stopLevel() {}
+    startLocation() {}
+    restartLocation() {}
+    stopLocation() {}
     onAction() {}
 
-    getLevelId() {
+    getLocationName() {
         return this.id;
     }
 

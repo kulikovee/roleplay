@@ -53,30 +53,32 @@ export default class Player extends FiringUnit {
         this.animationState.isMovingForward = input.vertical === 1;
         this.animationState.isMovingBackward = input.vertical === -1;
 
-        if (input.isThirdPerson) {
-            if (input.look.horizontal) {
-                const horizontalLook = input.look.horizontal;
-                this.animationState.isRotateLeft = horizontalLook < 0;
-                this.animationState.isRotateRight = horizontalLook > 0;
-                this.rotationAcceleration += (-horizontalLook / 5000) * input.look.sensitivity;
-                input.resetHorizontalLook();
+        if (!input.network) {
+            if (input.isThirdPerson) {
+                if (input.look.horizontal) {
+                    const horizontalLook = input.look.horizontal;
+                    this.animationState.isRotateLeft = horizontalLook < 0;
+                    this.animationState.isRotateRight = horizontalLook > 0;
+                    this.rotationAcceleration += (-horizontalLook / 5000) * input.look.sensitivity;
+                    input.resetHorizontalLook();
+                }
+
+                const CALC_ROTATE_THRESHOLD = 0.0000001;
+
+                if (Math.abs(this.rotationAcceleration) > CALC_ROTATE_THRESHOLD) {
+                    object.rotateOnWorldAxis(new THREE.Vector3(0, 1, 0), this.rotationAcceleration);
+                    this.rotationAcceleration *= 0.7;
+                }
+            } else {
+                const deltaX = window.innerWidth / 2 - input.cursor.x;
+                const deltaY = input.cursor.y - window.innerHeight / 2;
+                const rotationY = Math.atan2(deltaY, deltaX);
+
+                this.animationState.isRotateLeft = rotationY > object.rotation.y;
+                this.animationState.isRotateRight = rotationY < object.rotation.y;
+
+                object.rotation.set(0, rotationY, 0);
             }
-
-            const CALC_ROTATE_THRESHOLD = 0.0000001;
-    
-            if (Math.abs(this.rotationAcceleration) > CALC_ROTATE_THRESHOLD) {
-                object.rotateOnWorldAxis(new THREE.Vector3(0, 1, 0), this.rotationAcceleration);
-                this.rotationAcceleration *= 0.7;
-            }
-        } else {
-            const deltaX = window.innerWidth / 2 - input.cursor.x;
-            const deltaY = input.cursor.y - window.innerHeight / 2;
-            const rotationY = Math.atan2(deltaY, deltaX);
-
-            this.animationState.isRotateLeft = rotationY > object.rotation.y;
-            this.animationState.isRotateRight = rotationY < object.rotation.y;
-
-            object.rotation.set(0, rotationY, 0);
         }
     }
 

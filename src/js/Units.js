@@ -21,21 +21,73 @@ export default class Units extends AutoBindMethods {
         return this.player;
     }
 
-    createAnotherPlayer(callback) {
-        const pivot = new THREE.Object3D();
-        const { hookGameObject } = this.scene.gameObjects;
+    createNetworkAI({ params }, callback) {
+        const gameObjectsService = this.scene.gameObjectsService;
 
-        this.scene.models.loadGLTF({
-            baseUrl: './assets/models/units/player',
-            noScene: true,
-            callback: (loadedObject) => hookGameObject(new AnimatedGameObject({
-                object: loadedObject.scene,
-                animations: loadedObject.animations,
-                complexAnimations: true,
-            })),
+        return this.scene.models.loadGLTF({
+            baseUrl: params.fraction === 'goats'
+               ? './assets/models/units/goat-warrior'
+               : './assets/models/units/enemy',
+            callback: (loadedObject) => {
+                const ai = gameObjectsService.hookGameObject(new AI({
+                    object: loadedObject.scene,
+                    animations: loadedObject.animations,
+                    checkWay: this.scene.colliders.checkWay,
+                    unitNetworkId: 2 + Math.random().toString(32),
+                    fromNetwork: true,
+                    // getNextPoint: this.scene.pathFinder.getNextPoint,
+                    attack: () => gameObjectsService.attack(ai),
+                    onDamageTaken: () => this.scene.particles.loadEffect({
+                        position: ai.position.clone().add(new THREE.Vector3(0, 0.75, 0))
+                    }),
+                    onDie: () => this.scene.intervals.setTimeout(() => {
+                        if (ai.isDead()) {
+                            gameObjectsService.destroyGameObject(ai);
+                        }
+                    }, 10000),
+                    name: ' ',
+                }));
+
+                ai.params.level = params.level;
+
+                callback(ai);
+            },
         });
+    }
 
-        return pivot;
+    createNetworkPlayer(id, callback) {
+        const gameObjectsService = this.scene.gameObjectsService;
+
+        return this.scene.models.loadGLTF({
+            baseUrl: './assets/models/units/network-player',
+            callback: (loadedObject) => {
+                const player = gameObjectsService.hookGameObject(new Player({
+                    object: loadedObject.scene,
+                    animations: loadedObject.animations,
+                    complexAnimations: true,
+                    checkWay: this.scene.colliders.checkWay,
+                    unitNetworkId: id,
+                    fromNetwork: true,
+                    input: {
+                        network: true,
+                        vertical: 0,
+                        horizontal: 0,
+                        jump: false,
+                        cursor: {
+                            x: 0,
+                            y: 0,
+                        },
+                        look: {
+                            vertical: 0,
+                            horizontal: 0,
+                        },
+                    },
+                    name: ' ',
+                }));
+
+                callback(player)
+            },
+        });
     }
 
     createPlayer({
