@@ -143,4 +143,13 @@ export default class AI extends FiringUnit {
     isUpdateTargetReleased(time) {
         return time - this.lastTargetUpdate > this.params.updateTargetTimeout * 1000;
     }
+    
+    damageTaken({ damage, unit: attacker } = {}, time) {
+        super.damageTaken({ damage, unit: attacker }, time);
+
+        if (!this.params.target) {
+            this.params.target = attacker;
+            this.lastTargetUpdate = time;
+        }
+    }
 }

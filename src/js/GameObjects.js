@@ -95,8 +95,8 @@ export default class GameObjectsService extends AutoBindMethods {
         const fireGameObject = this.hookGameObject(new Fire({
             object,
             throttling: new THREE.Vector3(1, 1, 1),
-            speed: firingGameObject.params.fireFlySpeed,
-            damage: firingGameObject.params.damage,
+            speed: firingGameObject.params.fireShellSpeed,
+            damage: firingGameObject.params.fireDamage,
             parent: firingGameObject,
             checkWay: this.scene.colliders.checkWay,
             getCollisions: () => this.gameObjects.filter(gameObject => (

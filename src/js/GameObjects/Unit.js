@@ -113,21 +113,26 @@ export default class Unit extends MovingGameObject {
         return this.params.attackDamageTimeout * 1000;
     }
 
-    damageTaken(attackParams, time) {
-        if (attackParams) {
-            this.params.hp -= attackParams.damage;
-            const damageDealerUnit = attackParams.unit;
+    damageTaken({ damage, unit: attacker } = {}, time) {
+        if (damage && attacker) {
+            this.params.hp -= damage;
 
-            this.dispatchEvent('onDamageTaken', damageDealerUnit);
+            this.dispatchEvent('onDamageTaken', attacker);
 
-            if (damageDealerUnit) {
-                damageDealerUnit.dispatchEvent('onDamageDeal', this);
+            if (attacker) {
+                attacker.dispatchEvent('onDamageDeal', this);
             }
 
-            this.latestHitTimestamp = time;
+            const interruptByChance = Math.random() < 0.33;
+            const interruptByLevel = attacker.getLevel() - this.getLevel() > 2;
+            const shouldBeInterrupted = interruptByLevel || interruptByChance;
+
+            if (shouldBeInterrupted) {
+                this.latestHitTimestamp = time;
+            }
 
             if (this.isDead()) {
-                this.die(damageDealerUnit);
+                this.die(attacker);
             }
         }
     }

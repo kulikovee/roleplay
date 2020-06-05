@@ -107,7 +107,7 @@ export default class Units extends AutoBindMethods {
                     object: gltf.scene,
                     speed: 0.35 + level * 0.025,
                     damage: 5 + level * 1.5,
-                    hp: 70 + level * 20,
+                    hp: 70 + level * 30,
                     fraction,
                     name,
                     level,

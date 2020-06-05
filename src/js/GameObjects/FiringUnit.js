@@ -3,8 +3,9 @@ import Unit from './Unit';
 export default class FiringUnit extends Unit {
     constructor(params = {}) {
         super({
+            fireDamage: 10,
             fireTimeout: 1.5,
-            fireFlySpeed: 3,
+            fireShellSpeed: 3,
             ...params
         });
 
@@ -29,7 +30,7 @@ export default class FiringUnit extends Unit {
 
         this.isFire = false;
 
-        if (this.shouldFire && this.params.fire && this.isFireReleased(time)) {
+        if (this.shouldFire && this.params.fire && this.isFireReleased(time) && this.isAttackReleased(time)) {
             this.isFire = true;
             this.shouldFire = false;
             this.latestFire = time;
