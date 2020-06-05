@@ -30,6 +30,7 @@ class App extends Component {
     update() {
         const { units, camera } = this.props.scene;
         const container = this.container.current;
+        const player = this.props.scene.getPlayer();
 
         if (container) {
             const hpBars = units.getUnits().map(unit => ({
@@ -39,39 +40,66 @@ class App extends Component {
             }));
 
             camera.camera.updateMatrixWorld(true);
-            const cameraPosition = new THREE.Vector3().setFromMatrixPosition(camera.camera.matrixWorld);
 
             Object.keys(hpBars).forEach((hpBarId) => {
                 const hpBar = hpBars[hpBarId];
                 const unit = hpBar.unit;
-                let element = unit.__unit_hp_bar;
+                const unitLevel = unit.getLevel().toString();
+                let hpBarElement = unit.__unit_hp_bar;
 
-                if (!element) {
-                    element = document.createElement('div');
-                    element.className = 'hp-bar';
-                    element.append(document.createElement('div'));
-                    unit.__unit_hp_bar = element;
-                    container.append(element);
+                if (!hpBarElement) {
+                    hpBarElement = document.createElement('div');
+                    hpBarElement.className = (
+                        'hp-bar ' + (
+                            player === unit
+                                ? ''
+                                : (player.isEnemy(unit) ? 'enemy' : 'friendly')
+                        )
+                    );
+    
+                    const levelElement = document.createElement('span');
+                    const nameElement = document.createElement('span');
+                    const barElement = document.createElement('div');
+
+                    levelElement.innerHTML = unitLevel;
+                    levelElement.className = 'level';
+                    nameElement.innerHTML = unit.getName();
+                    nameElement.className = 'name';
+                    barElement.append(document.createElement('div'));
+
+                    hpBarElement.append(levelElement);
+                    hpBarElement.append(nameElement);
+                    hpBarElement.append(barElement);
+
+                    unit.__unit_hp_bar = hpBarElement;
+                    container.append(hpBarElement);
                 }
 
                 if (unit.isAlive()) {
-                    const unitPosition = unit.position.clone().add(new THREE.Vector3(0, 1.8 * unit.object.scale.y, 0)),
-                        distance = cameraPosition.distanceTo(unitPosition),
+                    const unitPosition = unit.position.clone().add(new THREE.Vector3(0, 1.9 * unit.object.scale.y, 0)),
+                        distance = player.position.distanceTo(unitPosition),
                         isNearEnough = distance < 20,
                         screenBarPosition = isNearEnough && camera.toScreenPosition(unitPosition),
                         width = Math.min(70, 1000 / distance);
 
-                    element.style.display = screenBarPosition.z > 1 || !isNearEnough ? 'none' : 'block';
+                    hpBarElement.style.display = screenBarPosition.z > 1 || !isNearEnough ? 'none' : 'block';
 
                     if (isNearEnough) {
-                        element.style.left = `${screenBarPosition.x}px`;
-                        element.style.top = `${screenBarPosition.y}px`;
-                        element.style.width = `${width}px`;
+                        hpBarElement.style.left = `${screenBarPosition.x}px`;
+                        hpBarElement.style.top = `${screenBarPosition.y}px`;
+                        hpBarElement.style.width = `${width}px`;
                     }
 
-                    element.children[0].style.width = `${Math.round(100 * unit.getHP() / unit.getMaxHP())}%`;
-                } else if (element) {
-                    element.remove();
+                    const barContainer = hpBarElement.children[2];
+                    const barLine = barContainer.children[0];
+                    barLine.style.width = `${Math.round(100 * unit.getHP() / unit.getMaxHP())}%`;
+    
+                    const levelElement = hpBarElement.children[0];
+                    if (levelElement.innerHTML !== levelElement) {
+                        levelElement.innerHTML = unit.getLevel();
+                    }
+                } else if (hpBarElement) {
+                    hpBarElement.remove();
                     unit.__unit_hp_bar = null;
                 }
             });

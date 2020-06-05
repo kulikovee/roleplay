@@ -15,67 +15,6 @@ export default class Level extends AbstractLevel {
 
         this.shadowLightPosition = new THREE.Vector3(25, 50, 25);
 
-        const getAIParams = ({ level, ...params }) => {
-            return {
-                ...params,
-                level,
-                scale: 0.7 + level / 10,
-                onDie: () => this.scene.units.createAI(getAIParams({
-                    ...params,
-                    level: level + 1 + Math.round(Math.random() * level),
-                })),
-            };
-        };
-        
-        const getGoatsParams = (level, position) => getAIParams({
-            level,
-            position,
-            fraction: 'goats'
-        });
-
-        const getFriendlyParams = (level, position, rotation) => getAIParams({
-                level, position, rotation, fraction: 'friendly',
-        });
-    
-        const createHealItem = () => (
-            this.scene.intervals.setTimeout(() => {
-                const itemHealPosition = new THREE.Vector3(-6.5, 0.1, 32.8);
-        
-                this.scene.gameObjectsService.createItem({
-                    model: 'item-heal',
-                    position: itemHealPosition,
-                    canPickup: (unit) => (unit.getMaxHP() - unit.getHP() > 0),
-                    onPickup: (unit) => {
-                        unit.addHP(25);
-                        createHealItem();
-                    },
-                });
-            }, 10000)
-        );
-        
-        createHealItem();
-
-        this.units = [
-            getGoatsParams(3, { x: -17, y: 0.2, z: -5 }),
-            getGoatsParams(3, { x: 17 , y: 0.2, z: -5 }),
-            getGoatsParams(2, { x: -15, y: 0.2, z: -30 }),
-            getGoatsParams(2, { x: 15, y: 0.2, z: -30 }),
-
-            getGoatsParams(5, { x: -30, y: 0.2, z: -9 }),
-            getGoatsParams(5, { x: 30 , y: 0.2, z: -9 }),
-            getGoatsParams(4, { x: -45, y: 0.2, z: -30 }),
-            getGoatsParams(4, { x: 45, y: 0.2, z: -30 }),
-    
-            getGoatsParams(1, { x: 45, y: 0.2, z: 45 }),
-            getGoatsParams(1, { x: 45, y: 0.2, z: -45 }),
-
-            getGoatsParams(25, { x: 0, y: 0.2, z: 0 }),
-
-            getFriendlyParams(5, { x: -0.8, y: 0.2, z: 40 - 4.03 }, { y: Math.PI }),
-            getFriendlyParams(5, { x: -10 + 3.5, y: 0.2, z: 29.2 }, { y: Math.PI / 2 }),
-            getFriendlyParams(5, { x: 10 - 3.5, y: 0.2, z: 30.8 }, { y: -Math.PI / 2 }),
-        ].forEach(this.scene.units.createAI);
-
         this.scene.ui.setLoading(true);
         this.scene.ui.setPause(true);
 
@@ -151,8 +90,8 @@ export default class Level extends AbstractLevel {
             }
         }
     }
-
-    onClear() {
+    
+    afterClear() {
         this.scene.units.createPlayer({
             /**
              * @param {Player} player
@@ -174,6 +113,8 @@ export default class Level extends AbstractLevel {
             onDamageTaken: () => this.scene.ui.updatePlayerParams(),
             onLevelUp: () => this.scene.ui.updatePlayerParams(),
         });
+
+        this.createInteractiveGameObjects();
     }
 
     startLevel() {
@@ -197,6 +138,72 @@ export default class Level extends AbstractLevel {
         if (this.interval) {
             clearInterval(this.interval);
         }
+    }
+    
+    createInteractiveGameObjects() {
+        const createHealItem = () => (
+            this.scene.intervals.setTimeout(() => {
+                const itemHealPosition = new THREE.Vector3(-6.5, 0.1, 32.8);
+            
+                this.scene.gameObjectsService.createItem({
+                    model: 'item-heal',
+                    position: itemHealPosition,
+                    canPickup: (unit) => (unit.getMaxHP() - unit.getHP() > 0),
+                    onPickup: (unit) => {
+                        unit.addHP(25);
+                        createHealItem();
+                    },
+                });
+            }, 10000)
+        );
+    
+        createHealItem();
+    
+        const getAIParams = ({ level, ...params }) => {
+            return {
+                ...params,
+                level,
+                scale: 0.7 + level / 10,
+                onDie: () => this.scene.units.createAI(getAIParams({
+                    ...params,
+                    level: level + 1 + Math.round(Math.random() * level),
+                })),
+            };
+        };
+    
+        const getGoatsParams = (level, position) => getAIParams({
+            level,
+            position,
+            fraction: 'goats',
+            name: level <= 10
+                ? 'Goat Warrior'
+                : (level <= 20 ? 'Goat Elite' : 'Goat Destroyer'),
+        });
+    
+        const getFriendlyParams = (level, position, rotation) => getAIParams({
+            level, position, rotation, fraction: 'friendly', name: 'Friendly Citizen',
+        });
+    
+        this.units = [
+            getGoatsParams(3, { x: -17, y: 0.2, z: -5 }),
+            getGoatsParams(3, { x: 17 , y: 0.2, z: -5 }),
+            getGoatsParams(2, { x: -15, y: 0.2, z: -30 }),
+            getGoatsParams(2, { x: 15, y: 0.2, z: -30 }),
+        
+            getGoatsParams(5, { x: -30, y: 0.2, z: -9 }),
+            getGoatsParams(5, { x: 30 , y: 0.2, z: -9 }),
+            getGoatsParams(4, { x: -45, y: 0.2, z: -30 }),
+            getGoatsParams(4, { x: 45, y: 0.2, z: -30 }),
+        
+            getGoatsParams(1, { x: 45, y: 0.2, z: 45 }),
+            getGoatsParams(1, { x: 45, y: 0.2, z: -45 }),
+        
+            getGoatsParams(25, { x: 0, y: 0.2, z: 0 }),
+        
+            getFriendlyParams(5, { x: -0.8, y: 0.2, z: 40 - 4.03 }, { y: Math.PI }),
+            getFriendlyParams(5, { x: -10 + 3.5, y: 0.2, z: 29.2 }, { y: Math.PI / 2 }),
+            getFriendlyParams(5, { x: 10 - 3.5, y: 0.2, z: 30.8 }, { y: -Math.PI / 2 }),
+        ].forEach(this.scene.units.createAI);
     }
 
     createLevelColliders() {

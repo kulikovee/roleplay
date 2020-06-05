@@ -101,6 +101,14 @@ export default class Unit extends MovingGameObject {
         );
     }
 
+    getLevel() {
+        return this.params.level;
+    }
+
+    getName() {
+        return this.params.name;
+    }
+
     getAttackTimeout() {
         return this.params.attackDamageTimeout * 1000;
     }

@@ -70,7 +70,7 @@ export default class Scene extends AutoBindMethods {
 
     clearScene() {
         this.gameObjectsService.removeAll();
-        this.level.onClear();
+        this.level.afterClear();
     }
 
     animate() {

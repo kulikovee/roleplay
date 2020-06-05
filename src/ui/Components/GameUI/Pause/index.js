@@ -81,31 +81,12 @@ class App extends Component {
 
                     <hr />
                     <div className="row title">
-                        <label>Shop ({money} left):</label>
+                        <label>Shop (${money} left):</label>
                     </div>
                     <div className="row">
                         <div>
                             <Button onClick={() => buy('hp')}>
                                 Buy: Heal +10 HP ($100)
-                            </Button>
-                        </div>
-                    </div>
-
-                    <hr />
-                    <div className="row title">
-                        <label>God Mode:</label>
-                    </div>
-                    <div className="row">
-                        <div>
-                            <Button onClick={() => buy('god-hp')}>
-                                Add 9999 HP
-                            </Button>
-                        </div>
-                    </div>
-                    <div className="row">
-                        <div>
-                            <Button onClick={() => buy('god-lvl')}>
-                                Level Up
                             </Button>
                         </div>
                     </div>

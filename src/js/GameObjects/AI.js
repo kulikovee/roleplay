@@ -8,6 +8,7 @@ export default class AI extends FiringUnit {
             damage: 10,
             mas: 1,
             hp: 100,
+            name: 'Unnamed Unit',
             fraction: 'neutral',
             fireTimeout: 1.5,
             attackTimeout: 1.5,

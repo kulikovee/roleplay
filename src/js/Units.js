@@ -59,6 +59,7 @@ export default class Units extends AutoBindMethods {
                     input: this.scene.input,
                     complexAnimations: true,
                     checkWay: this.scene.colliders.checkWay,
+                    name: ' ',
                     onDamageDeal: damagedUnit => onDamageDeal(damagedUnit),
                     onDamageTaken: (attacker) => {
                         onDamageTaken(attacker);
@@ -88,7 +89,7 @@ export default class Units extends AutoBindMethods {
         });
     }
 
-    createAI({ fraction, level, position: { x, y, z }, rotation = {}, scale, onDie }) {
+    createAI({ fraction, level, position: { x, y, z }, rotation = {}, scale, onDie, name }) {
         const gameObjectsService = this.scene.gameObjectsService;
         const getPriority = (unit, target) => (
             (target instanceof Player ? 0.75 : 0)
@@ -104,10 +105,12 @@ export default class Units extends AutoBindMethods {
                 const ai = gameObjectsService.hookGameObject(new AI({
                     animations: gltf.animations,
                     object: gltf.scene,
-                    speed: 0.4 + level * 0.02,
+                    speed: 0.35 + level * 0.025,
                     damage: 5 + level * 1.5,
                     hp: 70 + level * 20,
                     fraction,
+                    name,
+                    level,
                     checkWay: this.scene.colliders.checkWay,
                     getNextPoint: this.scene.pathFinder.getNextPoint,
                     attack: () => gameObjectsService.attack(ai),
@@ -128,7 +131,7 @@ export default class Units extends AutoBindMethods {
                             .filter(unit => (
                                 unit !== ai
                                 && unit.getFraction() !== fraction
-                                && unit.position.distanceTo(ai.position) < 20
+                                && unit.position.distanceTo(ai.position) < 15
                             ))
                             .sort((unitA, unitB) => getPriority(ai, unitB) - getPriority(ai, unitA));
 
