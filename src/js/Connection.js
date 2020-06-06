@@ -34,25 +34,102 @@ export default class Connection extends AutoBindMethods {
 		 * @param {string} messageType
 		 */
 		const { meta, data: response, messageType } = JSON.parse(data);
+
+		if (this.meta.role && this.meta.role !== meta.role) {
+			console.log('Connection role changed to', meta.role);
+		}
+
 		this.meta = meta;
 
 		try {
 			switch (messageType) {
 				case 'handshake':
-					// No action needed. Only meta update.
+					this.processHandshake();
 					break;
+
+				case 'setUserPlayer':
+					const player = this.scene.getPlayer();
+					console.log('setUserPlayer', response);
+					if (player) {
+						this.setPlayerParams(player, response);
+					} else {
+						this.scene.units.setDefaultPlayerParams(response);
+					}
+
+					break;
+
 				case 'updateGameObjects':
 					this.updateGameObjects(response);
 					break;
+
 				case 'disconnected':
 					this.removeDisconnectedPlayer(response);
 					break;
+
 				// case 'setConnectionRole':
 				//     this.setConnectionRole(response);
 				//     break;
 			}
 		} catch (e) {
+			console.log('Connection error', e);
 		}
+	}
+
+	// There is race condition between
+	// clearLocalGameObjects and Location.createInteractiveGameObjects
+	clearLocalGameObjects() {
+		const gameObjectsService = this.scene.gameObjectsService;
+		const player = this.scene.getPlayer();
+
+		// Clear local gameObjects to replace them by network units (except player)
+		gameObjectsService.getUnits().forEach((unit) => {
+			if (!unit.params.fromNetwork && unit !== player) {
+				gameObjectsService.destroyGameObject(unit);
+			}
+		});
+	}
+
+
+	/**
+	 * @param {String} str
+	 * @returns {string}
+	 */
+	getHash(str) {
+		function hash32(str) {
+			let i;
+			let l;
+			let hval = 0x811c9dc5;
+
+			for (i = 0, l = str.length; i < l; i++) {
+				hval ^= str.charCodeAt(i);
+				hval += (hval << 1) + (hval << 4) + (hval << 7) + (hval << 8) + (hval << 24);
+			}
+
+			return ("0000000" + (hval >>> 0).toString(16)).substr(-8);
+		}
+
+		let h1 = hash32(str);
+		return h1 + hash32(h1 + str);
+	}
+
+	send(messageType, data) {
+		const { userName, password } = this.scene.user;
+
+		const meta = {
+			token: this.getHash(userName + password),
+		};
+
+		this.connection.send(JSON.stringify({ messageType, meta, data }))
+	}
+
+	processHandshake() {
+		if (this.meta.role === 'client') {
+			if (!this.meta.debug) {
+				this.clearLocalGameObjects();
+			}
+		}
+
+		this.send('loadCurrentUser');
 	}
 
 	updateGameObjects(gameObjects) {
@@ -70,20 +147,25 @@ export default class Connection extends AutoBindMethods {
 		});
 	}
 
-	// TODO: Probably player.params.unitNetworkId is not the same as connection._id
-	removeDisconnectedPlayer({ id }) {
+	removeDisconnectedPlayer({ connectionId }) {
 		const gameObjectsService = this.scene.gameObjectsService;
-		const disconnectedPlayer = gameObjectsService.getUnits().find(unit => unit.params.unitNetworkId === id);
+		const disconnectedPlayer = gameObjectsService.getUnits().find(unit =>
+			unit instanceof Player
+			&& unit.params.connectionId === connectionId
+		);
+
+		console.log('Player disconnected', connectionId, disconnectedPlayer);
 
 		if (disconnectedPlayer) {
-			gameObjectsService.destroyGameObject(disconnectedPlayer);
+			disconnectedPlayer.die();
 		}
 	}
 
-	updateNetworkPlayer({ locationName, position, rotation, params }) {
-		const id = params.unitNetworkId;
+	updateNetworkPlayer(playerData) {
+		const { locationName, position, rotation, params } = playerData;
+		const { params: { unitNetworkId } } = playerData;
 
-		if (id === this.meta.id && !this.meta.debug) {
+		if (unitNetworkId === this.meta.unitNetworkId && !this.meta.debug) {
 			return;
 		}
 
@@ -94,54 +176,50 @@ export default class Connection extends AutoBindMethods {
 		/**
 		 * @type Player | string
 		 */
-		let networkPlayer = this.networkPlayers[id];
+		let networkPlayer = this.networkPlayers[unitNetworkId];
 
 		if (!networkPlayer) {
-			this.networkPlayers[id] = 'loading';
+			this.networkPlayers[unitNetworkId] = 'loading';
 
-			this.scene.units.createNetworkPlayer(id, (networkPlayer) => {
-				this.networkPlayers[id] = networkPlayer;
-			});
+			this.scene.units.createNetworkPlayer(
+				playerData,
+				(networkPlayer) => {
+					this.networkPlayers[unitNetworkId] = networkPlayer;
+				},
+			);
 		} else if (networkPlayer !== 'loading') {
-			networkPlayer.position.set(position.x, position.y, position.z);
-			networkPlayer.rotation.set(rotation.x, rotation.y, rotation.z);
+			this.setPlayerParams(networkPlayer, { position, rotation, params });
+		}
+	}
 
-			if (params) {
-				const { input, acceleration } = params;
-				const playerParams = networkPlayer.params;
+	setPlayerParams(player, { position, rotation, params }) {
+		player.position.set(position.x, position.y, position.z);
+		player.rotation.set(rotation.x, rotation.y, rotation.z);
 
-				playerParams.input.vertical = input.vertical;
-				playerParams.input.horizontal = input.horizontal;
-				playerParams.input.attack1 = input.attack1;
-				playerParams.input.attack2 = input.attack2;
-				playerParams.hp = params.hp;
-				playerParams.hpMax = params.hpMax;
-				playerParams.fraction = params.fraction;
-				playerParams.damage = params.damage;
-				playerParams.experience = networkPlayer.getExperience();
-				playerParams.acceleration.set(acceleration.x, acceleration.y, acceleration.z);
-			}
+		if (params) {
+			const { input, acceleration } = params;
+			const playerParams = player.params;
+
+			playerParams.input.vertical = input.vertical;
+			playerParams.input.horizontal = input.horizontal;
+			playerParams.input.attack1 = input.attack1;
+			playerParams.input.attack2 = input.attack2;
+			playerParams.hp = params.hp;
+			playerParams.hpMax = params.hpMax;
+			playerParams.fraction = params.fraction;
+			playerParams.damage = params.damage;
+			playerParams.speed = params.speed;
+			playerParams.money = params.money;
+			playerParams.level = params.level;
+			playerParams.unspentTalents = params.unspentTalents;
+			playerParams.experience = params.experience;
+			playerParams.acceleration.set(acceleration.x, acceleration.y, acceleration.z);
 		}
 	}
 
 	updateNetworkAI(unitData) {
 		const { locationName, position, rotation, animationState, scale, params } = unitData;
 		const { unitNetworkId } = params;
-
-		if (this.meta.role === 'host') {
-			if (!this.meta.debug) {
-				return;
-			}
-		} else {
-			const gameObjectsService = this.scene.gameObjectsService;
-			const player = this.scene.getPlayer();
-
-			gameObjectsService.getUnits().forEach((unit) => {
-				if (!unit.params.fromNetwork && unit !== player) {
-					gameObjectsService.destroyGameObject(unit);
-				}
-			});
-		}
 
 		if (locationName !== this.scene.location.getLocationName()) {
 			return;
@@ -168,7 +246,6 @@ export default class Connection extends AutoBindMethods {
 				const { acceleration } = params;
 				const networkAIParams = networkAI.params;
 
-				networkAIParams.unitNetworkId = params.unitNetworkId;
 				networkAIParams.hp = params.hp;
 				networkAIParams.hpMax = params.hpMax;
 				networkAIParams.fraction = params.fraction;
@@ -180,9 +257,9 @@ export default class Connection extends AutoBindMethods {
 	}
 
 	sendGameObjects() {
-		const id = this.meta.id;
+		const connectionId = this.meta.id;
 
-		if (this.connection.readyState !== 1 || !id) {
+		if (this.connection.readyState !== 1 || !connectionId) {
 			return;
 		}
 
@@ -205,7 +282,8 @@ export default class Connection extends AutoBindMethods {
 				const unitRotation = unit.object.rotation.toVector3();
 
 				if (!unit.params.unitNetworkId) {
-					unit.params.unitNetworkId = 3 + Math.random().toString(32);
+					const getRandomString = () => Math.random().toString(36).substr(2);
+					unit.params.unitNetworkId = getRandomString() + getRandomString();
 				}
 
 				const unitNetworkId = unit.params.unitNetworkId;
@@ -217,6 +295,10 @@ export default class Connection extends AutoBindMethods {
 					level,
 					experience,
 					fraction,
+					name,
+					speed,
+					unspentTalents,
+					money,
 				} = unit.params;
 
 				const {
@@ -240,7 +322,18 @@ export default class Connection extends AutoBindMethods {
 					rotation: vectorToObject(unitRotation),
 					scale: vectorToObject(unit.object.scale),
 					params: {
-						unitNetworkId, hp, hpMax, fraction, damage, level, experience,
+						connectionId,
+						unitNetworkId,
+						name,
+						hp,
+						hpMax,
+						fraction,
+						damage,
+						level,
+						experience,
+						speed,
+						money,
+						unspentTalents,
 						acceleration: vectorToObject(acceleration),
 						input: {
 							vertical, horizontal,
@@ -251,14 +344,10 @@ export default class Connection extends AutoBindMethods {
 			}
 		});
 
-		const send = (messageType, data) => (
-			this.connection.send(JSON.stringify({ messageType, data }))
-		);
-
 		if (this.meta.role === 'host') {
-			send('updateGameObjects', data);
+			this.send('updateGameObjects', data);
 		} else {
-			send('updatePlayer', data[0]);
+			this.send('updatePlayer', data[0]);
 		}
 	}
 }

@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { Player } from './GameObjects';
 import Audio from './Audio';
 import AutoBindMethods from './AutoBindMethods';
 import Camera from './Camera';
@@ -93,6 +94,13 @@ export default class Scene extends AutoBindMethods {
         requestAnimationFrame(this.animate);
     }
 
+    setLoggedUser(userName, password) {
+        this.user = { userName, password };
+    }
+
+    /**
+     * @returns {Player}
+     */
     getPlayer() {
         return this.units.getPlayer();
     }

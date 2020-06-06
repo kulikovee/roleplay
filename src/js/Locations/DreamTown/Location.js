@@ -90,7 +90,19 @@ export default class Location extends AbstractLocation {
             }
         }
     }
-    
+
+    reviveHero() {
+        const player = this.scene.getPlayer();
+        player.params.hp = 10;
+        player.position.set(0, 0.3, 30);
+        player.animationState.isDie = false;
+        this.scene.particles.createEffect({
+            effect: 'level-up/level-up',
+            scale: 1.5,
+            attachTo: player.object,
+        });
+    }
+
     afterClear() {
         this.scene.units.createPlayer({
             /**
@@ -158,7 +170,7 @@ export default class Location extends AbstractLocation {
         );
     
         createHealItem();
-    
+
         const getAIParams = ({ level, ...params }) => {
             return {
                 ...params,
@@ -170,36 +182,36 @@ export default class Location extends AbstractLocation {
                 })),
             };
         };
-    
+
         const getGoatsParams = (level, position) => getAIParams({
             level,
             position,
             fraction: 'goats',
             name: level <= 10
-                ? 'Goat Warrior'
-                : (level <= 20 ? 'Goat Elite' : 'Goat Destroyer'),
+               ? 'Goat Warrior'
+               : (level <= 20 ? 'Goat Elite' : 'Goat Destroyer'),
         });
-    
+
         const getFriendlyParams = (level, position, rotation) => getAIParams({
             level, position, rotation, fraction: 'friendly', name: 'Friendly Citizen',
         });
-    
+
         this.units = [
             getGoatsParams(3, { x: -17, y: 0.2, z: -5 }),
             getGoatsParams(3, { x: 17 , y: 0.2, z: -5 }),
             getGoatsParams(2, { x: -15, y: 0.2, z: -30 }),
             getGoatsParams(2, { x: 15, y: 0.2, z: -30 }),
-        
+
             getGoatsParams(5, { x: -30, y: 0.2, z: -9 }),
             getGoatsParams(5, { x: 30 , y: 0.2, z: -9 }),
             getGoatsParams(4, { x: -45, y: 0.2, z: -30 }),
             getGoatsParams(4, { x: 45, y: 0.2, z: -30 }),
-        
+
             getGoatsParams(1, { x: 45, y: 0.2, z: 45 }),
             getGoatsParams(1, { x: 45, y: 0.2, z: -45 }),
-        
+
             getGoatsParams(25, { x: 0, y: 0.2, z: 0 }),
-        
+
             getFriendlyParams(5, { x: -0.8, y: 0.2, z: 40 - 4.03 }, { y: Math.PI }),
             getFriendlyParams(5, { x: -10 + 3.5, y: 0.2, z: 29.2 }, { y: Math.PI / 2 }),
             getFriendlyParams(5, { x: 10 - 3.5, y: 0.2, z: 30.8 }, { y: -Math.PI / 2 }),

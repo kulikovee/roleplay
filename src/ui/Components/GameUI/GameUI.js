@@ -29,7 +29,7 @@ class App extends Component {
         this.switchCamera = this.switchCamera.bind(this);
         this.buy = this.buy.bind(this);
         this.setRestartButtonVisible = this.setRestartButtonVisible.bind(this);
-        this.restartGame = this.restartGame.bind(this);
+        this.reviveHero = this.reviveHero.bind(this);
         this.updatePlayerParams = this.updatePlayerParams.bind(this);
         this.setFps = this.setFps.bind(this);
         this.setNotification = this.setNotification.bind(this);
@@ -108,7 +108,11 @@ class App extends Component {
                 })
             });
 
+            /**
+             * @type {Scene}
+             */
             this.scene = scene;
+            this.scene.setLoggedUser(this.props.userName, this.props.password);
         }
     }
 
@@ -255,6 +259,12 @@ class App extends Component {
         this.setState({ showRestart: false });
     }
 
+    reviveHero() {
+        this.scene.location.reviveHero();
+        this.setState({ showRestart: false });
+        this.setPause(false);
+    }
+
     render() {
         const {
             hp,
@@ -319,7 +329,8 @@ class App extends Component {
                             showRestart={showRestart}
                             setPause={this.setPause}
                             switchCamera={this.switchCamera}
-                            restartGame={this.restartGame}
+                            // restartGame={this.restartGame}
+                            reviveHero={this.reviveHero}
                             buy={this.buy}
                         />}
                         {isLoading && <LoadingScreen />}

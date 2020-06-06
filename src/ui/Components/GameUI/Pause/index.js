@@ -9,7 +9,8 @@ class App extends Component {
             money,
             showRestart,
             switchCamera,
-            restartGame,
+            // restartGame,
+            reviveHero,
             setPause,
             buy,
         } = this.props;
@@ -28,7 +29,7 @@ class App extends Component {
                         {showRestart
                             ? (
                                 <div>
-                                    <Button onClick={() => restartGame()}>Restart</Button>
+                                    <Button onClick={() => reviveHero()}>Revive hero</Button>
                                 </div>
                             )
                             : null

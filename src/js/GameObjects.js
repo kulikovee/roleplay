@@ -152,7 +152,7 @@ export default class GameObjectsService extends AutoBindMethods {
                                 .getAliveUnits()
                                 .filter((unit) => (
                                     (!canPickup || canPickup(unit))
-                                    && positionVector.distanceTo(unit.position) < 1
+                                    && positionVector.distanceTo(unit.position) < 2
                                 ))
                                 .sort((unitA, unitB) => getPriority(unitB) - getPriority(unitA));
                         
