@@ -176,6 +176,16 @@ socketServer.on('connection', function(connection) {
 			db.players[connectionId] = player;
 		};
 
+		const takeHost = () => {
+			console.log(`#${connectionId} takes the host`);
+			db.hostId = connectionId;
+		};
+
+		const restartServer = () => {
+			console.log(`#${connectionId} reloads server`);
+			Object.values(db.connections).forEach(c => send(c, 'restartServer'));
+		};
+
 		switch (messageType) {
 			case 'loadCurrentUser': {
 				sendUserData();
@@ -187,6 +197,14 @@ socketServer.on('connection', function(connection) {
 			}
 			case 'updatePlayer': {
 				updatePlayerData(data);
+				break;
+			}
+			case 'takeHost': {
+				takeHost();
+				break;
+			}
+			case 'restartServer': {
+				restartServer();
 				break;
 			}
 		}

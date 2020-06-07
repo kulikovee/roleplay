@@ -27,6 +27,7 @@ export default class AI extends FiringUnit {
         this.lastNextPointUpdate = 0;
         this.lastJumpTimestamp = 0;
         this.isRunning = false;
+        this.isAttack = false;
     }
 
     update(time, deltaTime) {
@@ -42,43 +43,45 @@ export default class AI extends FiringUnit {
 
         const { object, target, acceleration, speed, getNextPoint } = this.params;
 
-        if (target) {
-            if (getNextPoint) {
-                if (this.isNextPointUpdateReleased(time)) {
-                    this.lastNextPointUpdate = time;
-                    this.nextPoint = getNextPoint(this.position, target.position);
+        if (!this.params.fromNetwork) {
+            if (target) {
+                if (getNextPoint) {
+                    if (this.isNextPointUpdateReleased(time)) {
+                        this.lastNextPointUpdate = time;
+                        this.nextPoint = getNextPoint(this.position, target.position);
+                    }
+                } else {
+                    this.nextPoint = target.position;
                 }
-            } else {
-                this.nextPoint = target.position;
             }
+
+            const isTargetNear = target && object.position.distanceTo(target.position) < 1.75;
+
+            this.isAttack = (
+               isTargetNear
+               && this.isEnemy(target)
+               && target.isAlive()
+            );
+
+            if (this.isAttack) {
+                this.rotateToPosition(target.position);
+            } else if (this.nextPoint) {
+                this.rotateToPosition(this.nextPoint);
+            }
+
+            const isNextPointNear = !this.nextPoint;
+
+            this.isRunning = (
+                target
+                && !isTargetNear
+                && !isNextPointNear
+                && (this.isRunning || this.isRunReleased(time))
+                && this.isAttackReleased(time)
+                && this.isHitReleased(time)
+            );
         }
 
-        const isTargetNear = target && object.position.distanceTo(target.position) < 1.75;
-
-        const isAttack = (
-            isTargetNear
-            && this.isEnemy(target)
-            && target.isAlive()
-        );
-
-        if (isAttack) {
-            this.rotateToPosition(target.position);
-        } else if (this.nextPoint) {
-            this.rotateToPosition(this.nextPoint);
-        }
-        
-        const isNextPointNear = !this.nextPoint;
-
-        this.isRunning = (
-            target
-            && !isTargetNear
-            && !isNextPointNear
-            && (this.isRunning || this.isRunReleased(time))
-            && this.isAttackReleased(time)
-            && this.isHitReleased(time)
-        );
-
-        if (isAttack) {
+        if (this.isAttack) {
             this.attack();
         }
 

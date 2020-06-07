@@ -35,44 +35,58 @@ export default class Connection extends AutoBindMethods {
 		 */
 		const { meta, data: response, messageType } = JSON.parse(data);
 
-		if (this.meta.role && this.meta.role !== meta.role) {
-			console.log('Connection role changed to', meta.role);
+		if (this.meta.role !== meta.role) {
+			this.scene.ui.setConnectionRole(meta.role);
+
+			if (this.meta.role && meta.role === 'host') {
+				this.hostUnitsFromNetwork();
+			} else if (!this.meta.debug) {
+				this.clearLocalGameObjects();
+			}
 		}
 
 		this.meta = meta;
 
 		try {
 			switch (messageType) {
-				case 'handshake':
+				case 'handshake': {
 					this.processHandshake();
 					break;
-
-				case 'setUserPlayer':
+				}
+				case 'restartServer': {
+					window.location.reload();
+					break;
+				}
+				case 'setUserPlayer': {
 					const player = this.scene.getPlayer();
-					console.log('setUserPlayer', response);
+
 					if (player) {
 						this.setPlayerParams(player, response);
 					} else {
 						this.scene.units.setDefaultPlayerParams(response);
 					}
-
 					break;
-
-				case 'updateGameObjects':
+				}
+				case 'updateGameObjects': {
 					this.updateGameObjects(response);
 					break;
-
-				case 'disconnected':
+				}
+				case 'disconnected': {
 					this.removeDisconnectedPlayer(response);
 					break;
-
-				// case 'setConnectionRole':
-				//     this.setConnectionRole(response);
-				//     break;
+				}
 			}
 		} catch (e) {
 			console.log('Connection error', e);
 		}
+	}
+
+	takeHost() {
+		this.send('takeHost');
+	}
+
+	restartServer() {
+		this.send('restartServer');
 	}
 
 	// There is race condition between
@@ -89,29 +103,6 @@ export default class Connection extends AutoBindMethods {
 		});
 	}
 
-
-	/**
-	 * @param {String} str
-	 * @returns {string}
-	 */
-	getHash(str) {
-		function hash32(str) {
-			let i;
-			let l;
-			let hval = 0x811c9dc5;
-
-			for (i = 0, l = str.length; i < l; i++) {
-				hval ^= str.charCodeAt(i);
-				hval += (hval << 1) + (hval << 4) + (hval << 7) + (hval << 8) + (hval << 24);
-			}
-
-			return ("0000000" + (hval >>> 0).toString(16)).substr(-8);
-		}
-
-		let h1 = hash32(str);
-		return h1 + hash32(h1 + str);
-	}
-
 	send(messageType, data) {
 		const { userName, password } = this.scene.user;
 
@@ -123,12 +114,6 @@ export default class Connection extends AutoBindMethods {
 	}
 
 	processHandshake() {
-		if (this.meta.role === 'client') {
-			if (!this.meta.debug) {
-				this.clearLocalGameObjects();
-			}
-		}
-
 		this.send('loadCurrentUser');
 	}
 
@@ -161,8 +146,40 @@ export default class Connection extends AutoBindMethods {
 		}
 	}
 
+	/**
+	 * @param {String} str
+	 * @returns {string}
+	 */
+	getHash(str) {
+		function hash32(str) {
+			let i;
+			let l;
+			let hval = 0x811c9dc5;
+
+			for (i = 0, l = str.length; i < l; i++) {
+				hval ^= str.charCodeAt(i);
+				hval += (hval << 1) + (hval << 4) + (hval << 7) + (hval << 8) + (hval << 24);
+			}
+
+			return ("0000000" + (hval >>> 0).toString(16)).substr(-8);
+		}
+
+		let h1 = hash32(str);
+		return h1 + hash32(h1 + str);
+	}
+
+	hostUnitsFromNetwork() {
+		this.scene.units
+			.getAliveUnits()
+			.forEach((unit) => {
+				if (unit.params.fromNetwork) {
+					unit.params.fromNetwork = false;
+				}
+			});
+	}
+
 	updateNetworkPlayer(playerData) {
-		const { locationName, position, rotation, params } = playerData;
+		const { locationName, position, rotation, animationState, params } = playerData;
 		const { params: { unitNetworkId } } = playerData;
 
 		if (unitNetworkId === this.meta.unitNetworkId && !this.meta.debug) {
@@ -188,13 +205,14 @@ export default class Connection extends AutoBindMethods {
 				},
 			);
 		} else if (networkPlayer !== 'loading') {
-			this.setPlayerParams(networkPlayer, { position, rotation, params });
+			this.setPlayerParams(networkPlayer, { position, rotation, animationState, params });
 		}
 	}
 
-	setPlayerParams(player, { position, rotation, params }) {
+	setPlayerParams(player, { position, rotation, animationState, params }) {
 		player.position.set(position.x, position.y, position.z);
 		player.rotation.set(rotation.x, rotation.y, rotation.z);
+		player.animationState = animationState;
 
 		if (params) {
 			const { input, acceleration } = params;
@@ -218,7 +236,7 @@ export default class Connection extends AutoBindMethods {
 	}
 
 	updateNetworkAI(unitData) {
-		const { locationName, position, rotation, animationState, scale, params } = unitData;
+		const { locationName, position, rotation, isRunning, isAttack, animationState, scale, params } = unitData;
 		const { unitNetworkId } = params;
 
 		if (locationName !== this.scene.location.getLocationName()) {
@@ -240,6 +258,8 @@ export default class Connection extends AutoBindMethods {
 			networkAI.position.set(position.x, position.y, position.z);
 			networkAI.rotation.set(rotation.x, rotation.y, rotation.z);
 			networkAI.object.scale.set(scale.x, scale.y, scale.z);
+			networkAI.isRunning = isRunning;
+			networkAI.isAttack = isAttack;
 			networkAI.animationState = animationState;
 
 			if (params) {
@@ -288,6 +308,10 @@ export default class Connection extends AutoBindMethods {
 
 				const unitNetworkId = unit.params.unitNetworkId;
 				const {
+					isRunning,
+					isAttack,
+				} = unit;
+				const {
 					hp,
 					hpMax,
 					acceleration,
@@ -318,6 +342,8 @@ export default class Connection extends AutoBindMethods {
 					type: unit instanceof Player ? 'player' : 'ai',
 					locationName: this.scene.location.getLocationName(),
 					animationState: unit.animationState,
+					isRunning,
+					isAttack,
 					position: vectorToObject(unit.position),
 					rotation: vectorToObject(unitRotation),
 					scale: vectorToObject(unit.object.scale),
@@ -346,7 +372,7 @@ export default class Connection extends AutoBindMethods {
 
 		if (this.meta.role === 'host') {
 			this.send('updateGameObjects', data);
-		} else {
+		} else if (data[0]) {
 			this.send('updatePlayer', data[0]);
 		}
 	}

@@ -114,7 +114,6 @@ export default class Location extends AbstractLocation {
                 player.position.set(0, 0.3, 30);
             },
             onDie: () => window.setTimeout(() => {
-                this.scene.ui.setRestartButtonVisible(true);
                 this.scene.ui.setPause(true);
             }, 2500),
             onKill: (object) => {
@@ -133,8 +132,6 @@ export default class Location extends AbstractLocation {
         if (this.interval) {
             clearInterval(this.interval);
         }
-
-        this.scene.ui.setRestartButtonVisible(false);
     }
 
     restartLocation() {

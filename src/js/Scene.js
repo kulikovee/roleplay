@@ -80,15 +80,17 @@ export default class Scene extends AutoBindMethods {
         this.intervals.update(now);
         const gameTime = this.intervals.getTimePassed();
 
+        this.gameObjectsService.update(gameTime, deltaTime);
+
         if (!this.ui.isPause()) {
-            this.gameObjectsService.update(gameTime, deltaTime);
             this.camera.update(gameTime, deltaTime);
-            this.ui.update();
             this.input.update();
-            this.location.update();
-            this.particles.update();
-            this.connection.update(gameTime, deltaTime);
         }
+
+        this.ui.update();
+        this.location.update();
+        this.particles.update();
+        this.connection.update(gameTime, deltaTime);
 
         this.renderer.render(this.scene, this.camera.camera, deltaTime);
         requestAnimationFrame(this.animate);

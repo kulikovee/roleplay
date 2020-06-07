@@ -36,7 +36,7 @@ export default class Player extends FiringUnit {
             return;
         }
 
-        const { input, object, acceleration } = this.params;
+        const { input, object, acceleration, fromNetwork } = this.params;
 
         acceleration.add(this.getMovingAcceleration(time, deltaTime));
 
@@ -53,7 +53,7 @@ export default class Player extends FiringUnit {
         this.animationState.isMovingForward = input.vertical === 1;
         this.animationState.isMovingBackward = input.vertical === -1;
 
-        if (!input.network) {
+        if (!fromNetwork) {
             if (input.isThirdPerson) {
                 if (input.look.horizontal) {
                     const horizontalLook = input.look.horizontal;
