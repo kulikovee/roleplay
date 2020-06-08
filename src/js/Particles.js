@@ -1,4 +1,3 @@
-import * as THREE from 'three';
 import Scene from './Scene';
 import AutoBindMethods from './AutoBindMethods';
 import AnimatedGameObject from './GameObjects/AnimatedGameObject';

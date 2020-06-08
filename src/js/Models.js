@@ -1,5 +1,3 @@
-import * as THREE from 'three';
-import * as GLTFLoader from "three-gltf-loader";
 import AutoBindMethods from './AutoBindMethods';
 
 export default class Models extends AutoBindMethods {

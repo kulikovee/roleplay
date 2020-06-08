@@ -1,6 +1,5 @@
 import AutoBindMethods from './AutoBindMethods';
 import AStar from './Utils/AStar';
-import * as THREE from 'three';
 
 export default class Colliders extends AutoBindMethods {
     constructor(scene) {

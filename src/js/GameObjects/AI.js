@@ -1,4 +1,3 @@
-import * as THREE from 'three';
 import FiringUnit from './FiringUnit';
 
 export default class AI extends FiringUnit {

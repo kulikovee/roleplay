@@ -1,4 +1,3 @@
-import * as THREE from 'three';
 import AutoBindMethods from './AutoBindMethods';
 import { Player, AI, AnimatedGameObject } from './GameObjects';
 

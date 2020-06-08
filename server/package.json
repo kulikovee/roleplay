@@ -1,4 +1,8 @@
 {
+  "scripts": {
+    "build-production": "webpack --mode production",
+    "build": "webpack --mode development"
+  },
   "dependencies": {
     "ws": "^7.2.0"
   }

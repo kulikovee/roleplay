@@ -84,7 +84,9 @@ export const addPointerLockEvents = ({
                         document.body.webkitRequestFullscreen ||
                         document.body.mozRequestFullScreen;
 
-                    document.body.requestFullscreen();
+                    if (document.body.requestFullscreen) {
+                        document.body.requestFullscreen();
+                    }
                 },
                 false
             );

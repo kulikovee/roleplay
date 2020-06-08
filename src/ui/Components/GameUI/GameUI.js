@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import * as THREE from 'three';
 import TopRight from './TopRightLabel';
 import BottomRight from './BottomRightLabel';
 import BottomLeft from './BottomLeftLabel';

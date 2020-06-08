@@ -1,6 +1,7 @@
 {
   "name": "roleplay",
   "version": "1.0.0",
+  "type": "module",
   "description": "[demo](https://kulikovee.github.io/roleplay/)",
   "scripts": {
     "build": "webpack --mode production",

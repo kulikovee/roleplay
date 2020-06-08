@@ -1,4 +1,3 @@
-import * as THREE from 'three';
 import React, { Component } from 'react';
 
 class App extends Component {

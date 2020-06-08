@@ -1,4 +1,3 @@
-import * as THREE from 'three';
 import AbstractLocation from '../AbstractLocation';
 import { Player, Fire } from '../../GameObjects';
 import Elevator from './Elevator';

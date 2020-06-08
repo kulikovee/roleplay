@@ -1,6 +1,5 @@
-import * as THREE from 'three';
 import { Player } from './GameObjects';
-import Audio from './Audio';
+// import Audio from './Audio';
 import AutoBindMethods from './AutoBindMethods';
 import Camera from './Camera';
 import Connection from './Connection';
@@ -44,7 +43,7 @@ export default class Scene extends AutoBindMethods {
         this.colliders = new Colliders(this);
         this.units = new Units(this);
         this.camera = new Camera(this);
-        this.audio = new Audio(this);
+        // this.audio = new Audio(this);
         this.input = new Input({
             onAction: () => this.level.onAction(),
             onExit: () => this.ui.setPause(!this.ui.isPause()),
@@ -93,7 +92,7 @@ export default class Scene extends AutoBindMethods {
         this.connection.update(gameTime, deltaTime);
 
         this.renderer.render(this.scene, this.camera.camera, deltaTime);
-        requestAnimationFrame(this.animate);
+        window.requestAnimationFrame(this.animate);
     }
 
     setLoggedUser(userName, password) {

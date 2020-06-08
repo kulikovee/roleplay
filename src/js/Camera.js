@@ -1,4 +1,3 @@
-import * as THREE from 'three';
 import AutoBindMethods from './AutoBindMethods';
 
 export default class Camera extends AutoBindMethods {
