@@ -52,7 +52,7 @@ export default class Scene extends AutoBindMethods {
         });
         this.gameObjectsService = new GameObjectsService(this);
         this.particles = new Particles(this);
-        this.connection = new Connection(this, 'gohtml.ru');
+        this.connection = new Connection(this, 'localhost.ru');
         this.location = new Location(this);
 
         this.intervals.setInterval(() => {

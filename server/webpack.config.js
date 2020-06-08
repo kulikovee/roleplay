@@ -1,12 +1,18 @@
 const path = require('path');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
     entry: './index.js',
     devtool: 'inline-source-map',
+    target: 'node',
     output: {
         filename: 'server.js',
-        path: path.resolve(__dirname, 'dist')
+        path: path.resolve(__dirname, 'dist'),
+    },
+    node: {
+        __dirname: false,
+        __filename: false,
     },
     devServer: {
         contentBase: path.join(__dirname, './'),
@@ -29,7 +35,10 @@ module.exports = {
     },
     plugins: [
         new CleanWebpackPlugin({
-            cleanOnceBeforeBuildPatterns: ['*', '!.gitignore']
+            cleanOnceBeforeBuildPatterns: ['*', '!.gitignore', '!localhost']
         }),
-    ]
+        new CopyWebpackPlugin([
+            { from: 'example-certs', to: './' },
+        ]),
+    ],
 };
