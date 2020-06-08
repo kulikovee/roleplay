@@ -35,7 +35,7 @@ export default class Connection extends AutoBindMethods {
 		 */
 		const { meta, data: response, messageType } = JSON.parse(data);
 
-		if (this.meta.role !== meta.role) {
+		if (meta.role && this.meta.role !== meta.role) {
 			this.scene.ui.setConnectionRole(meta.role);
 
 			if (this.meta.role && meta.role === 'host') {
@@ -139,7 +139,7 @@ export default class Connection extends AutoBindMethods {
 			&& unit.params.connectionId === connectionId
 		);
 
-		console.log('Player disconnected', connectionId, disconnectedPlayer);
+		console.log('Player disconnected', connectionId);
 
 		if (disconnectedPlayer) {
 			disconnectedPlayer.die();
@@ -298,75 +298,14 @@ export default class Connection extends AutoBindMethods {
 		const data = [];
 
 		units.forEach((unit) => {
-			if (unit) {
-				const unitRotation = unit.object.rotation.toVector3();
+			const unitData = Connection.unitToNetwork(
+				unit,
+				connectionId,
+				this.scene.location.getLocationName(),
+			);
 
-				if (!unit.params.unitNetworkId) {
-					const getRandomString = () => Math.random().toString(36).substr(2);
-					unit.params.unitNetworkId = getRandomString() + getRandomString();
-				}
-
-				const unitNetworkId = unit.params.unitNetworkId;
-				const {
-					isRunning,
-					isAttack,
-				} = unit;
-				const {
-					hp,
-					hpMax,
-					acceleration,
-					damage,
-					level,
-					experience,
-					fraction,
-					name,
-					speed,
-					unspentTalents,
-					money,
-				} = unit.params;
-
-				const {
-					vertical,
-					horizontal,
-					attack1,
-					attack2,
-				} = unit.params.input || {};
-
-				const vectorToObject = (vector, eps = 1000) => ({
-					x: Math.round(vector.x * eps) / eps,
-					y: Math.round(vector.y * eps) / eps,
-					z: Math.round(vector.z * eps) / eps,
-				});
-
-				data.push({
-					type: unit instanceof Player ? 'player' : 'ai',
-					locationName: this.scene.location.getLocationName(),
-					animationState: unit.animationState,
-					isRunning,
-					isAttack,
-					position: vectorToObject(unit.position),
-					rotation: vectorToObject(unitRotation),
-					scale: vectorToObject(unit.object.scale),
-					params: {
-						connectionId,
-						unitNetworkId,
-						name,
-						hp,
-						hpMax,
-						fraction,
-						damage,
-						level,
-						experience,
-						speed,
-						money,
-						unspentTalents,
-						acceleration: vectorToObject(acceleration),
-						input: {
-							vertical, horizontal,
-							attack1, attack2,
-						},
-					},
-				});
+			if (unitData) {
+				data.push(unitData);
 			}
 		});
 
@@ -374,6 +313,79 @@ export default class Connection extends AutoBindMethods {
 			this.send('updateGameObjects', data);
 		} else if (data[0]) {
 			this.send('updatePlayer', data[0]);
+		}
+	}
+
+	static unitToNetwork(unit, connectionId, locationName) {
+		if (unit) {
+			const unitRotation = unit.object.rotation.toVector3();
+
+			if (!unit.params.unitNetworkId) {
+				const getRandomString = () => Math.random().toString(36).substr(2);
+				unit.params.unitNetworkId = getRandomString() + getRandomString();
+			}
+
+			const unitNetworkId = unit.params.unitNetworkId;
+			const {
+				isRunning,
+				isAttack,
+			} = unit;
+			const {
+				hp,
+				hpMax,
+				acceleration,
+				damage,
+				level,
+				experience,
+				fraction,
+				name,
+				speed,
+				unspentTalents,
+				money,
+			} = unit.params;
+
+			const {
+				vertical,
+				horizontal,
+				attack1,
+				attack2,
+			} = unit.params.input || {};
+
+			const vectorToObject = (vector, eps = 1000) => ({
+				x: Math.round(vector.x * eps) / eps,
+				y: Math.round(vector.y * eps) / eps,
+				z: Math.round(vector.z * eps) / eps,
+			});
+
+			return ({
+				type: unit instanceof Player ? 'player' : 'ai',
+				locationName,
+				animationState: unit.animationState,
+				isRunning,
+				isAttack,
+				position: vectorToObject(unit.position),
+				rotation: vectorToObject(unitRotation),
+				scale: vectorToObject(unit.object.scale),
+				params: {
+					connectionId,
+					unitNetworkId,
+					name,
+					hp,
+					hpMax,
+					fraction,
+					damage,
+					level,
+					experience,
+					speed,
+					money,
+					unspentTalents,
+					acceleration: vectorToObject(acceleration),
+					input: {
+						vertical, horizontal,
+						attack1, attack2,
+					},
+				},
+			});
 		}
 	}
 }

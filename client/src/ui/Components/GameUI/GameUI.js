@@ -83,7 +83,8 @@ class App extends Component {
 
 	initScene() {
 		if (this.container.current) {
-			THREE.Cache.enabled = true;
+			console.log({ THREE });
+			// THREE.Cache.enabled = true;
 
 			const container = this.container.current,
 				renderer = new Renderer(container),

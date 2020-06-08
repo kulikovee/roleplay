@@ -1,43 +1,20 @@
 import { Vector3 } from 'three/src/math/Vector3';
 import { Quaternion } from 'three/src/math/Quaternion';
+import { Object3D } from 'three/src/core/Object3D';
 
 global.debug = (...params) => console.log(`[${(new Date).toLocaleTimeString()}]`, ...params);
 
-const Object3D = (params = {}) => {
-	let objects = [];
-	const add = object => objects.push(object);
-	const remove = object => objects = object.filter(o => o !== object);
-
-	const object = ({
-		position: new Vector3(),
-		scale: new Vector3(),
-		rotation: new Quaternion(),
-		add,
-		remove,
-		lookAt: () => ({}),
-		traverse: () => ({}),
-		updateMatrix: () => ({}),
-		getObjectByName: () => object,
-		...params,
-	});
-
-	object.quaternion = object.rotation;
-	object.scene = object;
-	object.clone = () => {
-		const cloned = Object3D();
-		cloned.position.clone(object.position);
-		cloned.scale.clone(object.scale);
-		cloned.rotation.clone(object.rotation);
-		return cloned;
-	};
-
-	return object;
-};
+class Obj3D extends Object3D {
+	constructor(...props) {
+		super(...props);
+		this.scene = this;
+	}
+}
 
 global.THREE = {
 	Vector3,
 	Quaternion,
-	Object3D,
+	Object3D: Obj3D,
 	WebGLRenderer: () => ({
 		render: () => ({}),
 		setSize: () => ({}),
@@ -49,7 +26,7 @@ global.THREE = {
 		}),
 		shadowMap: {},
 	}),
-	Scene: () => Object3D(),
+	Scene: Obj3D,
 	Cache: {},
 	Clock: () => ({}),
 	AnimationMixer: () => ({
@@ -59,7 +36,7 @@ global.THREE = {
 		}),
 	}),
 	PCFSoftShadowMap: () => ({}),
-	PerspectiveCamera: () => Object3D(),
+	PerspectiveCamera: Obj3D,
 	Raycaster: () => ({}),
 	TextureLoader: () => ({
 		load: () => ({}),
@@ -67,7 +44,7 @@ global.THREE = {
 	Fog: () => ({}),
 	RepeatWrapping: () => ({}),
 	Color: () => ({}),
-	Mesh: () => Object3D(),
+	Mesh: Obj3D,
 	CubeGeometry: () => ({}),
 	MeshLambertMaterial: () => ({}),
 	NormalBlending: () => ({}),
@@ -77,7 +54,7 @@ global.THREE = {
 	PointCloud: () => ({}),
 	AmbientLight: () => ({}),
 	DirectionalLight: () => {
-		const light = Object3D();
+		const light = new Obj3D();
 		light.shadow = {
 			camera: {},
 			mapSize: {},
@@ -90,7 +67,7 @@ global.THREE = {
 };
 
 global.GLTFLoader = () => ({
-	load: (url, callback) => callback(Object3D()),
+	load: (url, callback) => callback(new Obj3D()),
 });
 
 global.window = {

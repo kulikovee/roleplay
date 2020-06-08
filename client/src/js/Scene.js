@@ -52,7 +52,10 @@ export default class Scene extends AutoBindMethods {
         });
         this.gameObjectsService = new GameObjectsService(this);
         this.particles = new Particles(this);
-        this.connection = new Connection(this, 'localhost.ru');
+
+        const connectionHostname = window.location.hostname === 'localhost' ? 'localhost' : 'gohtml.ru';
+        const isSSL = window.location.hostname !== 'localhost';
+        this.connection = new Connection(this, connectionHostname, 1337, isSSL);
         this.location = new Location(this);
 
         this.intervals.setInterval(() => {
@@ -61,11 +64,12 @@ export default class Scene extends AutoBindMethods {
         }, 1000);
 
         this.input.isThirdPerson = ui.isThirdPerson();
+        this.pathFinder.rebuildAreas();
 
         this.clearScene();
         this.animate();
 
-        console.log('Scene', this);
+        // console.log('Scene', this);
     }
 
     clearScene() {

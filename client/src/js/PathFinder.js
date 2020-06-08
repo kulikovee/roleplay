@@ -5,6 +5,7 @@ export default class Colliders extends AutoBindMethods {
     constructor(scene) {
         super();
         this.scene = scene;
+        this.areas = [];
     }
 
     getNextPoint(from, to) {
