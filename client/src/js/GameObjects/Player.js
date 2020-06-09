@@ -89,21 +89,6 @@ export default class Player extends FiringUnit {
         return this.params.unspentTalents--;
     }
 
-    getFireInitialPosition() {
-        const head = this.getChildByName('Head') || this.object;
-        const headForward = this.getChildDirection(head, new THREE.Vector3(0, 0, 1));
-        const headUp = new THREE.Vector3(0, 1, 0);
-        headUp.applyQuaternion(head.quaternion);
-
-        return this.getChildPosition(head)
-            .add(headUp.multiplyScalar(0.15))
-            .add(headForward.multiplyScalar(0.25));
-    }
-
-    getFireInitialRotation() {
-        return this.getChildRotation('Head');
-    }
-
     addExperience(experience) {
         this.params.experience += experience;
 

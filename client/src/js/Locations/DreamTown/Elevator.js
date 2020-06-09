@@ -13,7 +13,7 @@ export default class Elevator extends AutoBindMethods {
         this.speed = 0.3;
         this.standTime = 10;
 
-        this.object = this.scene.models.createCube(params);
+        this.object = this.scene.models.createGeometry(params);
         this.standAt = this.scene.intervals.getTimePassed();
     }
 

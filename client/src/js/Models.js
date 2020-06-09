@@ -14,7 +14,7 @@ export default class Models extends AutoBindMethods {
      * @param {THREE.Vector3} params.position
      * @returns {THREE.Mesh}
      */
-    createCube(params) {
+    createGeometry(params) {
         params = params || {};
 
         const materialParams = {};
@@ -33,15 +33,19 @@ export default class Models extends AutoBindMethods {
             materialParams.emissiveMap = null;
         }
 
-        const cube = new THREE.Mesh(
-            new THREE.CubeGeometry(1, 1, 1),
+        if (params.color) {
+            materialParams.color = params.color;
+        }
+
+        const geometry = new THREE.Mesh(
+            params.geometry || new THREE.CubeGeometry(1, 1, 1),
             new THREE.MeshLambertMaterial(materialParams)
         );
 
-        cube.scale.set(params.x || 1, params.y || 1, params.z || 1);
+        geometry.scale.set(params.x || 1, params.y || 1, params.z || 1);
 
         if (params.position) {
-            cube.position.set(
+            geometry.position.set(
                 params.position.x || 0,
                 params.position.y || 0,
                 params.position.z || 0
@@ -49,7 +53,7 @@ export default class Models extends AutoBindMethods {
         }
 
         if (params.rotation) {
-            cube.rotation.set(
+            geometry.rotation.set(
                 params.rotation.x || 0,
                 params.rotation.y || 0,
                 params.rotation.z || 0
@@ -57,10 +61,10 @@ export default class Models extends AutoBindMethods {
         }
 
         if (!params.noScene) {
-            this.scene.add(cube);
+            this.scene.add(geometry);
         }
 
-        return cube;
+        return geometry;
     }
 
     loadGLTF({

@@ -12,8 +12,8 @@ class App extends Component {
         return (
             <div className="label--in-game bottom-left">
                 HP {Math.ceil(hp)} / {Math.ceil(hpMax)}
-                &nbsp;| Speed: {Math.floor(speed * 100)}%
-                &nbsp;| Damage: {damage}
+                &nbsp;| Movement Speed: {Math.floor(speed * 100)}%
+                &nbsp;| Melee Damage: {damage}
             </div>
         );
     }

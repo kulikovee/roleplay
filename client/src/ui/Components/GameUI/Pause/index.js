@@ -74,14 +74,14 @@ class App extends Component {
 					<div className="row">
 						<div>
 							<Button onClick={() => buy('talent-speed')}>
-								Speed +5%
+								Movement Speed +5%
 							</Button>
 						</div>
 					</div>
 					<div className="row">
 						<div>
 							<Button onClick={() => buy('talent-damage')}>
-								Damage +5
+								Melee Damage +5
 							</Button>
 						</div>
 					</div>

@@ -4,11 +4,13 @@ export default class FiringUnit extends Unit {
     constructor(params = {}) {
         super({
             fireDamage: 10,
+            fireTimeOffset: 0.4,
             fireTimeout: 1.5,
             fireShellSpeed: 3,
             ...params
         });
 
+        this.isFire = false;
         this.shouldFire = false;
         this.latestFire = 0;
     }
@@ -17,8 +19,13 @@ export default class FiringUnit extends Unit {
         return this.position.clone().add(
             this.getUp()
                 .multiplyScalar(1.5)
-                .add(this.getForward().multiplyScalar(0.3))
+                .add(this.getForward().multiplyScalar(0.5))
+                .add(this.getLeft().multiplyScalar(0.2))
         );
+    }
+
+    getFireInitialRotation() {
+        return this.object.quaternion;
     }
 
     update(time, deltaTime) {
@@ -28,15 +35,22 @@ export default class FiringUnit extends Unit {
             return;
         }
 
-        this.isFire = false;
 
         if (this.shouldFire && this.params.fire && this.isFireReleased(time) && this.isAttackReleased(time)) {
             this.isFire = true;
             this.shouldFire = false;
             this.latestFire = time;
-            this.params.fire();
         } else {
             this.shouldFire = false;
+        }
+
+        if (this.isFire && time - this.latestFire >= this.params.fireTimeOffset * 1000) {
+            this.params.fire();
+            this.isFire = false;
+        }
+
+        if (!this.animationState.isAttack) {
+            this.animationState.isAttack = !this.isFireReleased(time);
         }
     }
 

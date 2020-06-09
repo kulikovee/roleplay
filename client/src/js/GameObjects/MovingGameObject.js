@@ -23,17 +23,25 @@ export default class MovingGameObject extends AnimatedGameObject {
             this.animationState.isJump = !this.isGrounded;
         }
         
-        const isX = Boolean(acceleration.x) && this.checkWay(acceleration.x, 0, 0);
-        const isY = Boolean(acceleration.y) && this.checkWay(0, acceleration.y, 0);
-        const isZ = Boolean(acceleration.z) && this.checkWay(0, 0, acceleration.z);
+        const hasAccelerationX = Boolean(acceleration.x);
+        const hasAccelerationY = Boolean(acceleration.y);
+        const hasAccelerationZ = Boolean(acceleration.z);
 
-        if (!isX || !isY || !isZ) {
+        const canMoveX = hasAccelerationX && this.checkWay(acceleration.x, 0, 0);
+        const canMoveY = hasAccelerationY && this.checkWay(0, acceleration.y, 0);
+        const canMoveZ = hasAccelerationZ && this.checkWay(0, 0, acceleration.z);
+
+        if (
+           (hasAccelerationX && !canMoveX)
+           || (hasAccelerationY && !canMoveY)
+           || (hasAccelerationZ && !canMoveZ)
+        ) {
             if (!this.params.mas) {
                 // Stop object smoothly because of Collider hit
-                acceleration.multiplyScalar(0.75);
+                acceleration.multiplyScalar(0.5);
             }
 
-            if (!isX) {
+            if (hasAccelerationX && !canMoveX) {
                 const isClimbing = (acceleration.x && acceleration.y <= 0 && this.checkWay(acceleration.x, 0.04, 0));
 
                 if (isClimbing) {
@@ -43,9 +51,9 @@ export default class MovingGameObject extends AnimatedGameObject {
                 }
             }
 
-            if (!isY) { acceleration.y = 0; }
+            if (!canMoveY) { acceleration.y = 0; }
 
-            if (!isZ) {
+            if (hasAccelerationZ && !canMoveZ) {
                 const isClimbing = (acceleration.z && acceleration.y <= 0 && this.checkWay(0, 0.04, acceleration.z));
 
                 if (isClimbing) {

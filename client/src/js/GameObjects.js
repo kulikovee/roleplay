@@ -65,49 +65,46 @@ export default class GameObjectsService extends AutoBindMethods {
     }
 
     /**
-     * @param {Unit} firingGameObject
+     * @param {FiringUnit} firingGameObject
      */
     fire(firingGameObject) {
         if (firingGameObject.isDead()) {
             return;
         }
 
-        const createLightCube = left => this.scene.models.createCube({
-            x: 0.02,
-            y: 0.02,
-            z: 0.3,
-            emissive: '#ff0000',
-            position: new THREE.Vector3(0.05 - Number(left) * 0.1, 0, 0),
-            noScene: true,
+        const object = this.scene.models.createGeometry({
+            x: 0.1,
+            y: 0.1,
+            z: 0.1,
+            emissive: '#ff1100',
+            color: 0xff1100,
+            position: firingGameObject.getFireInitialPosition(),
+            geometry: new THREE.SphereGeometry(1),
         });
 
-        const object = new THREE.Object3D();
-
-        object.position.copy(firingGameObject.getFireInitialPosition());
         object.quaternion.copy(firingGameObject.getFireInitialRotation());
 
-        object.add(createLightCube(true));
-        object.add(createLightCube(false));
-
-        this.scene.add(object);
-
-        const fireGameObject = this.hookGameObject(new Fire({
+        const fireObject = this.hookGameObject(new Fire({
             object,
             throttling: new THREE.Vector3(1, 1, 1),
             speed: firingGameObject.params.fireShellSpeed,
             damage: firingGameObject.params.fireDamage,
             parent: firingGameObject,
             checkWay: this.scene.colliders.checkWay,
-            getCollisions: () => this.gameObjects.filter(gameObject => (
-                gameObject instanceof Unit
-                && gameObject.isAlive()
-                && fireGameObject.params.parent !== gameObject
-                && fireGameObject.position.distanceTo(gameObject.position) < 3
-            )),
-            destroy: () => this.destroyGameObject(fireGameObject),
+            getCollisions: () => this.scene.units
+               .getAliveUnits()
+               .filter(unit => (
+                    unit !== fireObject.params.parent
+                    && unit.isEnemy(fireObject.params.parent)
+                    && fireObject.position.distanceTo(unit.position) < 2
+                )),
+            destroy: () => this.destroyGameObject(fireObject),
         }));
 
-        this.scene.intervals.setTimeout(() => this.destroyGameObject(fireGameObject), 2000);
+        this.scene.intervals.setTimeout(
+           () => fireObject && this.destroyGameObject(fireObject),
+           2000,
+       );
 
         // this.scene.audio.playSound(firingGameObject.position, 'Lasers');
     }

@@ -46,6 +46,7 @@ global.THREE = {
 	Color: () => ({}),
 	Mesh: Obj3D,
 	CubeGeometry: () => ({}),
+	SphereGeometry: () => ({}),
 	MeshLambertMaterial: () => ({}),
 	NormalBlending: () => ({}),
 	AdditiveBlending: () => ({}),
