@@ -11,20 +11,18 @@ export default class Intervals extends AutoBindMethods {
     }
 
     update(now) {
-        if (this.scene.ui && !this.scene.ui.isPause()) {
-            this.timePassed += now - this.lastFrame;
+        this.timePassed += now - this.lastFrame;
 
-            this.intervals
-                .filter(i => this.timePassed - i.calledAt > i.interval)
-                .forEach((interval) => {
-                    interval.calledAt = this.timePassed;
-                    interval.fn();
+        this.intervals
+            .filter(i => this.timePassed - i.calledAt > i.interval)
+            .forEach((interval) => {
+                interval.calledAt = this.timePassed;
+                interval.fn();
 
-                    if (interval.loops && --interval.loops === 0) {
-                        this.clearInterval(interval.id);
-                    }
-                });
-        }
+                if (interval.loops && --interval.loops === 0) {
+                    this.clearInterval(interval.id);
+                }
+            });
 
         this.lastFrame = now;
     }

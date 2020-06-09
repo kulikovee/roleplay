@@ -33,6 +33,7 @@ class App extends Component {
 		this.restartServer = this.restartServer.bind(this);
 		this.updatePlayerParams = this.updatePlayerParams.bind(this);
 		this.setFps = this.setFps.bind(this);
+		this.setPing = this.setPing.bind(this);
 		this.setNotification = this.setNotification.bind(this);
 		this.setConnectionRole = this.setConnectionRole.bind(this);
 		this.setLoading = this.setLoading.bind(this);
@@ -136,6 +137,7 @@ class App extends Component {
 			clearHpBars: this.clearHpBars,
 			switchCamera: this.switchCamera,
 			setFps: this.setFps,
+			setPing: this.setPing,
 			notify: this.setNotification,
 			setLoading: this.setLoading,
 		};
@@ -161,6 +163,10 @@ class App extends Component {
 
 	setFps(fps, targetFps) {
 		this.setState({ fps, targetFps });
+	}
+
+	setPing(ping) {
+		this.setState({ ping });
 	}
 
 	setConnectionRole(connectionRole) {
@@ -305,6 +311,7 @@ class App extends Component {
 			experience,
 			levelExperience,
 			isThirdPerson,
+			ping,
 			fps,
 			targetFps,
 			position,
@@ -325,6 +332,7 @@ class App extends Component {
 							money={money}
 							position={position}
 							fps={fps}
+							ping={ping}
 							targetFps={targetFps}
 						/>}
 						{!isLoading && <BottomRight

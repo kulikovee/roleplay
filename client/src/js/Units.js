@@ -110,6 +110,7 @@ export default class Units extends AutoBindMethods {
 			baseUrl: fraction === 'goats'
 				? './assets/models/units/goat-warrior'
 				: './assets/models/units/enemy',
+			noScene: true,
 			callback: (gltf) => {
 				const networkConnection = this.scene.connection;
 
@@ -119,6 +120,7 @@ export default class Units extends AutoBindMethods {
 					|| !networkConnection.meta.role
 					|| networkConnection.meta.role === 'host'
 				) {
+					this.scene.add(gltf.scene);
 					/** @type {AI} */
 					const ai = gameObjectsService.hookGameObject(new AI({
 						animations: gltf.animations,

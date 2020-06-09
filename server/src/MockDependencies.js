@@ -111,6 +111,7 @@ export const MockGUI = {
 		clearHpBars: () => null,
 		switchCamera: () => null,
 		setFps: () => null,
+		setPing: () => null,
 		notify: debug,
 		setLoading: () => null,
 };

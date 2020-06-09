@@ -60,6 +60,7 @@ export default class Scene extends AutoBindMethods {
 
         this.intervals.setInterval(() => {
             this.ui.setFps(this.renderer.fps, this.renderer.targetFps);
+            this.ui.setPing(this.connection.ping);
             this.ui.updatePlayerParams()
         }, 1000);
 

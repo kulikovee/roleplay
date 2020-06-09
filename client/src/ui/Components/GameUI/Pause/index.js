@@ -17,8 +17,6 @@ class App extends Component {
 			buy,
 		} = this.props;
 
-		console.log('Render Settings', { showRestart });
-
 		return (
 			<div className="overlay theme">
 				<div className="menu">

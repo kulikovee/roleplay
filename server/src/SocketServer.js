@@ -12,7 +12,7 @@ class SocketServer {
 		this.loadUserData = this.loadUserData.bind(this);
 		this.startSocketServer = this.startSocketServer.bind(this);
 		this.getConnectionId = this.getConnectionId.bind(this);
-		this.sendGameObjectsToPlayers = this.sendGameObjectsToPlayers.bind(this);
+		this.sendToConnection = this.sendToConnection.bind(this);
 		this.send = this.send.bind(this);
 
 		const isProduction = process.env.NODE_ENV === 'production';
@@ -25,8 +25,6 @@ class SocketServer {
 			sessionsPath: path.join(__dirname, './sessions/'),
 			debug: false
 		};
-
-		console.log(__dirname, fs.readdirSync(__dirname));
 
 		this.db = {
 			sequenceId: 0,
@@ -99,19 +97,18 @@ class SocketServer {
 		return c._id;
 	}
 
-	sendGameObjectsToPlayers() {
+	sendToConnection(connectionId) {
 		const players = this.db.players;
-		const connections = this.db.connections;
-		const gameObjects = this.db.gameObjects;
+		const connection = this.db.connections[connectionId];
 
-		Object.keys(connections).forEach((connectionId) => {
-			const connection = connections[connectionId];
-			const networkPlayers = Object.keys(players)
-				.filter(playerConnectionId => playerConnectionId !== connectionId)
-				.map(playerConnectionId => players[playerConnectionId]);
+		const gameObjects = this.db.gameObjects
+			.filter(gameObject => gameObject.type !== 'player');
 
-			this.send(connection, 'updateGameObjects', [...gameObjects, ...networkPlayers]);
-		});
+		const networkPlayers = Object.keys(players)
+			.filter(playerConnectionId => playerConnectionId !== String(connectionId))
+			.map(playerConnectionId => players[playerConnectionId]);
+
+		this.send(connection, 'updateGameObjects', [].concat(gameObjects, networkPlayers));
 	}
 
 	send(connection, messageType, data) {
@@ -133,6 +130,7 @@ class SocketServer {
 		const loadUserData = this.loadUserData;
 		const getConnectionId = this.getConnectionId;
 		const send = this.send;
+		const sendToConnection = this.sendToConnection;
 		const getConnectionToken = c => c._meta.token;
 
 		setInterval(() => {
@@ -191,7 +189,10 @@ class SocketServer {
 					}
 
 					case 'updatePlayer': {
+						// Process request
 						updatePlayerData(data);
+						// Send response
+						sendToConnection(connectionId);
 						break;
 					}
 

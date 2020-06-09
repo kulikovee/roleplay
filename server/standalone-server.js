@@ -18,42 +18,38 @@ function Server() {
 		sceneLocation: Boolean(scene.location),
 		sceneColliders: scene.colliders.colliders.length,
 		sceneAreas: scene.pathFinder.areas.length,
+		aliveUnits: scene.units.getAliveUnits().length,
 	});
 
-	const init = () => {
-		const player = scene.getPlayer();
+	const player = scene.getPlayer();
 
-		if (player) {
-			player.params.hp = 0;
-		}
+	if (player) {
+		player.params.hp = 0;
+	}
 
-		debug('Starting socket server ...');
-		const socketServer = new SocketServer();
+	debug('Starting socket server ...');
+	const socketServer = new SocketServer();
 
-		const updateGameObjects = () => {
-			const data = [];
+	const updateGameObjects = () => {
+		const data = [];
 
-			scene.units.getAliveUnits()
-				.filter(unit => !(unit instanceof Player))
-				.forEach((unit) => {
-					const unitData = Connection.unitToNetwork(unit, null, 'dream-town');
+		scene.units.getAliveUnits().forEach((unit) => {
+			if (!(unit instanceof Player)) {
+				const unitData = Connection.unitToNetwork(unit, null, 'dream-town');
 
-					if (unitData) {
-						data.push(unitData);
-					}
-				});
+				if (unitData) {
+					data.push(unitData);
+				}
+			}
+		});
 
-			Object.values(socketServer.db.players)
-				.forEach(scene.connection.updateNetworkPlayer);
+		socketServer.db.gameObjects = data;
 
-			socketServer.db.gameObjects = data;
-			socketServer.sendGameObjectsToPlayers();
-		};
-
-		setInterval(updateGameObjects, 100);
+		Object.values(socketServer.db.players)
+			.forEach(scene.connection.updateNetworkPlayer);
 	};
 
-	setTimeout(init,5000);
+	setInterval(updateGameObjects, 100);
 }
 
 export default Server;

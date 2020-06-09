@@ -15,17 +15,23 @@ export default class Connection extends AutoBindMethods {
 		this.networkPlayers = {};
 		this.networkAIs = {};
 
+		this.lastRequest = Date.now();
+		this.ping = 0;
+
 		const WebSocket = window.WebSocket || window.MozWebSocket;
 
 		this.connection = new WebSocket(`${isSecure ? 'wss' : 'ws'}://${ip}:${port}`);
 		this.connection.onopen = () => console.log('open connection');
 		this.connection.onerror = (error) => console.log('error connection', error);
 		this.connection.onmessage = this.onMessage;
+
+		this.scene.intervals.setInterval(() => {
+			this.sendGameObjects();
+			this.lastRequest = Date.now();
+		}, 100);
 	}
 
-	update(time, deltaTime) {
-		this.sendGameObjects();
-	}
+	update() {}
 
 	onMessage({ data }) {
 		/**
@@ -68,6 +74,7 @@ export default class Connection extends AutoBindMethods {
 					break;
 				}
 				case 'updateGameObjects': {
+					this.ping = Date.now() - this.lastRequest;
 					this.updateGameObjects(response);
 					break;
 				}
