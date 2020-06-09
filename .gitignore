@@ -3,3 +3,4 @@ node_modules
 package-lock.json
 ./sources/blender/*.blend1
 ./server/dist/sessions
+./server/dist/

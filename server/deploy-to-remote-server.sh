@@ -1,7 +1,8 @@
 #!/bin/bash
 
 echo "Copy server to the server ..."
-scp server.js gohtml@gohtml.ru:roleplay-server/server.js
+npm run build-production
+scp dist/server.js gohtml@gohtml.ru:roleplay-server/server.js
 
 ssh -tt gohtml@gohtml.ru << EOF
   echo "Killing server ..."

@@ -20,7 +20,7 @@ class SocketServer {
 		this.config = {
 			ssl: isProduction,
 			port: 1337,
-			sslKey: path.join(__dirname, './private.pem'),
+			sslKey: path.join(__dirname, './privkey.pem'),
 			sslCertificate: path.join(__dirname, './fullchain.pem'),
 			sessionsPath: path.join(__dirname, './sessions/'),
 			debug: false

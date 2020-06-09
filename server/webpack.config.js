@@ -1,6 +1,5 @@
 const path = require('path');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
-const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
     entry: './index.js',
@@ -37,8 +36,5 @@ module.exports = {
         new CleanWebpackPlugin({
             cleanOnceBeforeBuildPatterns: ['*', '!.gitignore', '!localhost']
         }),
-        new CopyWebpackPlugin([
-            { from: 'example-certs', to: './' },
-        ]),
     ],
 };
