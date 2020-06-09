@@ -34,7 +34,7 @@ module.exports = {
     },
     plugins: [
         new CleanWebpackPlugin({
-            cleanOnceBeforeBuildPatterns: ['*', '!.gitignore', '!localhost']
+            cleanOnceBeforeBuildPatterns: ['*', '!.gitignore', '!sessions']
         }),
     ],
 };

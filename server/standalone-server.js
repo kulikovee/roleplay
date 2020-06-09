@@ -28,9 +28,8 @@ function Server() {
 	}
 
 	debug('Starting socket server ...');
-	const socketServer = new SocketServer();
 
-	const updateGameObjects = () => {
+	const getGameObjects = (networkPlayers) => {
 		const data = [];
 
 		scene.units.getAliveUnits().forEach((unit) => {
@@ -43,13 +42,15 @@ function Server() {
 			}
 		});
 
-		socketServer.db.gameObjects = data;
+		return data;
+	};
 
-		Object.values(socketServer.db.players)
+	const updateNetworkPlayers = (networkPlayers) => {
+		Object.values(networkPlayers)
 			.forEach(scene.connection.updateNetworkPlayer);
 	};
 
-	setInterval(updateGameObjects, 100);
+	return new SocketServer(getGameObjects, updateNetworkPlayers);
 }
 
 export default Server;

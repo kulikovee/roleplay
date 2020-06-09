@@ -5,15 +5,19 @@ import * as path from 'path';
 const WebSocketServer = ws.Server;
 
 class SocketServer {
-	constructor() {
+	constructor(getGameObjectsFromScene, updateNetworkPlayers) {
 		this.createWebServer = this.createWebServer.bind(this);
 		this.createSocketServer = this.createSocketServer.bind(this);
 		this.saveUserData = this.saveUserData.bind(this);
 		this.loadUserData = this.loadUserData.bind(this);
 		this.startSocketServer = this.startSocketServer.bind(this);
 		this.getConnectionId = this.getConnectionId.bind(this);
+		this.updateGameObjects = this.updateGameObjects.bind(this);
 		this.sendToConnection = this.sendToConnection.bind(this);
 		this.send = this.send.bind(this);
+
+		this.getGameObjectsFromScene = getGameObjectsFromScene;
+		this.updateNetworkPlayers = updateNetworkPlayers;
 
 		const isProduction = process.env.NODE_ENV === 'production';
 
@@ -97,7 +101,14 @@ class SocketServer {
 		return c._id;
 	}
 
+	updateGameObjects() {
+		this.updateNetworkPlayers(this.db.players);
+		this.db.gameObjects = this.getGameObjectsFromScene();
+	}
+
 	sendToConnection(connectionId) {
+		this.updateGameObjects();
+
 		const players = this.db.players;
 		const connection = this.db.connections[connectionId];
 

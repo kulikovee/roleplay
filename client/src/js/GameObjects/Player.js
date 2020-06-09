@@ -90,7 +90,7 @@ export default class Player extends FiringUnit {
     }
 
     getFireInitialPosition() {
-        const head = this.getChildByName('Head');
+        const head = this.getChildByName('Head') || this.object;
         const headForward = this.getChildDirection(head, new THREE.Vector3(0, 0, 1));
         const headUp = new THREE.Vector3(0, 1, 0);
         headUp.applyQuaternion(head.quaternion);
