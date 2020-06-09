@@ -47,7 +47,7 @@ export default class Connection extends AutoBindMethods {
 			if (this.meta.role && meta.role === 'host') {
 				this.hostUnitsFromNetwork();
 			} else if (!this.meta.debug) {
-				this.clearLocalGameObjects();
+				this.clearLocalUnits();
 			}
 		}
 
@@ -60,7 +60,7 @@ export default class Connection extends AutoBindMethods {
 					break;
 				}
 				case 'restartServer': {
-					window.location.reload();
+					this.networkAIs = {};
 					break;
 				}
 				case 'setUserPlayer': {
@@ -88,17 +88,13 @@ export default class Connection extends AutoBindMethods {
 		}
 	}
 
-	takeHost() {
-		this.send('takeHost');
-	}
-
 	restartServer() {
 		this.send('restartServer');
 	}
 
 	// There is race condition between
-	// clearLocalGameObjects and Location.createInteractiveGameObjects
-	clearLocalGameObjects() {
+	// clearLocalUnits and Location.createInteractiveGameObjects
+	clearLocalUnits() {
 		const gameObjectsService = this.scene.gameObjectsService;
 		const player = this.scene.getPlayer();
 
@@ -124,7 +120,23 @@ export default class Connection extends AutoBindMethods {
 		this.send('loadCurrentUser');
 	}
 
+	removeArtefactUnits() {
+		const gameObjectsService = this.scene.gameObjectsService;
+		const networkAIs = this.networkAIs;
+		const networkPlayers = this.networkPlayers;
+		const player = this.scene.getPlayer();
+
+		this.scene.units.getUnits()
+			.filter(unit => (
+				(unit instanceof AI && !networkAIs[unit.params.unitNetworkId])
+				|| (unit instanceof Player && !networkPlayers[unit.params.connectionId] && unit !== player)
+			))
+			.forEach(gameObjectsService.destroyGameObject);
+	}
+
 	updateGameObjects(gameObjects) {
+		this.removeArtefactUnits();
+
 		gameObjects.forEach((gameObject) => {
 			switch (gameObject.type) {
 				case 'player': {

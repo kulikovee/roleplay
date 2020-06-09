@@ -29,7 +29,6 @@ class App extends Component {
 		this.buy = this.buy.bind(this);
 		this.setRestartButtonVisible = this.setRestartButtonVisible.bind(this);
 		this.reviveHero = this.reviveHero.bind(this);
-		this.takeHost = this.takeHost.bind(this);
 		this.restartServer = this.restartServer.bind(this);
 		this.updatePlayerParams = this.updatePlayerParams.bind(this);
 		this.setFps = this.setFps.bind(this);
@@ -289,10 +288,6 @@ class App extends Component {
 		this.setPause(false);
 	}
 
-	takeHost() {
-		this.scene.connection.takeHost();
-	}
-
 	restartServer() {
 		this.scene.connection.restartServer();
 	}
@@ -318,10 +313,7 @@ class App extends Component {
 			notification,
 			isNotificationVisible,
 			isLoading,
-			connectionRole,
 		} = this.state;
-
-		const isClient = connectionRole === 'client';
 
 		return (
 			<div>
@@ -361,13 +353,11 @@ class App extends Component {
 						{notification && <ActionLabel action={notification} isVisible={isNotificationVisible} />}
 						{!isLoading && pause && <Pause
 							isThirdPerson={isThirdPerson}
-							isClient={isClient}
 							unspentTalents={unspentTalents}
 							money={money}
 							showRestart={showRestart}
 							setPause={this.setPause}
 							switchCamera={this.switchCamera}
-							takeHost={this.takeHost}
 							restartServer={this.restartServer}
 							reviveHero={this.reviveHero}
 							buy={this.buy}

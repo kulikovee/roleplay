@@ -5,7 +5,7 @@ import * as path from 'path';
 const WebSocketServer = ws.Server;
 
 class SocketServer {
-	constructor(getGameObjectsFromScene, updateNetworkPlayers) {
+	constructor(getGameObjectsFromScene, updateNetworkPlayers, restartServer, removeDisconnected) {
 		this.createWebServer = this.createWebServer.bind(this);
 		this.createSocketServer = this.createSocketServer.bind(this);
 		this.saveUserData = this.saveUserData.bind(this);
@@ -18,6 +18,13 @@ class SocketServer {
 
 		this.getGameObjectsFromScene = getGameObjectsFromScene;
 		this.updateNetworkPlayers = updateNetworkPlayers;
+		this.removeDisconnected = removeDisconnected;
+
+		this.restartServer = () => {
+			restartServer();
+			Object.values(this.db.connections)
+				.forEach(c => this.send(c, 'restartServer'));
+		};
 
 		const isProduction = process.env.NODE_ENV === 'production';
 
@@ -138,11 +145,16 @@ class SocketServer {
 
 	startSocketServer(socketServer) {
 		const db = this.db;
-		const loadUserData = this.loadUserData;
-		const getConnectionId = this.getConnectionId;
-		const send = this.send;
-		const sendToConnection = this.sendToConnection;
 		const getConnectionToken = c => c._meta.token;
+
+		const {
+			loadUserData,
+			getConnectionId,
+			restartServer,
+			removeDisconnected,
+			send,
+			sendToConnection,
+		} = this;
 
 		setInterval(() => {
 			Object.values(db.connections).forEach((connection) => {
@@ -172,6 +184,7 @@ class SocketServer {
 					send(c, 'disconnected', { connectionId: id });
 				});
 
+				removeDisconnected(id);
 				delete db.connections[id];
 				delete db.players[id];
 			};
@@ -208,7 +221,7 @@ class SocketServer {
 					}
 
 					case 'restartServer': {
-						// restartServer();
+						restartServer();
 						break;
 					}
 				}

@@ -6,7 +6,6 @@ class App extends Component {
         this.update = this.update.bind(this);
         this.clearHpBars = this.clearHpBars.bind(this);
 
-        this.state = { hpBars: [] };
         this.container = React.createRef();
 
         if (props.setUpdate) {

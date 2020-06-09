@@ -148,24 +148,26 @@ export default class Location extends AbstractLocation {
         }
     }
     
-    createInteractiveGameObjects() {
-        const createHealItem = () => (
-            this.scene.intervals.setTimeout(() => {
-                const itemHealPosition = new THREE.Vector3(-6.5, 0.1, 32.8);
-            
-                this.scene.gameObjectsService.createItem({
-                    model: 'item-heal',
-                    position: itemHealPosition,
-                    canPickup: (unit) => (unit.getMaxHP() - unit.getHP() > 0),
-                    onPickup: (unit) => {
-                        unit.addHP(25);
-                        createHealItem();
-                    },
-                });
-            }, 10000)
-        );
-    
-        createHealItem();
+    createInteractiveGameObjects(skipItemsCreation) {
+        if (!skipItemsCreation) {
+            const createHealItem = () => (
+                this.scene.intervals.setTimeout(() => {
+                    const itemHealPosition = new THREE.Vector3(-6.5, 0.1, 32.8);
+
+                    this.scene.gameObjectsService.createItem({
+                        model: 'item-heal',
+                        position: itemHealPosition,
+                        canPickup: (unit) => (unit.getMaxHP() - unit.getHP() > 0),
+                        onPickup: (unit) => {
+                            unit.addHP(Math.round(unit.params.hpMax * 0.25));
+                            createHealItem();
+                        },
+                    });
+                }, 10000)
+            );
+
+            createHealItem();
+        }
 
         const getAIParams = ({ level, ...params }) => {
             return {

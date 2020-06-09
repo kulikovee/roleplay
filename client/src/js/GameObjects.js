@@ -203,7 +203,7 @@ export default class GameObjectsService extends AutoBindMethods {
             const gameObject = this.gameObjects[removeIdx];
             this.gameObjects.splice(removeIdx, 1);
 
-            this.removeGameObjectFromScene(gameObject);
+            this._removeGameObjectFromScene(gameObject);
 
             removeIdx = getNextNonPlayerIndex();
         }
@@ -219,14 +219,19 @@ export default class GameObjectsService extends AutoBindMethods {
             this.gameObjects.splice(index, 1);
         }
 
-        this.removeGameObjectFromScene(gameObject);
+        this._removeGameObjectFromScene(gameObject);
     }
 
     /**
      * @param {GameObject} gameObject
      */
-    removeGameObjectFromScene(gameObject) {
+    _removeGameObjectFromScene(gameObject) {
         const parent = (gameObject.object && gameObject.object.parent) || this.scene;
+
+        if (gameObject.__unit_hp_bar) {
+            gameObject.__unit_hp_bar.remove();
+            gameObject.__unit_hp_bar = null;
+        }
 
         if (parent.remove) {
             parent.remove(gameObject.object);

@@ -5,12 +5,10 @@ class App extends Component {
 	render() {
 		const {
 			isThirdPerson,
-			isClient,
 			unspentTalents,
 			money,
 			showRestart,
 			switchCamera,
-			takeHost,
 			restartServer,
 			reviveHero,
 			setPause,
@@ -56,18 +54,9 @@ class App extends Component {
 					{
 						<div className="row">
 							<div>
-								{isClient
-									? (
-										<Button onClick={() => takeHost()}>
-											Take host
-										</Button>
-									)
-									: (
-										<Button onClick={() => restartServer()}>
-											Restart server
-										</Button>
-									)
-								}
+								<Button onClick={() => restartServer()}>
+									Restart server
+								</Button>
 							</div>
 						</div>
 					}
