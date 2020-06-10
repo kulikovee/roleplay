@@ -129,7 +129,7 @@ export default class Connection extends AutoBindMethods {
 		this.scene.units.getUnits()
 			.filter(unit => (
 				(unit instanceof AI && !networkAIs[unit.params.unitNetworkId])
-				|| (unit instanceof Player && !networkPlayers[unit.params.connectionId] && unit !== player)
+				// || (unit instanceof Player && !networkPlayers[unit.params.connectionId] && unit !== player)
 			))
 			.forEach(gameObjectsService.destroyGameObject);
 	}

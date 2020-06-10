@@ -70,6 +70,8 @@ export default class Scene extends AutoBindMethods {
         this.clearScene();
         this.animate();
 
+        window.goTo = (x, y, z) => this.getPlayer().position.set(x, y, z);
+
         // console.log('Scene', this);
     }
 
