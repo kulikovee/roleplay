@@ -151,10 +151,13 @@ class SocketServer {
 			loadUserData,
 			getConnectionId,
 			restartServer,
+			saveUserData,
 			removeDisconnected,
 			send,
 			sendToConnection,
 		} = this;
+
+		const SAVE_TIME = 10000;
 
 		setInterval(() => {
 			Object.values(db.connections).forEach((connection) => {
@@ -162,10 +165,15 @@ class SocketServer {
 				const token = getConnectionToken(connection);
 
 				if (connectionPlayer && token) {
-					this.saveUserData(token, connectionPlayer);
+					saveUserData(token, connectionPlayer);
+				}
+
+				if (Date.now() - connection._lastMessageAt >= SAVE_TIME) {
+					removeDisconnected(getConnectionId(connection));
+					delete db.players[getConnectionId(connection)];
 				}
 			});
-		}, 10000);
+		}, SAVE_TIME);
 
 		socketServer.on('connection', function(connection) {
 			const id = ++db.sequenceId;
@@ -184,6 +192,13 @@ class SocketServer {
 					send(c, 'disconnected', { connectionId: id });
 				});
 
+				const connectionPlayer = db.players[id];
+				const token = getConnectionToken(connection);
+
+				if (connectionPlayer && token) {
+					saveUserData(token, connectionPlayer);
+				}
+
 				removeDisconnected(id);
 				delete db.connections[id];
 				delete db.players[id];
@@ -192,6 +207,7 @@ class SocketServer {
 			const onSocketMessage = (message) => {
 				const { data, messageType, meta } = JSON.parse(message);
 				const connectionId = getConnectionId(connection);
+				connection._lastMessageAt = Date.now();
 
 				if (meta && meta.token && meta.token !== connection._meta.token) {
 					debug(`User #${connectionId} token changed from ${connection._meta.token} to ${meta.token}`);
