@@ -85,6 +85,13 @@ class App extends Component {
 							</Button>
 						</div>
 					</div>
+					<div className="row">
+						<div>
+							<Button onClick={() => buy('talent-fire-damage')}>
+								Ranged Damage +3
+							</Button>
+						</div>
+					</div>
 
 					<hr />
 					<div className="row title">

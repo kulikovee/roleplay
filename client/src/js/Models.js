@@ -42,10 +42,29 @@ export default class Models extends AutoBindMethods {
             new THREE.MeshLambertMaterial(materialParams)
         );
 
+        if (params.rotation) {
+            geometry.rotation.copy(params.rotation);
+        }
+
         geometry.scale.set(params.x || 1, params.y || 1, params.z || 1);
 
-        if (params.position) {
+        const pivot = new THREE.Object3D();
+        pivot.add(geometry);
+
+        if (params.rotation) {
+            pivot.rotation.copy(params.rotation);
+        }
+
+        if (params.localPosition) {
             geometry.position.set(
+                params.localPosition.x || 0,
+                params.localPosition.y || 0,
+                params.localPosition.z || 0
+            );
+        }
+
+        if (params.position) {
+            pivot.position.set(
                 params.position.x || 0,
                 params.position.y || 0,
                 params.position.z || 0
@@ -53,7 +72,7 @@ export default class Models extends AutoBindMethods {
         }
 
         if (params.rotation) {
-            geometry.rotation.set(
+            pivot.rotation.set(
                 params.rotation.x || 0,
                 params.rotation.y || 0,
                 params.rotation.z || 0
@@ -61,10 +80,10 @@ export default class Models extends AutoBindMethods {
         }
 
         if (!params.noScene) {
-            this.scene.add(geometry);
+            this.scene.add(pivot);
         }
 
-        return geometry;
+        return pivot;
     }
 
     loadGLTF({

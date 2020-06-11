@@ -5,342 +5,356 @@ import { createEnvironment } from './Environment';
 import Areas from './Areas';
 
 export default class Location extends AbstractLocation {
-    /**
-     * @param {Scene} scene
-     */
-    constructor(scene) {
-        super(scene);
-        this.id = 'dream-town';
+	/**
+	 * @param {Scene} scene
+	 */
+	constructor(scene) {
+		super(scene);
+		this.id = 'dream-town';
 
-        this.shadowLightPosition = new THREE.Vector3(25, 50, 25);
+		this.shadowLightPosition = new THREE.Vector3(25, 50, 25);
 
-        this.scene.ui.setLoading(true);
-        this.scene.ui.setPause(true);
+		this.scene.ui.setLoading(true);
+		this.scene.ui.setPause(true);
 
-        this.environment = createEnvironment({
-            load: this.scene.models.loadGLTF,
-            addColliderFunction: this.scene.colliders.addColliderFunction,
-            trees: [
-                { x: 0, y: 0, z: 15 },
-                { x: 0, y: 0, z: -15 },
-                { x: 15, y: 0, z: 0 },
-                { x: -15, y: 0, z: 0 },
-    
-    
-                { x: 15, y: 0, z: 15 },
-                { x: 15, y: 0, z: -15 },
-                { x: 30, y: 0, z: 20 },
-                { x: 30, y: 0, z: -20 },
-    
-                { x: 45, y: 0, z: -35 },
-                { x: 45, y: 0, z: 35 },
-            ],
-            houses: [
-                { x: 0, y: 0, z: 40, ry: -Math.PI },
-                { x: -10, y: 0, z: 30, ry: Math.PI / 2 },
-                { x: 10, y: 0, z: 30, ry: -Math.PI / 2 },
-                // { x: 75, y: 100, z: 75 },
-                // { x: 75, y: 200, z: 75 },
-            ],
-            onLoad: () => {
-                this.scene.ui.setLoading(false);
-                this.scene.ui.setPause(false);
-                this.scene.notify('Dream Town');
-                this.startLocation();
-            }
-        });
+		this.environment = createEnvironment({
+			load: this.scene.models.loadGLTF,
+			addColliderFunction: this.scene.colliders.addColliderFunction,
+			trees: [
+				{ x: 0, y: 0, z: 15 },
+				{ x: 0, y: 0, z: -15 },
+				{ x: 15, y: 0, z: 0 },
+				{ x: -15, y: 0, z: 0 },
 
-        this.ambientLight = this.createAmbientLight();
-        this.shadowLight = this.createShadowLight();
 
-        this.scene.add(this.environment);
-        this.scene.add(this.ambientLight);
-        this.scene.add(this.shadowLight);
+				{ x: 15, y: 0, z: 15 },
+				{ x: 15, y: 0, z: -15 },
+				{ x: 30, y: 0, z: 20 },
+				{ x: 30, y: 0, z: -20 },
 
-        this.elevator = new Elevator(scene, {
-            position: { x: -48, y: 100, z: 0 },
-            x: 4,
-            y: 1,
-            z: 4,
-        });
+				{ x: 45, y: 0, z: -35 },
+				{ x: 45, y: 0, z: 35 },
+			],
+			houses: [
+				{ x: 0, y: 0, z: 40, ry: -Math.PI },
+				{ x: -10, y: 0, z: 30, ry: Math.PI / 2 },
+				{ x: 10, y: 0, z: 30, ry: -Math.PI / 2 },
+				// { x: 75, y: 100, z: 75 },
+				// { x: 75, y: 200, z: 75 },
+			],
+			onLoad: () => {
+				this.scene.ui.setLoading(false);
+				this.scene.ui.setPause(false);
+				this.scene.notify('Dream Town');
+				this.startLocation();
+			}
+		});
 
-        const color = 0x000000;
-        const near = 10;
-        const far = 100;
-        this.scene.scene.fog = new THREE.Fog(color, near, far);
+		this.ambientLight = this.createAmbientLight();
+		this.shadowLight = this.createShadowLight();
 
-        this.createLocationColliders();
-    }
+		this.scene.add(this.environment);
+		this.scene.add(this.ambientLight);
+		this.scene.add(this.shadowLight);
 
-    update() {
-        super.update();
+		this.elevator = new Elevator(scene, {
+			position: { x: -48, y: 100, z: 0 },
+			x: 4,
+			y: 1,
+			z: 4,
+		});
 
-        const player = this.scene.getPlayer();
+		const color = 0x000000;
+		const near = 10;
+		const far = 100;
+		this.scene.scene.fog = new THREE.Fog(color, near, far);
 
-        if (player) {
-            this.elevator.update();
+		this.createLocationColliders();
+	}
 
-            this.shadowLight.position
-                .copy(player.position)
-                .add(this.shadowLightPosition);
+	update() {
+		super.update();
 
-            if (this.shadowLight.target !== player.object) {
-                this.shadowLight.target = player.object;
-            }
-        }
-    }
+		const player = this.scene.getPlayer();
 
-    reviveHero() {
-        const player = this.scene.getPlayer();
-        player.params.hp = 10;
-        player.position.set(0, 0.3, 30);
-        player.animationState.isDie = false;
-        this.scene.particles.createEffect({
-            effect: 'level-up/level-up',
-            scale: 1.5,
-            attachTo: player.object,
-        });
-    }
+		if (player) {
+			this.elevator.update();
 
-    afterClear() {
-        this.scene.units.createPlayer({
-            /**
-             * @param {Player} player
-             */
-            onCreate: (player) => {
-                this.scene.camera.player = player;
-                this.scene.ui.updatePlayerParams();
-                player.position.set(0, 0.3, 30);
-            },
-            onDie: () => window.setTimeout(() => {
-                this.scene.ui.setPause(true);
-            }, 2500),
-            onKill: (object) => {
-                const player = this.scene.getPlayer();
-                player.addExperience(object.params.bounty);
-                player.addMoney(object.params.bounty);
-            },
-            onDamageTaken: () => this.scene.ui.updatePlayerParams(),
-            onLocationUp: () => this.scene.ui.updatePlayerParams(),
-        });
+			this.shadowLight.position
+				.copy(player.position)
+				.add(this.shadowLightPosition);
 
-        this.createInteractiveGameObjects();
-    }
+			if (this.shadowLight.target !== player.object) {
+				this.shadowLight.target = player.object;
+			}
+		}
+	}
 
-    startLocation() {
-        if (this.interval) {
-            clearInterval(this.interval);
-        }
-    }
+	reviveHero() {
+		const player = this.scene.getPlayer();
+		player.params.hp = 10;
+		player.position.set(0, 0.3, 30);
+		player.animationState.isDie = false;
+		this.scene.particles.createEffect({
+			effect: 'level-up/level-up',
+			scale: 1.5,
+			attachTo: player.object,
+		});
+	}
 
-    restartLocation() {
-        this.scene.clearScene();
-    }
+	afterClear() {
+		this.scene.units.createPlayer({
+			/**
+			 * @param {Player} player
+			 */
+			onCreate: (player) => {
+				this.scene.camera.player = player;
+				this.scene.ui.updatePlayerParams();
+				player.position.set(0, 0.3, 30);
+			},
+			onDie: () => window.setTimeout(() => {
+				this.scene.ui.setPause(true);
+			}, 2500),
+			onKill: dyingUnit => this.onKill(dyingUnit, this.scene.getPlayer()),
+			onDamageTaken: () => this.scene.ui.updatePlayerParams(),
+			onLocationUp: () => this.scene.ui.updatePlayerParams(),
+		});
 
-    stopLocation() {
-        this.scene.remove(this.environment);
-        // this.scene.remove(this.skybox);
-        this.scene.remove(this.ambientLight);
-        this.scene.remove(this.shadowLight);
-        this.scene.gameObjectsService.removeAllExceptPlayer();
-        if (this.interval) {
-            clearInterval(this.interval);
-        }
-    }
-    
-    createInteractiveGameObjects(skipItemsCreation) {
-        if (!skipItemsCreation) {
-            const createHealItem = () => (
-                this.scene.intervals.setTimeout(() => {
-                    const itemHealPosition = new THREE.Vector3(-6.5, 0.1, 32.8);
+		this.createInteractiveGameObjects();
+	}
 
-                    this.scene.gameObjectsService.createItem({
-                        model: 'item-heal',
-                        position: itemHealPosition,
-                        canPickup: (unit) => (unit.getMaxHP() - unit.getHP() > 0),
-                        onPickup: (unit) => {
-                            unit.addHP(Math.round(unit.params.hpMax * 0.25));
-                            createHealItem();
-                        },
-                    });
-                }, 10000)
-            );
+	onKill(dyingUnit, killingUnit) {
+		this.scene.units.getAliveUnits()
+			.filter(unit => (
+				!unit.isEnemy(killingUnit)
+				&& unit.addExperience
+				&& unit.position.distanceTo(dyingUnit.position) < 40
+			))
+			.forEach(unit => unit.addExperience(dyingUnit.params.bounty / 2));
 
-            createHealItem();
-        }
+		if (killingUnit.addExperience) {
+			killingUnit.addExperience(dyingUnit.params.bounty / 2);
+		}
 
-        const getAIParams = ({ level, ...params }) => {
-            return {
-                ...params,
-                level,
-                scale: 0.7 + level / 10,
-                onDie: () => this.scene.units.createAI(getAIParams({
-                    ...params,
-                    level: level + 1 + Math.round(Math.random() * level),
-                })),
-            };
-        };
+		if (killingUnit.addMoney) {
+			killingUnit.addMoney(dyingUnit.params.bounty);
+		}
+	}
 
-        const getGoatsParams = (level, position) => getAIParams({
-            level,
-            position,
-            fraction: 'goats',
-            name: level <= 10
-               ? 'Goat Warrior'
-               : (level <= 20 ? 'Goat Elite' : 'Goat Destroyer'),
-        });
+	startLocation() {
+		if (this.interval) {
+			clearInterval(this.interval);
+		}
+	}
 
-        const getFriendlyParams = (level, position, rotation) => getAIParams({
-            level, position, rotation, fraction: 'friendly', name: 'Friendly Citizen',
-        });
+	restartLocation() {
+		this.scene.clearScene();
+	}
 
-        this.units = [
-            getGoatsParams(3, { x: -17, y: 0.2, z: -5 }),
-            getGoatsParams(3, { x: 17 , y: 0.2, z: -5 }),
-            getGoatsParams(2, { x: -15, y: 0.2, z: -30 }),
-            getGoatsParams(2, { x: 15, y: 0.2, z: -30 }),
+	stopLocation() {
+		this.scene.remove(this.environment);
+		// this.scene.remove(this.skybox);
+		this.scene.remove(this.ambientLight);
+		this.scene.remove(this.shadowLight);
+		this.scene.gameObjectsService.removeAllExceptPlayer();
+		if (this.interval) {
+			clearInterval(this.interval);
+		}
+	}
 
-            getGoatsParams(5, { x: -30, y: 0.2, z: -9 }),
-            getGoatsParams(5, { x: 30 , y: 0.2, z: -9 }),
-            getGoatsParams(4, { x: -45, y: 0.2, z: -30 }),
-            getGoatsParams(4, { x: 45, y: 0.2, z: -30 }),
+	createInteractiveGameObjects(skipItemsCreation) {
+		if (!skipItemsCreation) {
+			const createHealItem = () => (
+				this.scene.intervals.setTimeout(() => {
+					const itemHealPosition = new THREE.Vector3(-6.5, 0.1, 32.8);
 
-            getGoatsParams(1, { x: 45, y: 0.2, z: 45 }),
-            getGoatsParams(1, { x: 45, y: 0.2, z: -45 }),
+					this.scene.gameObjectsService.createItem({
+						model: 'item-heal',
+						position: itemHealPosition,
+						canPickup: (unit) => (unit.getMaxHP() - unit.getHP() > 0),
+						onPickup: (unit) => {
+							unit.addHP(Math.round(unit.params.hpMax * 0.25));
+							createHealItem();
+						},
+					});
+				}, 10000)
+			);
 
-            getGoatsParams(25, { x: 0, y: 0.2, z: 0 }),
+			createHealItem();
+		}
 
-            getFriendlyParams(5, { x: -0.8, y: 0.2, z: 40 - 4.03 }, { y: Math.PI }),
-            getFriendlyParams(5, { x: -10 + 3.5, y: 0.2, z: 29.2 }, { y: Math.PI / 2 }),
-            getFriendlyParams(5, { x: 10 - 3.5, y: 0.2, z: 30.8 }, { y: -Math.PI / 2 }),
-        ].forEach(this.scene.units.createAI);
-    }
+		const getAIParams = ({ level, ...params }) => {
+			return {
+				...params,
+				level,
+				scale: 0.7 + level / 10,
+				onDie: () => this.scene.units.createAI(getAIParams({
+					...params,
+					level: level + 1 + Math.round(Math.random() * level),
+				})),
+			};
+		};
 
-    createLocationColliders() {
-        const isBetween = (v, min, max) => v > min && v < max;
+		const getGoatsParams = (level, position) => getAIParams({
+			level,
+			position,
+			fraction: 'goats',
+			name: level <= 10
+				? 'Goat Warrior'
+				: (level <= 20 ? 'Goat Elite' : 'Goat Destroyer'),
+		});
 
-        this.scene.colliders.addColliderFunction((position, gameObject) => {
-            const { x, y, z } = position;
-            const absX = Math.abs(x);
-            const absZ = Math.abs(z);
+		const getFriendlyParams = (level, position, rotation) => getAIParams({
+			level, position, rotation, fraction: 'friendly', name: 'Friendly Citizen',
+		});
 
-            if (
-                (y < 0.1 && absX < 50 && absZ < 50) // floor 0
-                || (((y < (absX - 50) / 1.5) && absX > 50) || ((y < (absZ - 50) / 1.5) && absZ > 50)) // out of floor 0
-                || (y < 90 && absX > 96 && absZ > 96) // out of floor 0
-                || (isBetween(y, 90, 100) && (absX > 50 || absZ > 50)) // floor 1
-                || (isBetween(y, 90, 190) && (absX > 135 || absZ > 135)) // out of floor 1
-                || (isBetween(y, 190, 200) && (absX > 50 || absZ > 50)) // floor 2
-                || (y > 190 && (absX > 133 || absZ > 133)) // out of floor 2
-                || this.elevator.isCarrying(position)
-            ) {
-                return true;
-            }
+		this.units = [
+			getGoatsParams(3, { x: -17, y: 0.2, z: -5 }),
+			getGoatsParams(3, { x: 17, y: 0.2, z: -5 }),
+			getGoatsParams(2, { x: -15, y: 0.2, z: -30 }),
+			getGoatsParams(2, { x: 15, y: 0.2, z: -30 }),
 
-            // TODO: Check if we need units colliders
-            // const units = this.scene.units.getAliveUnits();
-            //
-            // for(let unit of units) {
-            //     if (
-            //         unit !== gameObject
-            //         && (
-            //             !(gameObject instanceof Fire)
-            //             || gameObject.params.parent !== unit
-            //         )
-            //         && unit.getCollider(position)
-            //     ) {
-            //         return true;
-            //     }
-            // }
+			getGoatsParams(5, { x: -30, y: 0.2, z: -9 }),
+			getGoatsParams(5, { x: 30, y: 0.2, z: -9 }),
+			getGoatsParams(4, { x: -45, y: 0.2, z: -30 }),
+			getGoatsParams(4, { x: 45, y: 0.2, z: -30 }),
 
-            return false;
-        });
-    }
+			getGoatsParams(1, { x: 45, y: 0.2, z: 45 }),
+			getGoatsParams(1, { x: 45, y: 0.2, z: -45 }),
 
-    getAreas() {
-        const areas = Object.values(Areas);
+			getGoatsParams(25, { x: 0, y: 0.2, z: 0 }),
 
-        const generateWaypoints = (width, height, map) => {
-            return new Array(width).fill(null).map(
-                (null1, x) => new Array(height).fill(null).map(
-                    (null2, y) => map(x, y),
-                ),
-            );
-        };
+			getFriendlyParams(5, { x: -0.8, y: 0.2, z: 40 - 4.03 }, { y: Math.PI }),
+			getFriendlyParams(5, { x: -10 + 3.5, y: 0.2, z: 29.2 }, { y: Math.PI / 2 }),
+			getFriendlyParams(5, { x: 10 - 3.5, y: 0.2, z: 30.8 }, { y: -Math.PI / 2 }),
+		].forEach(this.scene.units.createAI);
+	}
 
-        return areas.map((area) => {
-            const result = { ...area };
+	createLocationColliders() {
+		const isBetween = (v, min, max) => v > min && v < max;
 
-            result.getWaypoints = () => generateWaypoints(
-                area.width,
-                area.height,
-                (x, y) => {
-                    if (
-                        // Elevator
-                        Math.abs(area.waypointXToWorldX(x) - this.elevator.params.position.x) <= 5
-                        && Math.abs(area.waypointYToWorldZ(y) - this.elevator.params.position.z) <= 1
-                    ) {
-                        return 1;
-                    }
+		this.scene.colliders.addColliderFunction((position, gameObject) => {
+			const { x, y, z } = position;
+			const absX = Math.abs(x);
+			const absZ = Math.abs(z);
 
-                    if (
-                        area.id !== 'FLOOR_0' && (
-                            // Center hole
-                            (
-                                Math.abs(area.waypointXToWorldX(x)) < 51
-                                && Math.abs(area.waypointYToWorldZ(y)) < 51
-                            )
-                            || (
-                                Math.abs(area.waypointXToWorldX(x)) <= 51
-                                && Math.abs(area.waypointYToWorldZ(y)) <= 51
-                                && Math.abs(area.waypointXToWorldX(x)) >= 50
-                                && Math.abs(area.waypointYToWorldZ(y)) >= 50
-                            )
-                        )
-                    ) {
-                        return 0;
-                    }
+			if (
+				(y < 0.1 && absX < 50 && absZ < 50) // floor 0
+				|| (((y < (absX - 50) / 1.5) && absX > 50) || ((y < (absZ - 50) / 1.5) && absZ > 50)) // out of floor 0
+				|| (y < 90 && absX > 96 && absZ > 96) // out of floor 0
+				|| (isBetween(y, 90, 100) && (absX > 50 || absZ > 50)) // floor 1
+				|| (isBetween(y, 90, 190) && (absX > 135 || absZ > 135)) // out of floor 1
+				|| (isBetween(y, 190, 200) && (absX > 50 || absZ > 50)) // floor 2
+				|| (y > 190 && (absX > 133 || absZ > 133)) // out of floor 2
+				|| this.elevator.isCarrying(position)
+			) {
+				return true;
+			}
 
-                    if (
-                        area.id === 'FLOOR_0'
-                        && (
-                            // Floor out
-                            Math.abs(area.waypointXToWorldX(x)) >= 49
-                            || Math.abs(area.waypointYToWorldZ(y)) >= 49
-                        )
-                    ) {
-                        return 1;
-                    }
+			// TODO: Check if we need units colliders
+			// const units = this.scene.units.getAliveUnits();
+			//
+			// for(let unit of units) {
+			//     if (
+			//         unit !== gameObject
+			//         && (
+			//             !(gameObject instanceof Fire)
+			//             || gameObject.params.parent !== unit
+			//         )
+			//         && unit.getCollider(position)
+			//     ) {
+			//         return true;
+			//     }
+			// }
 
-                    return Number(this.checkWayForWaypoint(area.getWorldWaypointByXY(x, y)))
-                },
-            );
+			return false;
+		});
+	}
 
-            return result;
-        });
-    }
+	getAreas() {
+		const areas = Object.values(Areas);
 
-    checkWayForWaypoint({ x, y, z }) {
-        const checkWay = this.scene.colliders.checkWay;
-        const checkNear = (range, diagonal) => (
-            checkWay(new THREE.Vector3(x + range, y, z))
-            && (checkWay(new THREE.Vector3(x - range, y, z)))
-            && (checkWay(new THREE.Vector3(x, y, z + range)))
-            && (checkWay(new THREE.Vector3(x, y, z - range)))
-            && (
-                !diagonal || (
-                    checkWay(new THREE.Vector3(x + range, y, z + range))
-                    && checkWay(new THREE.Vector3(x - range, y, z - range))
-                    && checkWay(new THREE.Vector3(x - range, y, z + range))
-                    && checkWay(new THREE.Vector3(x + range, y, z - range))
-                )
-            )
-        );
+		const generateWaypoints = (width, height, map) => {
+			return new Array(width).fill(null).map(
+				(null1, x) => new Array(height).fill(null).map(
+					(null2, y) => map(x, y),
+				),
+			);
+		};
 
-        return (
-            checkWay(new THREE.Vector3(x, y, z))
-            && checkNear(1, true)
-            && checkNear(2)
-        );
-    }
+		return areas.map((area) => {
+			const result = { ...area };
+
+			result.getWaypoints = () => generateWaypoints(
+				area.width,
+				area.height,
+				(x, y) => {
+					if (
+						// Elevator
+						Math.abs(area.waypointXToWorldX(x) - this.elevator.params.position.x) <= 5
+						&& Math.abs(area.waypointYToWorldZ(y) - this.elevator.params.position.z) <= 1
+					) {
+						return 1;
+					}
+
+					if (
+						area.id !== 'FLOOR_0' && (
+							// Center hole
+							(
+								Math.abs(area.waypointXToWorldX(x)) < 51
+								&& Math.abs(area.waypointYToWorldZ(y)) < 51
+							)
+							|| (
+								Math.abs(area.waypointXToWorldX(x)) <= 51
+								&& Math.abs(area.waypointYToWorldZ(y)) <= 51
+								&& Math.abs(area.waypointXToWorldX(x)) >= 50
+								&& Math.abs(area.waypointYToWorldZ(y)) >= 50
+							)
+						)
+					) {
+						return 0;
+					}
+
+					if (
+						area.id === 'FLOOR_0'
+						&& (
+							// Floor out
+							Math.abs(area.waypointXToWorldX(x)) >= 49
+							|| Math.abs(area.waypointYToWorldZ(y)) >= 49
+						)
+					) {
+						return 1;
+					}
+
+					return Number(this.checkWayForWaypoint(area.getWorldWaypointByXY(x, y)))
+				},
+			);
+
+			return result;
+		});
+	}
+
+	checkWayForWaypoint({ x, y, z }) {
+		const checkWay = this.scene.colliders.checkWay;
+		const checkNear = (range, diagonal) => (
+			checkWay(new THREE.Vector3(x + range, y, z))
+			&& (checkWay(new THREE.Vector3(x - range, y, z)))
+			&& (checkWay(new THREE.Vector3(x, y, z + range)))
+			&& (checkWay(new THREE.Vector3(x, y, z - range)))
+			&& (
+				!diagonal || (
+					checkWay(new THREE.Vector3(x + range, y, z + range))
+					&& checkWay(new THREE.Vector3(x - range, y, z - range))
+					&& checkWay(new THREE.Vector3(x - range, y, z + range))
+					&& checkWay(new THREE.Vector3(x + range, y, z - range))
+				)
+			)
+		);
+
+		return (
+			checkWay(new THREE.Vector3(x, y, z))
+			&& checkNear(1, true)
+			&& checkNear(2)
+		);
+	}
 }

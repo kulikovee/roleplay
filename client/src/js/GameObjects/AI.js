@@ -5,7 +5,6 @@ export default class AI extends FiringUnit {
         super({
             speed: 0.5,
             damage: 10,
-            mas: 1,
             hp: 100,
             name: 'Unnamed Unit',
             fraction: 'neutral',

@@ -1,5 +1,6 @@
 import AutoBindMethods from './AutoBindMethods';
 import { Player, AI } from './GameObjects';
+import FiringUnit from "./GameObjects/FiringUnit";
 
 export default class Connection extends AutoBindMethods {
 	/**
@@ -228,6 +229,13 @@ export default class Connection extends AutoBindMethods {
 		}
 	}
 
+	/**
+	 * @param {Player} player
+	 * @param position
+	 * @param rotation
+	 * @param animationState
+	 * @param params
+	 */
 	setPlayerParams(player, { position, rotation, animationState, params }) {
 		player.position.set(position.x, position.y, position.z);
 		player.rotation.set(rotation.x, rotation.y, rotation.z);
@@ -245,6 +253,7 @@ export default class Connection extends AutoBindMethods {
 			playerParams.hpMax = params.hpMax;
 			playerParams.fraction = params.fraction;
 			playerParams.damage = params.damage;
+			playerParams.fireDamage = params.fireDamage;
 			playerParams.speed = params.speed;
 			playerParams.money = params.money;
 			playerParams.level = params.level;
@@ -289,6 +298,7 @@ export default class Connection extends AutoBindMethods {
 				networkAIParams.hpMax = params.hpMax;
 				networkAIParams.fraction = params.fraction;
 				networkAIParams.damage = params.damage;
+				networkAIParams.fireDamage = params.fireDamage;
 				networkAIParams.level = params.level;
 				networkAIParams.acceleration.set(acceleration.x, acceleration.y, acceleration.z);
 			}
@@ -354,6 +364,7 @@ export default class Connection extends AutoBindMethods {
 				hpMax,
 				acceleration,
 				damage,
+				fireDamage,
 				level,
 				experience,
 				fraction,
@@ -376,6 +387,12 @@ export default class Connection extends AutoBindMethods {
 				z: Math.round(vector.z * eps) / eps,
 			});
 
+			const isPostponedAttack = unit.params.__network_last_sent_attack1 < unit.latestAttackTimestamp;
+			const isPostponedFire = unit instanceof FiringUnit && unit.params.__network_last_sent_attack2 < unit.latestFire;
+
+			unit.params.__network_last_sent_attack1 = unit.latestAttackTimestamp;
+			unit.params.__network_last_sent_attack2 = unit.latestFire;
+
 			return ({
 				type: unit instanceof Player ? 'player' : 'ai',
 				locationName,
@@ -393,6 +410,7 @@ export default class Connection extends AutoBindMethods {
 					hpMax,
 					fraction,
 					damage,
+					fireDamage,
 					level,
 					experience,
 					speed,
@@ -401,7 +419,8 @@ export default class Connection extends AutoBindMethods {
 					acceleration: vectorToObject(acceleration),
 					input: {
 						vertical, horizontal,
-						attack1, attack2,
+						attack1: attack1 || isPostponedAttack,
+						attack2: attack2 || isPostponedFire,
 					},
 				},
 			});

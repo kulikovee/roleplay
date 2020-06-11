@@ -134,6 +134,11 @@ export default class Units extends AutoBindMethods {
 						checkWay: this.scene.colliders.checkWay,
 						getNextPoint: this.scene.pathFinder.getNextPoint,
 						attack: () => gameObjectsService.attack(ai),
+						onKill: (dyingUnit) => {
+							if (this.scene.location.onKill) {
+								this.scene.location.onKill(dyingUnit, ai);
+							}
+						},
 						onDamageTaken: () => this.scene.particles.loadEffect({
 							position: ai.position.clone().add(new THREE.Vector3(0, 0.75, 0))
 						}),
@@ -216,6 +221,11 @@ export default class Units extends AutoBindMethods {
 					onDamageTaken: () => this.scene.particles.loadEffect({
 						position: ai.position.clone().add(new THREE.Vector3(0, 0.75, 0))
 					}),
+					onKill: (dyingUnit) => {
+						if (this.scene.location.onKill) {
+							this.scene.location.onKill(dyingUnit, ai);
+						}
+					},
 
 					onDie: () => this.scene.intervals.setTimeout(() => {
 						if (ai.isDead()) {
@@ -305,7 +315,15 @@ export default class Units extends AutoBindMethods {
 							position: player.position.clone().add(new THREE.Vector3(0, 0.75, 0))
 						});
 					},
-					onKill: (object) => onKill && onKill(object),
+					onKill: (dyingUnit) => {
+						if (onKill) {
+							onKill(dyingUnit);
+						}
+
+						if (this.scene.location.onKill) {
+							this.scene.location.onKill(dyingUnit, player);
+						}
+					},
 					onLevelUp: () => {
 						this.scene.particles.createEffect({
 							effect: 'level-up-alt/level-up',

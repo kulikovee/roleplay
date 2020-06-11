@@ -8,6 +8,15 @@ function Server() {
 	debug('Starting server scene initialization ...');
 	const scene = new Scene(MockRenderer, MockGUI);
 
+	scene.particles.update = () => {};
+	scene.particles.createSnow = () => ({});
+	scene.particles.createEffect = () => ({});
+	scene.particles.loadEffect = () => ({});
+	scene.particles.createAttachedParticles = () => ({});
+	scene.particles.getRandomPosition = () => {};
+	scene.particles.createInstantParticles = () => ({});
+	scene.particles.destroy = () => {};
+
 	debug('Scene is loaded', {
 		THREE: Boolean(THREE),
 		document: Boolean(document),

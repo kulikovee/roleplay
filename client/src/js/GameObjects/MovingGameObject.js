@@ -4,9 +4,10 @@ export default class MovingGameObject extends AnimatedGameObject {
     constructor(params = {}) {
         super({
             speed: 0.1,
+            gravity: 1,
+            slideThrottling: new THREE.Vector3(1, 1, 1),
             throttling: new THREE.Vector3(0.5, 0.95, 0.5),
             acceleration: new THREE.Vector3(),
-            mas: 0,
             checkWay: () => true,
             ...params
         });
@@ -14,15 +15,13 @@ export default class MovingGameObject extends AnimatedGameObject {
 
     update(time, deltaTime) {
         super.update(time, deltaTime);
-        const { params: { acceleration, throttling } } = this;
+        const { params: { acceleration, throttling, gravity, slideThrottling } } = this;
 
-        if (this.params.mas) {
-            acceleration.y -= 0.01;
+        acceleration.y -= gravity  / 100;
 
-            this.isGrounded = !this.checkWay(0, -0.2, 0);
-            this.animationState.isJump = !this.isGrounded;
-        }
-        
+        this.isGrounded = !this.checkWay(0, -0.2, 0);
+        this.animationState.isJump = !this.isGrounded;
+
         const hasAccelerationX = Boolean(acceleration.x);
         const hasAccelerationY = Boolean(acceleration.y);
         const hasAccelerationZ = Boolean(acceleration.z);
@@ -36,10 +35,7 @@ export default class MovingGameObject extends AnimatedGameObject {
            || (hasAccelerationY && !canMoveY)
            || (hasAccelerationZ && !canMoveZ)
         ) {
-            if (!this.params.mas) {
-                // Stop object smoothly because of Collider hit
-                acceleration.multiplyScalar(0.5);
-            }
+            acceleration.multiply(slideThrottling);
 
             if (hasAccelerationX && !canMoveX) {
                 const isClimbing = (acceleration.x && acceleration.y <= 0 && this.checkWay(acceleration.x, 0.04, 0));

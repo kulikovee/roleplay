@@ -25,7 +25,15 @@ export default class FiringUnit extends Unit {
     }
 
     getFireInitialRotation() {
-        return this.object.quaternion;
+        return this.rotation;
+    }
+
+    getFireDamage() {
+        return this.params.fireDamage;
+    }
+
+    addFireDamage(fireDamage) {
+        return this.params.fireDamage += fireDamage;
     }
 
     update(time, deltaTime) {
@@ -34,7 +42,6 @@ export default class FiringUnit extends Unit {
         if (this.isDead()) {
             return;
         }
-
 
         if (this.shouldFire && this.params.fire && this.isFireReleased(time) && this.isAttackReleased(time)) {
             this.isFire = true;

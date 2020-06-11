@@ -3,7 +3,12 @@ import MovingGameObject from './MovingGameObject';
 
 export default class Fire extends MovingGameObject {
     constructor(params = {}) {
-        super(params);
+        super({
+            gravity: 0.05,
+            slideThrottling: new THREE.Vector3(0.5, 0.5, 0.5),
+            throttling: new THREE.Vector3(1, 1, 1),
+            ...params,
+        });
 
         this.params.acceleration.add(
             this.getForward().multiplyScalar(this.params.speed * 0.1)

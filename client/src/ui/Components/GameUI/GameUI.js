@@ -67,6 +67,7 @@ class App extends Component {
 			hpMax: 0,
 			speed: 0,
 			damage: 0,
+			fireDamage: 0,
 			money: 0,
 			experience: 0,
 			levelExperience: 0,
@@ -231,13 +232,11 @@ class App extends Component {
 					player.addDamage(5);
 				}
 				break;
-			case 'god-hp':
-				player.addMaxHP(9999);
-
-				break;
-			case 'god-lvl':
-				player.addExperience(player.getLevelExperience() - player.getExperience());
-
+			case 'talent-fire-damage':
+				if (unspentTalents > 0) {
+					player.decreaseUnspentTalents();
+					player.addFireDamage(3);
+				}
 				break;
 			default:
 				break;
@@ -258,6 +257,7 @@ class App extends Component {
 					hpMax: player.getMaxHP(),
 					speed: player.getSpeed(),
 					damage: player.getDamage(),
+					fireDamage: player.getFireDamage(),
 					money: player.getMoney(),
 					experience: player.getExperience(),
 					levelExperience: player.getLevelExperience(),
@@ -298,6 +298,7 @@ class App extends Component {
 			hpMax,
 			speed,
 			damage,
+			fireDamage,
 			pause,
 			money,
 			unspentTalents,
@@ -338,6 +339,7 @@ class App extends Component {
 							hpMax={hpMax}
 							speed={speed}
 							damage={damage}
+							fireDamage={fireDamage}
 						/>}
 						{!isThirdPerson
 							? <Cursor scene={this.scene} setUpdate={callback => this.updateCursor = callback} />
