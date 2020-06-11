@@ -115,6 +115,7 @@ export const MockGUI = {
 		setPing: () => null,
 		notify: debug,
 		setLoading: () => null,
+		onSuccessLogin: () => null,
 };
 
 export const MockRenderer = {

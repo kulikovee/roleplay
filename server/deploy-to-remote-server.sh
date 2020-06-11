@@ -1,7 +1,6 @@
 #!/bin/bash
 
 echo "Copy server to the server ..."
-npm run build-production
 scp dist/server.js gohtml@gohtml.ru:roleplay-server/server.js
 
 ssh -tt gohtml@gohtml.ru << EOF
@@ -12,7 +11,7 @@ ssh -tt gohtml@gohtml.ru << EOF
   cd roleplay-server
   nohup node server.js > server.log 2> server.error.log < /dev/null &
 
-  sleep 1
+  sleep 3
 
   echo "Error log:"
   cat server.error.log
@@ -20,6 +19,6 @@ ssh -tt gohtml@gohtml.ru << EOF
   echo "Success log:"
   cat server.log
 
-  tail -f server.error.log &
-  tail -f server.log &
+  echo "All done"
+  exit
 EOF

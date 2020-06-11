@@ -16,7 +16,7 @@ export default class Connection extends AutoBindMethods {
 		this.networkPlayers = {};
 		this.networkAIs = {};
 
-		this.lastRequest = Date.now();
+		this.lastRequestAt = Date.now();
 		this.ping = 0;
 
 		const WebSocket = window.WebSocket || window.MozWebSocket;
@@ -28,7 +28,7 @@ export default class Connection extends AutoBindMethods {
 
 		this.scene.intervals.setInterval(() => {
 			this.sendGameObjects();
-			this.lastRequest = Date.now();
+			this.lastRequestAt = Date.now();
 		}, 100);
 	}
 
@@ -57,7 +57,12 @@ export default class Connection extends AutoBindMethods {
 		try {
 			switch (messageType) {
 				case 'handshake': {
-					this.processHandshake();
+					this.send('login');
+					break;
+				}
+				case 'badLogin': {
+					alert(response);
+					window.location.reload();
 					break;
 				}
 				case 'restartServer': {
@@ -75,7 +80,7 @@ export default class Connection extends AutoBindMethods {
 					break;
 				}
 				case 'updateGameObjects': {
-					this.ping = Date.now() - this.lastRequest;
+					this.ping = Date.now() - this.lastRequestAt;
 					this.updateGameObjects(response);
 					break;
 				}
@@ -117,10 +122,6 @@ export default class Connection extends AutoBindMethods {
 		this.connection.send(JSON.stringify({ messageType, meta, data }))
 	}
 
-	processHandshake() {
-		this.send('loadCurrentUser');
-	}
-
 	removeArtefactUnits() {
 		const gameObjectsService = this.scene.gameObjectsService;
 		const networkAIs = this.networkAIs;
@@ -159,10 +160,13 @@ export default class Connection extends AutoBindMethods {
 			&& unit.params.connectionId === connectionId
 		);
 
-		console.log('Player disconnected', connectionId);
-
 		if (disconnectedPlayer) {
-			disconnectedPlayer.die();
+			if (this.scene.ui) {
+				this.scene.ui.notify(disconnectedPlayer.params.name + ' disconnected');
+			}
+
+			gameObjectsService.destroyGameObject(disconnectedPlayer);
+			delete this.networkPlayers[disconnectedPlayer.params.unitNetworkId];
 		}
 	}
 
@@ -202,11 +206,10 @@ export default class Connection extends AutoBindMethods {
 		const { locationName, position, rotation, animationState, params } = playerData;
 		const { params: { unitNetworkId } } = playerData;
 
-		if (unitNetworkId === this.meta.unitNetworkId && !this.meta.debug) {
-			return;
-		}
-
-		if (locationName !== this.scene.location.getLocationName()) {
+		if (
+			unitNetworkId === this.meta.unitNetworkId
+			|| locationName !== this.scene.location.getLocationName()
+		) {
 			return;
 		}
 
@@ -217,6 +220,10 @@ export default class Connection extends AutoBindMethods {
 
 		if (!networkPlayer) {
 			this.networkPlayers[unitNetworkId] = 'loading';
+
+			if (this.scene.ui) {
+				this.scene.ui.notify(playerData.params.name + ' connected');
+			}
 
 			this.scene.units.createNetworkPlayer(
 				playerData,

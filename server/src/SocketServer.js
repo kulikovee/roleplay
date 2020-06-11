@@ -158,19 +158,26 @@ class SocketServer {
 		} = this;
 
 		const SAVE_TIME = 10000;
+		const CONNECTION_TIMEOUT = 120 * 1000;
 
 		setInterval(() => {
-			Object.values(db.connections).forEach((connection) => {
+			Object.keys(db.players).forEach((connectionKey) => {
+				const connectionId = Number(connectionKey);
+				const connection = db.connections[connectionId];
 				const connectionPlayer = db.players[getConnectionId(connection)];
 				const token = getConnectionToken(connection);
 
-				if (connectionPlayer && token) {
-					saveUserData(token, connectionPlayer);
-				}
+				if (Date.now() - connection._lastMessageAt >= CONNECTION_TIMEOUT) {
+					debug('Connection timed out, id:', connectionId);
 
-				if (Date.now() - connection._lastMessageAt >= SAVE_TIME) {
-					removeDisconnected(getConnectionId(connection));
-					delete db.players[getConnectionId(connection)];
+					Object.values(db.connections).forEach((c) => {
+						send(c, 'disconnected', { connectionId });
+					});
+
+					removeDisconnected(connectionId);
+					delete db.players[connectionId];
+				} else if (connectionPlayer && token) {
+					saveUserData(token, connectionPlayer);
 				}
 			});
 		}, SAVE_TIME);
@@ -210,12 +217,19 @@ class SocketServer {
 				connection._lastMessageAt = Date.now();
 
 				if (meta && meta.token && meta.token !== connection._meta.token) {
-					debug(`User #${connectionId} token changed from ${connection._meta.token} to ${meta.token}`);
 					connection._meta.token = meta.token;
 				}
 
-				const sendUserData = () => {
-					send(connection, 'setUserPlayer', loadUserData(connection._meta.token));
+				const login = (token) => {
+					const connectedWithTheToken = Object.values(db.connections)
+						.filter(connection => getConnectionToken(connection) === token);
+
+					if (connectedWithTheToken.length > 1) {
+						send(connection, 'badLogin', 'Player with entered credentials is already connected');
+						connection.close();
+					} else {
+						send(connection, 'setUserPlayer', loadUserData(connection._meta.token));
+					}
 				};
 
 				const updatePlayerData = (player) => {
@@ -223,8 +237,8 @@ class SocketServer {
 				};
 
 				switch (messageType) {
-					case 'loadCurrentUser': {
-						sendUserData();
+					case 'login': {
+						login(getConnectionToken(connection));
 						break;
 					}
 

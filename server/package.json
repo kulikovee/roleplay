@@ -1,7 +1,8 @@
 {
   "scripts": {
-    "build-production": "webpack --mode production",
-    "build": "webpack --mode development"
+    "build": "webpack --mode production",
+    "deploy": "webpack --mode production && bash ./deploy-to-remote-server.sh",
+    "start": "webpack --mode development && node dist/server.js"
   },
   "dependencies": {
     "fs": "0.0.1-security",

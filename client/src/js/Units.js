@@ -86,6 +86,7 @@ export default class Units extends AutoBindMethods {
 					playerParams.fraction = params.fraction;
 					playerParams.level = params.level;
 					playerParams.damage = params.damage;
+					playerParams.fireDamage = params.fireDamage;
 					playerParams.speed = params.speed;
 					playerParams.experience = params.experience;
 					playerParams.money = params.money;
@@ -267,7 +268,7 @@ export default class Units extends AutoBindMethods {
 	}
 
 	createNetworkPlayer({
-		params: { connectionId, unitNetworkId, name },
+		params: { connectionId, unitNetworkId, name, damage, fireDamage },
 		onDamageDeal,
 		onKill,
 		onDie,
@@ -286,6 +287,8 @@ export default class Units extends AutoBindMethods {
 					unitNetworkId,
 					connectionId,
 					name,
+					damage,
+					fireDamage,
 					fromNetwork: true,
 					complexAnimations: true,
 					checkWay: this.scene.colliders.checkWay,
@@ -302,12 +305,7 @@ export default class Units extends AutoBindMethods {
 							horizontal: 0,
 						},
 					},
-					onDie: (killer) => this.scene.intervals.setTimeout(() => {
-						if (player.isDead()) {
-							gameObjectsService.destroyGameObject(player);
-						}
-						onDie && onDie(killer)
-					}, 10000),
+					onDie: killer => onDie && onDie(killer),
 					onDamageDeal: damagedUnit => onDamageDeal && onDamageDeal(damagedUnit),
 					onDamageTaken: (attacker) => {
 						onDamageTaken && onDamageTaken(attacker);

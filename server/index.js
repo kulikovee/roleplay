@@ -66,7 +66,7 @@ function Server() {
 	};
 
 	const removeDisconnected = (connectionId) => {
-		debug('Restarting server ...');
+		debug('Remove disconnected ' + connectionId + ' ...');
 		scene.connection.removeDisconnectedPlayer({ connectionId });
 	};
 

@@ -61,7 +61,7 @@ export default class Scene extends AutoBindMethods {
         this.intervals.setInterval(() => {
             this.ui.setFps(this.renderer.fps, this.renderer.targetFps);
             this.ui.setPing(this.connection.ping);
-            this.ui.updatePlayerParams()
+            this.ui.updatePlayerParams();
         }, 1000);
 
         this.input.isThirdPerson = ui.isThirdPerson();
@@ -71,8 +71,6 @@ export default class Scene extends AutoBindMethods {
         this.animate();
 
         window.goTo = (x, y, z) => this.getPlayer().position.set(x, y, z);
-
-        // console.log('Scene', this);
     }
 
     clearScene() {

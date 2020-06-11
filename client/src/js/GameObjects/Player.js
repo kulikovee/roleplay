@@ -22,8 +22,6 @@ export default class Player extends FiringUnit {
         this.lastJumpTimestamp = 0;
         this.rotationAcceleration = 0;
 
-        // console.log('Player', this);
-
         params.onLevelUp && this.addEventListener('onLevelUp', params.onLevelUp);
     }
 
