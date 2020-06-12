@@ -63,7 +63,7 @@ export default class Units extends AutoBindMethods {
 						this.scene.particles.createEffect({
 							effect: 'level-up-alt/level-up',
 							scale: 1.5,
-							attachTo: this.player.object,
+							attachTo: player.object,
 						});
 						onLevelUp();
 					},
@@ -127,7 +127,7 @@ export default class Units extends AutoBindMethods {
 						animations: gltf.animations,
 						object: gltf.scene,
 						speed: 0.35 + level * 0.025,
-						damage: 5 + level * 1.5,
+						damage: 5 + level * 1.0,
 						hp: 70 + level * 30,
 						fraction,
 						name,
@@ -241,7 +241,7 @@ export default class Units extends AutoBindMethods {
 									hpMax,
 									damage,
 									fromNetwork: false,
-									level: level + 1 + Math.round(Math.random() * level),
+									level: level + 1 + Math.round(Math.random() * level / 4),
 								});
 							}
 						}
@@ -326,7 +326,7 @@ export default class Units extends AutoBindMethods {
 						this.scene.particles.createEffect({
 							effect: 'level-up-alt/level-up',
 							scale: 1.5,
-							attachTo: this.player.object,
+							attachTo: player.object,
 						});
 						onLevelUp && onLevelUp();
 					},

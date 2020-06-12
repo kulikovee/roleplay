@@ -187,7 +187,11 @@ export default class Location extends AbstractLocation {
 			return {
 				...params,
 				level,
-				scale: 0.7 + level / 10,
+				scale: 1 + (
+					level <= 20
+						? level / 20
+						: 1 + level / 40
+				),
 				onDie: () => this.scene.units.createAI(getAIParams({
 					...params,
 					level: level + 1 + Math.round(Math.random() * level),
