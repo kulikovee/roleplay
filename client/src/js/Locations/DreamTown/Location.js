@@ -23,24 +23,54 @@ export default class Location extends AbstractLocation {
 			trees: [
 				{ x: 0, y: 0, z: 15 },
 				{ x: 0, y: 0, z: -15 },
-				{ x: 15, y: 0, z: 0 },
+				{ x: 26, y: 0, z: 0 },
 				{ x: -15, y: 0, z: 0 },
 
-
-				{ x: 15, y: 0, z: 15 },
-				{ x: 15, y: 0, z: -15 },
-				{ x: 30, y: 0, z: 20 },
-				{ x: 30, y: 0, z: -20 },
+				{ x: 40, y: 0, z: 15 },
+				{ x: 40, y: 0, z: -15 },
+				{ x: 55, y: 0, z: 20 },
+				{ x: 55, y: 0, z: -20 },
 
 				{ x: 45, y: 0, z: -35 },
-				{ x: 45, y: 0, z: 35 },
+				{ x: 45, y: 0, z: 40 },
+
+				{ x: -5, y: 0, z: 75 },
+				{ x: -20, y: 0, z: 90 },
 			],
 			houses: [
-				{ x: 0, y: 0, z: 40, ry: -Math.PI },
-				{ x: -10, y: 0, z: 30, ry: Math.PI / 2 },
-				{ x: 10, y: 0, z: 30, ry: -Math.PI / 2 },
-				// { x: 75, y: 100, z: 75 },
-				// { x: 75, y: 200, z: 75 },
+				{ x: 0, y: 0, z: 110, ry: -Math.PI },
+				{ x: 16, y: 0, z: 80, ry: -Math.PI / 2 },
+				{ x: 60, y: 0, z: 110, ry: -Math.PI },
+				{ x: 71, y: 0, z: 80, ry: -Math.PI / 2 },
+				{ x: -60, y: 0, z: 110, ry: -Math.PI },
+				{ x: -54, y: 0, z: 80, ry: -Math.PI / 2 },
+
+				{ x: 0, y: 0, z: 30, ry: -Math.PI },
+				{ x: 16, y: 0, z: 0, ry: -Math.PI / 2 },
+				{ x: 60, y: 0, z: 30, ry: -Math.PI },
+				{ x: 71, y: 0, z: 0, ry: -Math.PI / 2 },
+				{ x: -60, y: 0, z: 30, ry: -Math.PI },
+				{ x: -54, y: 0, z: 0, ry: -Math.PI / 2 },
+
+				{ x: 0, y: 0, z: -50, ry: -Math.PI },
+				{ x: 16, y: 0, z: -80, ry: -Math.PI / 2 },
+				{ x: 60, y: 0, z: -50, ry: -Math.PI },
+				{ x: 71, y: 0, z: -80, ry: -Math.PI / 2 },
+				{ x: -60, y: 0, z: -50, ry: -Math.PI },
+				{ x: -54, y: 0, z: -80, ry: -Math.PI / 2 },
+			],
+			sidewalks: [
+				{ x: 0, y: 0, z: 90 },
+				{ x: 60, y: 0, z: 90 },
+				{ x: -60, y: 0, z: 90 },
+
+				{ x: 0, y: 0, z: 10 },
+				{ x: 60, y: 0, z: 10 },
+				{ x: -60, y: 0, z: 10 },
+
+				{ x: 0, y: 0, z: -70 },
+				{ x: 60, y: 0, z: -70 },
+				{ x: -60, y: 0, z: -70 },
 			],
 			onLoad: () => {
 				this.scene.ui.setLoading(false);
@@ -110,7 +140,7 @@ export default class Location extends AbstractLocation {
 			onCreate: (player) => {
 				this.scene.camera.player = player;
 				this.scene.ui.updatePlayerParams();
-				player.position.set(0, 0.3, 30);
+				player.position.set(-10, 0.3, 60);
 			},
 			onDie: () => window.setTimeout(() => {
 				this.scene.ui.setPause(true);
@@ -166,7 +196,7 @@ export default class Location extends AbstractLocation {
 		if (!skipItemsCreation) {
 			const createHealItem = () => (
 				this.scene.intervals.setTimeout(() => {
-					const itemHealPosition = new THREE.Vector3(-6.5, 0.1, 32.8);
+					const itemHealPosition = new THREE.Vector3(-6.5, 0.3, 68);
 
 					this.scene.gameObjectsService.createItem({
 						model: 'item-heal',
@@ -228,28 +258,28 @@ export default class Location extends AbstractLocation {
 
 			getGoatsParams(25, { x: 0, y: 0.2, z: 0 }),
 
-			getFriendlyParams(5, { x: -0.8, y: 0.2, z: 40 - 4.03 }, { y: Math.PI }),
-			getFriendlyParams(5, { x: -10 + 3.5, y: 0.2, z: 29.2 }, { y: Math.PI / 2 }),
-			getFriendlyParams(5, { x: 10 - 3.5, y: 0.2, z: 30.8 }, { y: -Math.PI / 2 }),
+			getFriendlyParams(5, { x: -10, y: 0.2, z: 70 }, { y: Math.PI }),
+			getFriendlyParams(5, { x: -10 - 3.5, y: 0.2, z: 60 }, { y: Math.PI / 2 }),
+			getFriendlyParams(5, { x: -10 + 3.5, y: 0.2, z: 60 }, { y: -Math.PI / 2 }),
 		].forEach(this.scene.units.createAI);
 	}
 
 	createLocationColliders() {
-		const isBetween = (v, min, max) => v > min && v < max;
+		// const isBetween = (v, min, max) => v > min && v < max;
 
 		this.scene.colliders.addColliderFunction((position, gameObject) => {
 			const { x, y, z } = position;
-			const absX = Math.abs(x);
-			const absZ = Math.abs(z);
+			// const absX = Math.abs(x);
+			// const absZ = Math.abs(z);
 
 			if (
-				(y < 0.1 && absX < 50 && absZ < 50) // floor 0
-				|| (((y < (absX - 50) / 1.5) && absX > 50) || ((y < (absZ - 50) / 1.5) && absZ > 50)) // out of floor 0
-				|| (y < 90 && absX > 96 && absZ > 96) // out of floor 0
-				|| (isBetween(y, 90, 100) && (absX > 50 || absZ > 50)) // floor 1
-				|| (isBetween(y, 90, 190) && (absX > 135 || absZ > 135)) // out of floor 1
-				|| (isBetween(y, 190, 200) && (absX > 50 || absZ > 50)) // floor 2
-				|| (y > 190 && (absX > 133 || absZ > 133)) // out of floor 2
+				(y < 0.1 /* && absX < 50 && absZ < 50 */) // floor 0
+				// || (((y < (absX - 50) / 1.5) && absX > 50) || ((y < (absZ - 50) / 1.5) && absZ > 50)) // out of floor 0
+				// || (y < 90 && absX > 96 && absZ > 96) // out of floor 0
+				// || (isBetween(y, 90, 100) && (absX > 50 || absZ > 50)) // floor 1
+				// || (isBetween(y, 90, 190) && (absX > 135 || absZ > 135)) // out of floor 1
+				// || (isBetween(y, 190, 200) && (absX > 50 || absZ > 50)) // floor 2
+				// || (y > 190 && (absX > 133 || absZ > 133)) // out of floor 2
 				|| this.elevator.isCarrying(position)
 			) {
 				return true;

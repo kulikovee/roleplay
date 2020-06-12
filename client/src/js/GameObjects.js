@@ -107,17 +107,19 @@ export default class GameObjectsService extends AutoBindMethods {
 
 		const textureLoader = new THREE.TextureLoader();
 
+		const particlesSpeed = 0.01;
+
 		const fireParticles = this.scene.particles.createAttachedParticles({
-			size: 0.4,
-			count: 100,
+			size: 1.5,
+			count: 30,
 			color: 0xff1100,
 			lifeTime: particlesLifeTime,
 			parent: fireGameObject.object,
-			texture: textureLoader.load('./assets/models/effects/level-up/bulp.png'),
+			texture: textureLoader.load('./assets/textures/fire.png'),
 			getDefaultParticleVelocity: () => new THREE.Vector3(
-				Math.random() * 0.01 - 0.005,
-				Math.random() * 0.02 + 0.02,
-				Math.random() * 0.01 - 0.005,
+				Math.random() * particlesSpeed - particlesSpeed / 2,
+				Math.random() * particlesSpeed * 1.5 + 0.02,
+				Math.random() * particlesSpeed - particlesSpeed / 2,
 			),
 		});
 

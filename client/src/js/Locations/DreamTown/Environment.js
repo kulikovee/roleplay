@@ -2,6 +2,7 @@
 const createEnvironment = function ({
     load,
     trees,
+    sidewalks,
     houses,
     addColliderFunction,
     onLoad,
@@ -24,7 +25,7 @@ const createEnvironment = function ({
     };
 
     load({
-        baseUrl: './assets/models/environment/enviroment',
+        baseUrl: './assets/models/environment/city',
         noScene: true,
         castShadow: false,
         callback: object => {
@@ -63,7 +64,37 @@ const createEnvironment = function ({
     });
 
     load({
-        baseUrl: './assets/models/environment/house1',
+        baseUrl: './assets/models/environment/sidewalk',
+        noScene: true,
+        receiveShadow: true,
+        castShadow: false,
+        callback: (loadedModel) => {
+            isTreeLoaded = true;
+            checkIsAllLoaded();
+
+            sidewalks.forEach((position) => {
+                const model = loadedModel.scene.clone();
+                model.name = 'Sidewalk';
+                model.position.set(position.x, position.y, position.z);
+                model.matrixAutoUpdate = false;
+                model.updateMatrix();
+
+                const { x, y, z } = model.position;
+
+                addColliderFunction(
+                    (position) =>
+                       Math.abs(position.x - x) < 25.3
+                       && Math.abs(position.z - z) < 33
+                       && Math.abs(position.y - y) < 0.2
+                );
+
+                pivot.add(model);
+            })
+        }
+    });
+
+    load({
+        baseUrl: './assets/models/environment/house2',
         receiveShadow: false,
         noScene: true,
         callback: (loadedModel) => {
@@ -81,8 +112,8 @@ const createEnvironment = function ({
                 const { x, z } = model.position;
 
                 addColliderFunction(unitPosition => (
-                    Math.abs(unitPosition.x - x) < (position.ry < -3.13 ? 4 : 3)
-                    && Math.abs(unitPosition.z - z) < (position.ry < -3.13 ? 3 : 4)
+                    Math.abs(unitPosition.x - x) < (position.ry < -3.13 ? 21 : 4.3)
+                    && Math.abs(unitPosition.z - z) < (position.ry < -3.13 ? 4.5 : 21)
                 ));
 
                 pivot.add(model);

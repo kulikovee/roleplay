@@ -183,7 +183,8 @@ export default class Particles extends AutoBindMethods {
 					} else if (time - particlesCreatedAt[i] > lifeTimeMs) {
 
 						if (particleSystem.pause) {
-							particlesInitialPositions[i] = parent.position.clone();
+							// Hide particles far away from the scene
+							particlesInitialPositions[i] = { x: 0, y: -9999, z: 0 };
 							velocities[i] = new THREE.Vector3();
 						} else {
 							const defaultParticalPosition = getDefaultParticlePosition(i);
