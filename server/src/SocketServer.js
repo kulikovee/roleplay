@@ -1,6 +1,6 @@
-import * as ws from 'ws';
-import * as fs from 'fs';
-import * as path from 'path';
+const ws = require('ws');
+const fs = require('fs');
+const path = require('path');
 
 const WebSocketServer = ws.Server;
 
@@ -265,4 +265,4 @@ class SocketServer {
 	}
 }
 
-export default SocketServer;
+exports.SocketServer = SocketServer;

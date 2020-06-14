@@ -65,7 +65,6 @@ export default class Scene extends AutoBindMethods {
         }, 1000);
 
         this.input.isThirdPerson = ui.isThirdPerson();
-        this.pathFinder.rebuildAreas();
 
         this.clearScene();
         this.animate();
@@ -84,19 +83,22 @@ export default class Scene extends AutoBindMethods {
         this.intervals.update(now);
         const gameTime = this.intervals.getTimePassed();
 
-        this.gameObjectsService.update(gameTime, deltaTime);
+        if (this.location.isLoaded) {
+            this.gameObjectsService.update(gameTime, deltaTime);
 
-        if (!this.ui.isPause()) {
-            this.camera.update(gameTime, deltaTime);
-            this.input.update();
+            if (!this.ui.isPause()) {
+                this.camera.update(gameTime, deltaTime);
+                this.input.update();
+            }
+
+            this.ui.update();
+            this.location.update();
+            this.particles.update(gameTime);
+            this.connection.update(gameTime, deltaTime);
+
+            this.renderer.render(this.scene, this.camera.camera, deltaTime);
         }
 
-        this.ui.update();
-        this.location.update();
-        this.particles.update(gameTime);
-        this.connection.update(gameTime, deltaTime);
-
-        this.renderer.render(this.scene, this.camera.camera, deltaTime);
         window.requestAnimationFrame(this.animate);
     }
 

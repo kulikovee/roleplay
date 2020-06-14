@@ -2,11 +2,11 @@ const path = require('path');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 
 module.exports = {
-    entry: './index.js',
+    entry: './src/Scene.js',
     devtool: 'inline-source-map',
     target: 'node',
     output: {
-        filename: 'server.js',
+        filename: 'server-scene.js',
         path: path.resolve(__dirname, 'dist'),
     },
     node: {
@@ -29,7 +29,11 @@ module.exports = {
                 query: {
                     presets: ['@babel/preset-env', '@babel/preset-react']
                 }
-            }
+            },
+            {
+                test: /\.node$/,
+                use: 'node-loader'
+            },
         ],
     },
     plugins: [

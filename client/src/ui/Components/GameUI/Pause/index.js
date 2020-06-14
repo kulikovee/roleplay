@@ -100,7 +100,7 @@ class App extends Component {
 					<div className="row">
 						<div>
 							<Button onClick={() => buy('hp')}>
-								Buy: Heal +10 HP ($100)
+								Buy: Heal to full HP ($100)
 							</Button>
 						</div>
 					</div>

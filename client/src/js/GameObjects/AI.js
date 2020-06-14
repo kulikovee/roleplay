@@ -14,6 +14,7 @@ export default class AI extends FiringUnit {
             startRunTimeout: 1,
             nextPointUpdateTimeout: 0.1,
             updateTargetTimeout: 3,
+            type: 'ai',
             ...params,
         });
 

@@ -8,7 +8,7 @@ export default class Camera extends AutoBindMethods {
         super();
         this.scene = scene;
         const ratio = this.getWidth() / this.getHeight();
-        this.camera = new THREE.PerspectiveCamera(45, ratio, 1, 100);
+        this.camera = new THREE.PerspectiveCamera(45, ratio, 1, 300);
         this.camera.position.set(5, 3, 15);
         this.deltaY = 10;
         this.rotateY = 0.25;
@@ -56,12 +56,14 @@ export default class Camera extends AutoBindMethods {
 
     getWidth() {
         const renderer = this.scene.renderer.renderer;
-        return renderer.getContext().canvas.width;
+        const canvas = renderer.getContext().canvas;
+        return canvas ? canvas.width : 1;
     }
 
     getHeight() {
         const renderer = this.scene.renderer.renderer;
-        return renderer.getContext().canvas.height;
+        const canvas = renderer.getContext().canvas;
+        return canvas ? canvas.height : 1;
     }
 
     updateThirdPerson(player) {

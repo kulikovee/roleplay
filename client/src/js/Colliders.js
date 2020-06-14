@@ -35,7 +35,5 @@ export default class Colliders extends AutoBindMethods {
             id: this.nextId++,
             fn,
         });
-
-        this.scene.pathFinder.rebuildAreas();
     }
 }

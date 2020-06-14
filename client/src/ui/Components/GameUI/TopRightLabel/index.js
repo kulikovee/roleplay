@@ -7,7 +7,7 @@ class App extends Component {
         return (
             <div className="label--in-game top-right">
                 ${Math.floor(money)}<br />
-                Position: {position && `${this.getFormattedValue(position.x)}, ${this.getFormattedValue(position.z)}`}<br />
+                Position: {position && [position.x, position.y, position.z].map(this.getFormattedValue).join(', ')}<br />
                 FPS: {Math.round(fps)} (Target: {Math.round(targetFps)})<br />
                 Ping: {ping}ms
             </div>

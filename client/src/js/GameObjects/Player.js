@@ -16,6 +16,7 @@ export default class Player extends FiringUnit {
             jumpTimeout: 0.9,
             fraction: 'friendly',
             sensitivity: 1,
+            type: 'player',
             ...params,
         });
 

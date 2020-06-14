@@ -40,7 +40,7 @@ export default class AbstractLocation extends AutoBindMethods {
         light.shadow.mapSize.width = 512;
         light.shadow.mapSize.height = 512;
         light.shadow.camera.near = 10;
-        light.shadow.camera.far = 150;
+        light.shadow.camera.far = 250;
         light.shadow.camera.visible = true;
 
         return light;

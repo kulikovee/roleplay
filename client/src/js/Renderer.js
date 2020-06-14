@@ -4,19 +4,30 @@ export default class Renderer extends AutoBindMethods {
     /**
      * @param {HTMLElement} container
      */
-    constructor(container) {
+    constructor(container = null, params = {}) {
         super();
-        this.renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
-        this.renderer.setSize(window.innerWidth, window.innerHeight);
-        // this.renderer.setClearColor(0xffffff);
-        this.renderer.autoClear = false;
-        this.renderer.gammaOutput = true;
-        this.renderer.shadowMap.enabled = true;
-        this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-        // this.renderer.shadowMap.type = THREE.BasicShadowMap;
+        this.renderer = new THREE.WebGLRenderer({
+            antialias: true,
+            logarithmicDepthBuffer: true,
+            alpha: true,
+            powerPreference: 'high-performance',
+            ...params,
+        });
+
         this.fps = 60;
         this.targetFps = 70;
-        container.appendChild(this.renderer.domElement);
+
+        if (container) {
+            this.renderer.setSize(window.innerWidth, window.innerHeight);
+            this.renderer.setClearColor(0xffffff, 0);
+            this.renderer.autoClear = false;
+            this.renderer.gammaOutput = true;
+            this.renderer.shadowMap.enabled = true;
+            this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            // this.renderer.shadowMap.type = THREE.BasicShadowMap;
+
+            container.appendChild(this.renderer.domElement);
+        }
     }
 
     /**

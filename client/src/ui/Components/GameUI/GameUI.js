@@ -210,7 +210,7 @@ class App extends Component {
 			case 'hp':
 				if (player.getMoney() >= 100) {
 					player.addMoney(-100);
-					player.addHP(10);
+					player.addHP(player.getMaxHP());
 				}
 				break;
 			case 'talent-hp':
