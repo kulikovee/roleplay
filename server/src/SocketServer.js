@@ -31,9 +31,9 @@ class SocketServer {
 		this.config = {
 			ssl: isProduction,
 			port: 1337,
-			sslKey: path.join(__dirname, './privkey.pem'),
-			sslCertificate: path.join(__dirname, './fullchain.pem'),
-			sessionsPath: path.join(__dirname, './sessions/'),
+			sslKey: path.join(__dirname, '../../../certs/privkey.pem'),
+			sslCertificate: path.join(__dirname, '../../../certs/fullchain.pem'),
+			sessionsPath: path.join(__dirname, '../../../sessions/'),
 			debug: false
 		};
 
@@ -54,6 +54,12 @@ class SocketServer {
 			res.writeHead(200);
 			res.end("All glory to WebSockets!\n");
 		};
+
+		debug('Socket server params', {
+			...config,
+			sslKeyExists: fs.existsSync(config.sslKey),
+			sslCertificateExists: fs.existsSync(config.sslCertificate),
+		});
 
 		if (config.ssl) {
 			const sslParams = {

@@ -5,9 +5,8 @@ const { initScene } = require('./dist/server-scene');
 
 function Server() {
 	var Canvas = require("canvas");
-	var glContext = require('gl')(1,1); //headless-gl
-
-	var canvasGL = new Canvas.Canvas(0, 0);
+	var glContext = require('gl')(1, 1); //headless-gl
+	var canvasGL = new Canvas.Canvas(1, 1);
 	canvasGL.addEventListener = function(event, func, bind_) {};
 
 	const scene = initScene({ context: glContext, canvas: canvasGL }, MockGUI);
