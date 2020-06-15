@@ -1,6 +1,5 @@
 import AbstractLocation from '../AbstractLocation';
-import { Player, Fire } from '../../GameObjects';
-import Elevator from './Elevator';
+import { Player } from '../../GameObjects';
 import { createEnvironment } from './Environment';
 import Areas from './Areas';
 import { Vector3 } from "three";
@@ -20,32 +19,6 @@ export default class Location extends AbstractLocation {
 
       this.environment = createEnvironment({
          load: this.scene.models.loadGLTF,
-         addColliderFunction: this.scene.colliders.addColliderFunction,
-         trees: [
-            // { x: 0, y: 0, z: 15, ry: 0 },
-            // { x: 0, y: -0.75, z: -15, ry: Math.PI * 0.7 },
-            // { x: 26, y: 0, z: 0, ry: Math.PI * 1.5 },
-            // { x: -15, y: -1, z: 0, ry: Math.PI * 0.3 },
-            //
-            // { x: -40, y: -2, z: 15, ry: Math.PI * 0.3 },
-            // { x: -40, y: -3, z: -15, ry: Math.PI * 0.5 },
-            // { x: -55, y: -3, z: 20, ry: Math.PI * 0.7 },
-            // { x: -55, y: -4.5, z: -20, ry: Math.PI * 1.3 },
-            //
-            // { x: -45, y: -4.5, z: -35, ry: Math.PI * 1.3 },
-            // { x: -45, y: -2, z: 40, ry: Math.PI * 1.5 },
-            //
-            // { x: -5, y: 0, z: 75, ry: Math.PI * 0.4 },
-            // { x: -20, y: 0, z: 90, ry: Math.PI * 0.3 },
-         ],
-         houses: [
-            // { x: 0, y: -2.2, z: -50, ry: -Math.PI },
-            // { x: 16, y: -3.8, z: -80, ry: -Math.PI / 2 },
-            // { x: 60, y: -4, z: -50, ry: -Math.PI },
-            // { x: 71, y: -4, z: -80, ry: -Math.PI / 2 },
-            // { x: -60, y: -5.3, z: -50, ry: -Math.PI },
-            // { x: -54, y: -4, z: -80, ry: -Math.PI / 2 },
-         ],
          onLoad: () => {
             this.scene.ui.setLoading(false);
             this.scene.ui.setPause(false);
@@ -64,6 +37,10 @@ export default class Location extends AbstractLocation {
             this.createLocationColliders();
             this.scene.pathFinder.rebuildAreas();
             this.isLoaded = true;
+
+            if (this.onLoad) {
+               this.onLoad();
+            }
          }
       });
       this.environmentMeshes = [];
@@ -74,13 +51,6 @@ export default class Location extends AbstractLocation {
       this.scene.add(this.environment);
       this.scene.add(this.ambientLight);
       this.scene.add(this.shadowLight);
-
-      this.elevator = new Elevator(scene, {
-         position: { x: -48, y: 100, z: 0 },
-         x: 4,
-         y: 1,
-         z: 4,
-      });
 
       const color = 0xffffff;
       const near = 10;
@@ -102,8 +72,6 @@ export default class Location extends AbstractLocation {
       const player = this.scene.getPlayer();
 
       if (player) {
-         this.elevator.update();
-
          this.shadowLight.position
             .copy(player.position)
             .add(this.shadowLightPosition);
@@ -223,17 +191,21 @@ export default class Location extends AbstractLocation {
          };
       };
 
-      const getGoatsParams = (level, position) => getAIParams({
+      const getGoatsParams = (level, position, rotation, name) => getAIParams({
          level,
          position,
+         rotation,
          fraction: 'goats',
-         name: level <= 10
-            ? 'Goat Warrior'
-            : (level <= 20 ? 'Goat Elite' : 'Goat Destroyer'),
+         name: name || (
+              level <= 10 ? 'Goat Warrior'
+            : level <= 20 ? 'Goat Elite'
+            : level <= 35 ?  'Goat Commando'
+            : 'Goat Destroyer'
+         ),
       });
 
-      const getFriendlyParams = (level, position, rotation) => getAIParams({
-         level, position, rotation, fraction: 'friendly', name: 'Friendly Citizen',
+      const getFriendlyParams = (level, position, rotation, params = {}) => getAIParams({
+         level, position, rotation, fraction: 'friendly', name: 'Friendly Citizen', ...params
       });
 
       this.units = [
@@ -253,9 +225,14 @@ export default class Location extends AbstractLocation {
 
          getGoatsParams(1, { x: -33, y: 6, z: -1 }),
 
-         // getFriendlyParams(5, { x: -10, y: 2, z: 70 }, { y: Math.PI }),
-         // getFriendlyParams(5, { x: -10 - 3.5, y: 2, z: 60 }, { y: Math.PI / 2 }),
-         // getFriendlyParams(5, { x: -10 + 3.5, y: 2, z: 60 }, { y: -Math.PI / 2 }),
+         getGoatsParams(99, { x: 101, y: 155, z: 113 }, { y: 0.3 }, 'God of Goats'),
+
+         getFriendlyParams(10, { x: -25, y: 1, z: 108 }, { y: -1.53 }, { name: 'Silencing Bob' }),
+         getFriendlyParams(2, { x: -69, y: 0, z: 117 }, { y: 0.13 }, { name: 'Talking John' }),
+         getFriendlyParams(3, { x: -69, y: 0, z: 119 }, { y: 3.1 }, { name: 'Talking Ien' }),
+         getFriendlyParams(8, { x: -48, y: 6, z: 84 }, { y: 2.8 }, { name: 'Warlike Ken' }),
+         getFriendlyParams(3, { x: -80, y: 0, z: 97 }, { y: 1.1 }, { name: 'Scaring Dominic' }),
+         getFriendlyParams(3, { x: -33, y: 0, z: 137 }, { y: 2.8 }, { name: 'Grunting Glen' }),
       ].forEach(this.scene.units.createAI);
    }
 
@@ -283,32 +260,7 @@ export default class Location extends AbstractLocation {
          const intersects = raycaster.intersectObjects(this.environmentMeshes);
          const environmentY = Math.max(intersectTo, ...intersects.map(i => raycastFar / 2 - i.distance + 0.08));
 
-         if (environmentY === intersectTo) {
-            return true;
-         }
-
-         if (y < environmentY || this.elevator.isCarrying(position)) {
-            return true;
-         }
-
-         // TODO: Check if we need units colliders
-         // const units = this.scene.units.getAliveUnits();
-         //
-         // for(let unit of units) {
-         //     if (
-         //         unit !== gameObject
-         //         && (
-         //             !(gameObject instanceof Fire)
-         //             || gameObject.params.parent !== unit
-         //         )
-         //         && unit.getCollider(position)
-         //     ) {
-         //         return true;
-         //     }
-         // }
-
-
-         return false;
+         return environmentY === intersectTo || y < environmentY;
       });
    }
 
@@ -330,43 +282,6 @@ export default class Location extends AbstractLocation {
             area.width,
             area.height,
             (x, y) => {
-               // if (
-               //    // Elevator
-               //    Math.abs(area.waypointXToWorldX(x) - this.elevator.params.position.x) <= 5
-               //    && Math.abs(area.waypointYToWorldZ(y) - this.elevator.params.position.z) <= 1
-               // ) {
-               //    return 1;
-               // }
-
-               // if (
-               //    area.id !== 'FLOOR_0' && (
-               //       // Center hole
-               //       (
-               //          Math.abs(area.waypointXToWorldX(x)) < 51
-               //          && Math.abs(area.waypointYToWorldZ(y)) < 51
-               //       )
-               //       || (
-               //          Math.abs(area.waypointXToWorldX(x)) <= 51
-               //          && Math.abs(area.waypointYToWorldZ(y)) <= 51
-               //          && Math.abs(area.waypointXToWorldX(x)) >= 50
-               //          && Math.abs(area.waypointYToWorldZ(y)) >= 50
-               //       )
-               //    )
-               // ) {
-               //    return 0;
-               // }
-
-               // if (
-               //    area.id === 'FLOOR_0'
-               //    && (
-               //       // Floor out
-               //       Math.abs(area.waypointXToWorldX(x)) >= 49
-               //       || Math.abs(area.waypointYToWorldZ(y)) >= 49
-               //    )
-               // ) {
-               //    return 1;
-               // }
-
                return Number(this.checkWayForWaypoint(area.getWorldWaypointByXY(x, y)))
             },
          );

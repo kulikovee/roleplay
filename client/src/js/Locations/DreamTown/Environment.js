@@ -1,8 +1,5 @@
 const createEnvironment = function({
    load,
-   trees,
-   houses,
-   addColliderFunction,
    onLoad,
 }) {
    const pivot = new THREE.Object3D();

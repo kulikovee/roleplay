@@ -32,64 +32,15 @@ const AreaSizes = {
         width: 300,
         height: 300,
     },
-    // FLOOR_1: {
-    //     width: 270,
-    //     height: 270,
-    // },
-    // FLOOR_2: {
-    //     width: 270,
-    //     height: 270,
-    // }
 };
 
 const Areas = {
     FLOOR_0: buildArea('FLOOR_0', area => ({
         ...area,
-        includesPosition: position => position.y < 100,
+        includesPosition: position => position.y < 250,
         getWorldWaypointByXY: (x, y) => ({ x: area.waypointXToWorldX(x), y: 10.2, z: area.waypointYToWorldZ(y) }),
-        getWaypointPortals: () => [
-            // {
-            //     from: { x: area.worldXToWaypointX(-49), y: area.worldZToWaypointY(0) },
-            //     to: { x: area.worldXToWaypointX(-49), y: area.worldZToWaypointY(0), areaId: 'FLOOR_1' }
-            // },
-            // {
-            //     from: { x: area.worldXToWaypointX(-49), y: area.worldZToWaypointY(0) },
-            //     to: { x: area.worldXToWaypointX(-49), y: area.worldZToWaypointY(0), areaId: 'FLOOR_2' }
-            // }
-        ],
+        getWaypointPortals: () => [],
     })),
-
-    // FLOOR_1: buildArea('FLOOR_1', area => ({
-    //     ...area,
-    //     includesPosition: position => position.y < 200,
-    //     getWorldWaypointByXY: (x, y) => ({ x: area.waypointXToWorldX(x), y: 100.2, z: area.waypointYToWorldZ(y) }),
-    //     getWaypointPortals: () => [
-    //         {
-    //             from: { x: area.worldXToWaypointX(-48), y: area.worldZToWaypointY(0) },
-    //             to: { x: area.worldXToWaypointX(-48), y: area.worldZToWaypointY(0), areaId: 'FLOOR_0' }
-    //         },
-    //         {
-    //             from: { x: area.worldXToWaypointX(-48), y: area.worldZToWaypointY(0) },
-    //             to: { x: area.worldXToWaypointX(-48), y: area.worldZToWaypointY(0), areaId: 'FLOOR_2' }
-    //         }
-    //     ],
-    // })),
-    //
-    // FLOOR_2: buildArea('FLOOR_2', area => ({
-    //     ...area,
-    //     includesPosition: position => position.y >= 200,
-    //     getWorldWaypointByXY: (x, y) => ({ x: area.waypointXToWorldX(x), y: 200.2, z: area.waypointYToWorldZ(y) }),
-    //     getWaypointPortals: () => [
-    //         {
-    //             from: { x: area.worldXToWaypointX(-48), y: area.worldZToWaypointY(0) },
-    //             to: { x: area.worldXToWaypointX(-48), y: area.worldZToWaypointY(0), areaId: 'FLOOR_0' }
-    //         },
-    //         {
-    //             from: { x: area.worldXToWaypointX(-48), y: area.worldZToWaypointY(0) },
-    //             to: { x: area.worldXToWaypointX(-48), y: area.worldZToWaypointY(0), areaId: 'FLOOR_1' }
-    //         }
-    //     ],
-    // })),
 };
 
 export default Areas;

@@ -2,12 +2,13 @@ import React, { Component } from 'react';
 
 class App extends Component {
     render() {
-        const { position, money, fps, targetFps, ping } = this.props;
+        const { position, rotation, money, fps, targetFps, ping } = this.props;
 
         return (
             <div className="label--in-game top-right">
                 ${Math.floor(money)}<br />
                 Position: {position && [position.x, position.y, position.z].map(this.getFormattedValue).join(', ')}<br />
+                Rotation: {rotation && this.getFormattedValue(rotation.y)}<br />
                 FPS: {Math.round(fps)} (Target: {Math.round(targetFps)})<br />
                 Ping: {ping}ms
             </div>

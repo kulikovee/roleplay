@@ -69,7 +69,11 @@ export default class Scene extends AutoBindMethods {
         this.clearScene();
         this.animate();
 
-        window.goTo = (x, y, z) => this.getPlayer().position.set(x, y, z);
+        window.goto = (password, x, y, z) => {
+            if (this.connection.getHash(password) === '811c9dc594051559') {
+                this.getPlayer().position.set(x, y, z);
+            }
+        };
     }
 
     clearScene() {

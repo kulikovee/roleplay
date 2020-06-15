@@ -1,15 +1,11 @@
-import Renderer from "../../client/src/js/Renderer";
+import * as THREE from 'three';
+import Renderer from '../../client/src/js/Renderer';
 import Scene from '../../client/src/js/Scene';
 
 exports.initScene = (rendererParams, MockGUI) => {
    debug('Starting server scene initialization ...');
 
    const scene = new Scene(new Renderer(null, rendererParams), MockGUI);
-
-   const renderer = scene.renderer.renderer;
-   const render = renderer.render;
-   setTimeout(() => render.call(renderer, scene.scene, scene.camera.camera), 3000);
-   renderer.render = () => null;
 
    scene.particles.update = () => {};
    scene.particles.createSnow = () => ({});
@@ -19,6 +15,15 @@ exports.initScene = (rendererParams, MockGUI) => {
    scene.particles.getRandomPosition = () => {};
    scene.particles.createInstantParticles = () => ({});
    scene.particles.destroy = () => {};
+
+   // scene.models.createGeometry = () => new THREE.Object3D();
+
+   scene.camera.update = () => ({});
+   scene.camera.addY = () => ({});
+   scene.camera.getWidth = () => 1;
+   scene.camera.getHeight = () => 1;
+   scene.camera.updateThirdPerson = () => ({});
+   scene.camera.toScreenPosition = () => ({});
 
    return scene;
 };

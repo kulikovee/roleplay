@@ -11,65 +11,68 @@ function Server() {
 
 	const scene = initScene({ context: glContext, canvas: canvasGL }, MockGUI);
 
-	setTimeout(
-		() => {
-			debug('Scene is loaded', {
-				THREE: Boolean(THREE),
-				document: Boolean(document),
-				window: Boolean(window),
-				GLTFLoader: Boolean(GLTFLoader),
-				scene: Boolean(scene),
-				sceneLocation: Boolean(scene.location),
-				sceneColliders: scene.colliders.colliders.length,
-				sceneAreas: scene.pathFinder.areas.length,
-				units: scene.units.getUnits().length,
-				aliveUnits: scene.units.getAliveUnits().length,
-			});
-		},
-		5000,
-	);
+	scene.location.onLoad = () => {
+		const renderer = scene.renderer.renderer;
+		const render = renderer.render;
+		render.call(renderer, scene.scene, scene.camera.camera);
+		renderer.render = () => null;
 
-	const player = scene.getPlayer();
-
-	if (player) {
-		player.params.hp = 0;
-	}
-
-	debug('Starting socket server ...');
-
-	const getGameObjects = () => {
-		const data = [];
-
-		scene.units.getUnits().forEach((unit) => {
-			if (unit.params.type !== 'player') {
-				const unitData = unitToNetwork(unit, null, scene.location.id);
-
-				if (unitData) {
-					data.push(unitData);
-				}
-			}
+		debug('Scene is loaded', {
+			THREE: Boolean(THREE),
+			document: Boolean(document),
+			window: Boolean(window),
+			GLTFLoader: Boolean(GLTFLoader),
+			scene: Boolean(scene),
+			sceneLocation: Boolean(scene.location),
+			locationLoaded: Boolean(scene.location.isLoaded),
+			sceneColliders: scene.colliders.colliders.length,
+			sceneAreas: scene.pathFinder.areas.length,
+			units: scene.units.getUnits().length,
+			aliveUnits: scene.units.getAliveUnits().length,
 		});
 
-		return data;
-	};
+		const player = scene.getPlayer();
 
-	const updateNetworkPlayers = (networkPlayers) => {
-		Object.values(networkPlayers)
-			.forEach(scene.connection.updateNetworkPlayer);
-	};
+		if (player) {
+			player.params.hp = 0;
+		}
 
-	const restartServer = () => {
-		debug('Restarting server ...');
-		scene.connection.clearLocalUnits();
-		scene.location.createInteractiveGameObjects(true);
-	};
+		debug('Starting socket server ...');
 
-	const removeDisconnected = (connectionId) => {
-		debug('Remove disconnected ' + connectionId + ' ...');
-		scene.connection.removeDisconnectedPlayer({ connectionId });
-	};
+		const getGameObjects = () => {
+			const data = [];
 
-	return new SocketServer(getGameObjects, updateNetworkPlayers, restartServer, removeDisconnected);
+			scene.units.getUnits().forEach((unit) => {
+				if (unit.params.type !== 'player') {
+					const unitData = unitToNetwork(unit, null, scene.location.id);
+
+					if (unitData) {
+						data.push(unitData);
+					}
+				}
+			});
+
+			return data;
+		};
+
+		const updateNetworkPlayers = (networkPlayers) => {
+			Object.values(networkPlayers)
+				.forEach(scene.connection.updateNetworkPlayer);
+		};
+
+		const restartServer = () => {
+			debug('Restarting server ...');
+			scene.connection.clearLocalUnits();
+			scene.location.createInteractiveGameObjects(true);
+		};
+
+		const removeDisconnected = (connectionId) => {
+			debug('Remove disconnected ' + connectionId + ' ...');
+			scene.connection.removeDisconnectedPlayer({ connectionId });
+		};
+
+		return new SocketServer(getGameObjects, updateNetworkPlayers, restartServer, removeDisconnected);
+	};
 }
 
 new Server();

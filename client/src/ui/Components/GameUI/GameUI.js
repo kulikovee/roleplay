@@ -183,7 +183,7 @@ class App extends Component {
 			if (player) {
 				this.setRestartButtonVisible(!player.getHP());
 			}
-		} else {
+		} else if (this.scene.location.isLoaded) {
 			requestPointerLock();
 		}
 	}
@@ -265,6 +265,11 @@ class App extends Component {
 						y: player.position.y,
 						z: player.position.z,
 					},
+					rotation: {
+						x: player.rotation.x,
+						y: player.rotation.y,
+						z: player.rotation.z,
+					},
 				});
 			}
 		}
@@ -310,6 +315,7 @@ class App extends Component {
 			fps,
 			targetFps,
 			position,
+			rotation,
 			notification,
 			isNotificationVisible,
 			isLoading,
@@ -322,6 +328,7 @@ class App extends Component {
 					<div>
 						{!isLoading && <TopRight
 							money={money}
+							rotation={rotation}
 							position={position}
 							fps={fps}
 							ping={ping}

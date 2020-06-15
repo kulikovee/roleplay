@@ -1,21 +1,22 @@
 #!/bin/bash
 
 ssh -tt gohtml@gohtml.ru << EOF
-  echo "Killing server ..."
-  pkill -f server.js
-  pkill -f Xvfb
-
+  echo "Updating repository ..."
   cd roleplay/
   git reset HEAD~1 --hard
   git pull origin master
 
+  echo "Installing dependencies ..."
   cd client/
-  npm i
+  # npm i
 
   cd ../server/
-  npm i
-  npm run build
+  # npm i
+  # npm run build
 
+  echo "Killing server ..."
+  pkill -f server.js
+  pkill -f Xvfb
   Xvfb :5 -screen 0 1x1x24 &
   export DISPLAY=:5
 
