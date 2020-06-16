@@ -363,6 +363,7 @@ class App extends Component {
 							isThirdPerson={isThirdPerson}
 							unspentTalents={unspentTalents}
 							money={money}
+							speed={speed}
 							showRestart={showRestart}
 							setPause={this.setPause}
 							switchCamera={this.switchCamera}

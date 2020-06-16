@@ -25,7 +25,16 @@ export default class GameObjectsService extends AutoBindMethods {
 	}
 
 	update(time, deltaTime) {
-		this.gameObjects.forEach(gameObject => gameObject.update(time, deltaTime));
+		const player = this.scene.getPlayer();
+
+		this.gameObjects
+			.filter(go => (
+				// Performance optimization
+				this.scene.intervals.getTimePassed() < 30000
+				|| !go.params.fromNetwork
+				|| go.position.distanceTo(player.position) < 100
+			))
+			.forEach(gameObject => gameObject.update(time, deltaTime));
 	}
 
 	/**

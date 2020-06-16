@@ -15,65 +15,69 @@ export default class MovingGameObject extends AnimatedGameObject {
 
     update(time, deltaTime) {
         super.update(time, deltaTime);
-        const { params: { acceleration, throttling, gravity, slideThrottling } } = this;
+        const { params: { acceleration, throttling, gravity, slideThrottling, fromNetwork } } = this;
 
-        acceleration.y -= (gravity / 100) * (deltaTime * 0.06);
+        if (!fromNetwork) {
+            acceleration.y -= (gravity / 100) * (deltaTime * 0.06);
 
-        this.isGrounded = !this.checkWay(0, -0.2, 0);
-        this.animationState.isJump = !this.isGrounded;
+            this.isGrounded = !this.checkWay(0, -0.2, 0);
+            this.animationState.isJump = !this.isGrounded;
 
-        const hasAccelerationX = Boolean(acceleration.x);
-        const hasAccelerationY = Boolean(acceleration.y);
-        const hasAccelerationZ = Boolean(acceleration.z);
+            const hasAccelerationX = Boolean(acceleration.x);
+            const hasAccelerationY = Boolean(acceleration.y);
+            const hasAccelerationZ = Boolean(acceleration.z);
 
-        const canMoveX = hasAccelerationX && this.checkWay(acceleration.x, 0, 0);
-        const canMoveY = hasAccelerationY && this.checkWay(0, acceleration.y, 0);
-        const canMoveZ = hasAccelerationZ && this.checkWay(0, 0, acceleration.z);
+            const canMoveX = hasAccelerationX && this.checkWay(acceleration.x, 0, 0);
+            const canMoveY = hasAccelerationY && this.checkWay(0, acceleration.y, 0);
+            const canMoveZ = hasAccelerationZ && this.checkWay(0, 0, acceleration.z);
 
-        if (
-           (hasAccelerationX && !canMoveX)
-           || (hasAccelerationY && !canMoveY)
-           || (hasAccelerationZ && !canMoveZ)
-        ) {
-            acceleration.multiply(slideThrottling);
+            if (
+               (hasAccelerationX && !canMoveX)
+               || (hasAccelerationY && !canMoveY)
+               || (hasAccelerationZ && !canMoveZ)
+            ) {
+                acceleration.multiply(slideThrottling);
 
-            if (hasAccelerationX && !canMoveX) {
-                const isClimbing = (
-                   acceleration.x
-                   && this.isGrounded
-                   && acceleration.y <= 0
-                   && this.checkWay(acceleration.x, 0.1, 0)
-                );
-
-                if (isClimbing) {
-                    const climbingValue = (
-                       this.checkWay(acceleration.x, 0.05, 0) ? 0.01 : 0.02
+                if (hasAccelerationX && !canMoveX) {
+                    const isClimbing = (
+                       acceleration.x
+                       && this.isGrounded
+                       && acceleration.y <= 0
+                       && this.checkWay(acceleration.x, 0.1, 0)
                     );
 
-                    acceleration.y = climbingValue;
-                } else {
-                    acceleration.x = 0;
+                    if (isClimbing) {
+                        const climbingValue = (
+                           this.checkWay(acceleration.x, 0.05, 0) ? 0.01 : 0.02
+                        );
+
+                        acceleration.y = climbingValue;
+                    } else {
+                        acceleration.x = 0;
+                    }
                 }
-            }
 
-            if (!canMoveY) { acceleration.y = 0; }
+                if (!canMoveY) {
+                    acceleration.y = 0;
+                }
 
-            if (hasAccelerationZ && !canMoveZ) {
-                const isClimbing = (
-                   acceleration.z
-                   && this.isGrounded
-                   && acceleration.y <= 0
-                   && this.checkWay(0, 0.1, acceleration.z)
-                );
-
-                if (isClimbing) {
-                    const climbingValue = (
-                       this.checkWay(0, 0.05, acceleration.z) ? 0.01 : 0.02
+                if (hasAccelerationZ && !canMoveZ) {
+                    const isClimbing = (
+                       acceleration.z
+                       && this.isGrounded
+                       && acceleration.y <= 0
+                       && this.checkWay(0, 0.1, acceleration.z)
                     );
 
-                    acceleration.y = climbingValue;
-                } else {
-                    acceleration.z = 0;
+                    if (isClimbing) {
+                        const climbingValue = (
+                           this.checkWay(0, 0.05, acceleration.z) ? 0.01 : 0.02
+                        );
+
+                        acceleration.y = climbingValue;
+                    } else {
+                        acceleration.z = 0;
+                    }
                 }
             }
         }
@@ -83,13 +87,12 @@ export default class MovingGameObject extends AnimatedGameObject {
         acceleration.z *= throttling.z;
 
         const isMoving = (
-            Math.abs(acceleration.x) > 0.001
-            || Math.abs(acceleration.y) > 0.001
-            || Math.abs(acceleration.z) > 0.001
+           Math.abs(acceleration.x) > 0.001
+           || Math.abs(acceleration.y) > 0.001
+           || Math.abs(acceleration.z) > 0.001
         );
 
         if (isMoving) {
-            // acceleration.multiplyScalar(deltaTime * 60)
             this.position.add(acceleration);
         }
     }

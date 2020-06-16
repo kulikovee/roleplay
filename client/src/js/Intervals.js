@@ -5,7 +5,7 @@ export default class Intervals extends AutoBindMethods {
         super();
         this.scene = scene;
         this.timePassed = 0;
-        this.lastFrame = 0;
+        this.lastFrame = Date.now();
         this.intervals = [];
         this.intervalIndex = 0;
     }

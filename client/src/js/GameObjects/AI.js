@@ -36,13 +36,13 @@ export default class AI extends FiringUnit {
             return;
         }
 
-        if (this.params.findTarget && this.isUpdateTargetReleased(time)) {
-            this.params.target = this.params.findTarget();
-        }
+        const { object, target, acceleration, speed, getNextPoint, fromNetwork } = this.params;
 
-        const { object, target, acceleration, speed, getNextPoint } = this.params;
+        if (!fromNetwork) {
+            if (this.params.findTarget && this.isUpdateTargetReleased(time)) {
+                this.params.target = this.params.findTarget();
+            }
 
-        if (!this.params.fromNetwork) {
             if (target) {
                 if (getNextPoint) {
                     if (this.isNextPointUpdateReleased(time)) {
@@ -84,9 +84,9 @@ export default class AI extends FiringUnit {
             this.attack();
         }
 
-        this.animationState.isMovingForward = this.isRunning && this.isAcceleration();
+        this.animationState.isMovingForward = this.isRunning && (fromNetwork || this.isAcceleration());
 
-        if (this.isRunning) {
+        if (!fromNetwork && this.isRunning) {
             const checkWay = (jumpHeight) => {
                 const { params: { acceleration: { x: dx, y: dy, z: dz } } } = this;
                 return this.checkWay(dx, dy + jumpHeight, dz);

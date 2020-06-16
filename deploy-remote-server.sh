@@ -12,11 +12,12 @@ ssh -tt gohtml@gohtml.ru << EOF
 
   cd ../server/
   # npm i
-  # npm run build
+  npm run build
 
   echo "Killing server ..."
   pkill -f server.js
   pkill -f Xvfb
+
   Xvfb :5 -screen 0 1x1x24 &
   export DISPLAY=:5
 

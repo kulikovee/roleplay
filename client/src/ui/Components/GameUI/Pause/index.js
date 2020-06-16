@@ -13,6 +13,7 @@ class App extends Component {
 			reviveHero,
 			setPause,
 			buy,
+			speed,
 		} = this.props;
 
 		return (
@@ -71,13 +72,13 @@ class App extends Component {
 							</Button>
 						</div>
 					</div>
-					<div className="row">
+					{speed < 1 && <div className="row">
 						<div>
 							<Button onClick={() => buy('talent-speed')}>
 								Movement Speed +5%
 							</Button>
 						</div>
-					</div>
+					</div>}
 					<div className="row">
 						<div>
 							<Button onClick={() => buy('talent-damage')}>

@@ -44,6 +44,7 @@ export default class Location extends AbstractLocation {
          }
       });
       this.environmentMeshes = [];
+      this.raycastCache = {};
 
       this.ambientLight = this.createAmbientLight();
       this.shadowLight = this.createShadowLight();
@@ -64,6 +65,10 @@ export default class Location extends AbstractLocation {
             }
          });
       }, 1000);
+
+      this.scene.intervals.setInterval(() => {
+         this.raycastCache = {};
+      }, 60000);
    }
 
    update() {
@@ -247,18 +252,29 @@ export default class Location extends AbstractLocation {
 
       this.scene.colliders.addColliderFunction((position, gameObject) => {
          const { x, y, z } = position;
+         const intersectTo = -raycastFar / 2;
 
          if (!this.environmentMeshes.length) {
             return true;
          }
 
-         origin.set(x, raycastFar / 2, z);
-         target.set(x, -raycastFar / 2, z);
-         raycaster.set(origin, direction.subVectors(target, origin).normalize());
+         const getEnvironmentY = () => {
+            origin.set(x, raycastFar / 2, z);
+            target.set(x, -raycastFar / 2, z);
+            raycaster.set(origin, direction.subVectors(target, origin).normalize());
 
-         const intersectTo = -raycastFar / 2;
-         const intersects = raycaster.intersectObjects(this.environmentMeshes);
-         const environmentY = Math.max(intersectTo, ...intersects.map(i => raycastFar / 2 - i.distance + 0.08));
+            const intersects = raycaster.intersectObjects(this.environmentMeshes);
+            return Math.max(intersectTo, ...intersects.map(i => raycastFar / 2 - i.distance + 0.08));
+         };
+
+         const raycastPosition = `${x}, 0, ${z}`;
+         const isCache = typeof this.raycastCache[raycastPosition] === 'number';
+
+         const environmentY = isCache ? this.raycastCache[raycastPosition] : getEnvironmentY();
+
+         if (!isCache && environmentY !== intersectTo) {
+            this.raycastCache[raycastPosition] = environmentY;
+         }
 
          return environmentY === intersectTo || y < environmentY;
       });

@@ -100,7 +100,7 @@ export default class Scene extends AutoBindMethods {
             this.particles.update(gameTime);
             this.connection.update(gameTime, deltaTime);
 
-            this.renderer.render(this.scene, this.camera.camera, deltaTime);
+            this.renderer.render(gameTime, deltaTime, this.scene, this.camera.camera);
         }
 
         window.requestAnimationFrame(this.animate);

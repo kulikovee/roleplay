@@ -16,6 +16,7 @@ export default class Renderer extends AutoBindMethods {
 
         this.fps = 60;
         this.targetFps = 70;
+        this.lastRender = 0;
 
         if (container) {
             this.renderer.setSize(window.innerWidth, window.innerHeight);
@@ -42,11 +43,18 @@ export default class Renderer extends AutoBindMethods {
      * @param {THREE.Scene} scene
      * @param {THREE.Camera} camera
      */
-    render(scene, camera, deltaTime) {
-        this.fps -= (this.fps - 1000 / deltaTime) / 60;
+    render(time, deltaTime, scene, camera) {
+        if (!this.lastRender) {
+            this.lastRender = time - deltaTime;
+        }
 
-        if (deltaTime >= 1000 / this.targetFps) {
+        const timeSinceLastRender = time - this.lastRender;
+        const currentFPS = 1000 / timeSinceLastRender;
+        this.fps -= (this.fps - currentFPS) / 60;
+
+        if (timeSinceLastRender >= 1000 / this.targetFps) {
             this.renderer.render(scene, camera);
+            this.lastRender = time;
         }
 
         this.targetFps = this.fps + 10;
