@@ -15,7 +15,7 @@ export default class MovingGameObject extends AnimatedGameObject {
 
     update(time, deltaTime) {
         super.update(time, deltaTime);
-        const { params: { acceleration, throttling, gravity, slideThrottling, fromNetwork } } = this;
+        const { acceleration, throttling, gravity, slideThrottling, fromNetwork, getEnvironmentY } = this.params;
 
         if (!fromNetwork) {
             acceleration.y -= (gravity / 100) * (deltaTime * 0.06);
@@ -47,11 +47,16 @@ export default class MovingGameObject extends AnimatedGameObject {
                     );
 
                     if (isClimbing) {
-                        const climbingValue = (
-                           this.checkWay(acceleration.x, 0.05, 0) ? 0.01 : 0.02
-                        );
+                        let climbingValue = 0.1;
 
-                        acceleration.y = climbingValue;
+                        if (getEnvironmentY) {
+                            climbingValue = (
+                               getEnvironmentY({ x: this.position.x + acceleration.x, y: 0, z: this.position.z })
+                               - this.position.y
+                            );
+                        }
+
+                        this.position.y += climbingValue;
                     } else {
                         acceleration.x = 0;
                     }
@@ -70,11 +75,16 @@ export default class MovingGameObject extends AnimatedGameObject {
                     );
 
                     if (isClimbing) {
-                        const climbingValue = (
-                           this.checkWay(0, 0.05, acceleration.z) ? 0.01 : 0.02
-                        );
+                        let climbingValue = 0.1;
 
-                        acceleration.y = climbingValue;
+                        if (getEnvironmentY) {
+                            climbingValue = (
+                               getEnvironmentY({ x: this.position.x, y: 0, z: this.position.z + acceleration.z })
+                               - this.position.y
+                            );
+                        }
+
+                        this.position.y += climbingValue;
                     } else {
                         acceleration.z = 0;
                     }
@@ -99,7 +109,7 @@ export default class MovingGameObject extends AnimatedGameObject {
 
     checkWay(x = 0, y = 0, z = 0) {
         const { position, params: { checkWay } } = this;
-        const nextPosition = new THREE.Vector3(position.x + x, position.y + y + 0.1, position.z + z);
+        const nextPosition = new THREE.Vector3(position.x + x, position.y + y, position.z + z);
 
         return checkWay(nextPosition, this);
     }

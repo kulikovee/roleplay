@@ -35,6 +35,7 @@ class App extends Component {
 		this.setPing = this.setPing.bind(this);
 		this.setNotification = this.setNotification.bind(this);
 		this.setConnectionRole = this.setConnectionRole.bind(this);
+		this.moveToSpawn = this.moveToSpawn.bind(this);
 		this.setLoading = this.setLoading.bind(this);
 		this.render = this.render.bind(this);
 		this.clearHpBars = () => {
@@ -292,6 +293,11 @@ class App extends Component {
 		this.setPause(false);
 	}
 
+	moveToSpawn() {
+		this.scene.getPlayer().position.set(-58, 0, 106);
+		this.setPause(false);
+	}
+
 	restartServer() {
 		this.scene.connection.restartServer();
 	}
@@ -369,6 +375,7 @@ class App extends Component {
 							switchCamera={this.switchCamera}
 							restartServer={this.restartServer}
 							reviveHero={this.reviveHero}
+							moveToSpawn={this.moveToSpawn}
 							buy={this.buy}
 						/>}
 						{isLoading && <LoadingScreen />}

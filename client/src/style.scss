@@ -50,6 +50,15 @@ $color: #ffffff;
     padding: 8px;
   }
 
+  .hide-menu {
+    background: rgba(75, 0, 0);
+    font-weight: bold;
+
+    &:hover {
+      background: rgba(100, 0, 0);
+    }
+  }
+
   .title {
     margin-top: 12px;
   }

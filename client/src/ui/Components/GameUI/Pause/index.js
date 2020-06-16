@@ -14,6 +14,7 @@ class App extends Component {
 			setPause,
 			buy,
 			speed,
+			moveToSpawn,
 		} = this.props;
 
 		return (
@@ -36,8 +37,8 @@ class App extends Component {
 					</div>
 					<div className="row">
 						<div>
-							<Button onClick={() => setPause(false)}>
-								Resume
+							<Button className="hide-menu" onClick={() => setPause(false)}>
+								Close menu & Play
 							</Button>
 						</div>
 					</div>
@@ -102,6 +103,15 @@ class App extends Component {
 						<div>
 							<Button onClick={() => buy('hp')}>
 								Buy: Heal to full HP ($100)
+							</Button>
+						</div>
+					</div>
+
+					<hr />
+					<div className="row">
+						<div>
+							<Button onClick={() => moveToSpawn()}>
+								I'm stuck!
 							</Button>
 						</div>
 					</div>

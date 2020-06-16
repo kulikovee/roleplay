@@ -21,7 +21,6 @@ export default class Location extends AbstractLocation {
          load: this.scene.models.loadGLTF,
          onLoad: () => {
             this.scene.ui.setLoading(false);
-            this.scene.ui.setPause(false);
 
             this.scene.notify('Smoke Island');
 
@@ -44,7 +43,18 @@ export default class Location extends AbstractLocation {
          }
       });
       this.environmentMeshes = [];
-      this.raycastCache = {};
+
+      const raycastFar = 500;
+      this.raycaster = {
+         raycaster: new THREE.Raycaster(),
+         origin: new Vector3(),
+         target: new Vector3(),
+         direction: new THREE.Vector3(),
+         raycastFar,
+         intersectTo: -raycastFar / 2,
+         cache: {},
+      };
+      this.raycaster.raycaster.far = this.raycaster.raycastFar;
 
       this.ambientLight = this.createAmbientLight();
       this.shadowLight = this.createShadowLight();
@@ -67,7 +77,8 @@ export default class Location extends AbstractLocation {
       }, 1000);
 
       this.scene.intervals.setInterval(() => {
-         this.raycastCache = {};
+         console.log({ raycastCache: this.raycaster.cache });
+         this.raycaster.cache = {};
       }, 60000);
    }
 
@@ -242,42 +253,53 @@ export default class Location extends AbstractLocation {
    }
 
    createLocationColliders() {
-      // const isBetween = (v, min, max) => v > min && v < max;
-      const raycaster = new THREE.Raycaster();
-      const origin = new Vector3();
-      const target = new Vector3();
-      const direction = new THREE.Vector3();
-      const raycastFar = 500;
-      raycaster.far = raycastFar;
-
       this.scene.colliders.addColliderFunction((position, gameObject) => {
          const { x, y, z } = position;
-         const intersectTo = -raycastFar / 2;
 
          if (!this.environmentMeshes.length) {
             return true;
          }
 
-         const getEnvironmentY = () => {
-            origin.set(x, raycastFar / 2, z);
-            target.set(x, -raycastFar / 2, z);
-            raycaster.set(origin, direction.subVectors(target, origin).normalize());
+         const environmentY = this.getEnvironmentY(position);
 
-            const intersects = raycaster.intersectObjects(this.environmentMeshes);
-            return Math.max(intersectTo, ...intersects.map(i => raycastFar / 2 - i.distance + 0.08));
-         };
 
-         const raycastPosition = `${x}, 0, ${z}`;
-         const isCache = typeof this.raycastCache[raycastPosition] === 'number';
-
-         const environmentY = isCache ? this.raycastCache[raycastPosition] : getEnvironmentY();
-
-         if (!isCache && environmentY !== intersectTo) {
-            this.raycastCache[raycastPosition] = environmentY;
-         }
-
-         return environmentY === intersectTo || y < environmentY;
+         return environmentY === this.raycaster.intersectTo || y < environmentY;
       });
+   }
+
+   getEnvironmentY({ x, z }) {
+      const { intersectTo } = this.raycaster;
+
+      if (!this.environmentMeshes.length) {
+         return intersectTo;
+      }
+
+      const raycastCacheKey = `${Math.round(x * 100) / 100}, 0, ${Math.round(z * 100) / 100}`;
+      const isCache = typeof this.raycaster.cache[raycastCacheKey] === 'number';
+
+      if (isCache) {
+         return this.raycaster.cache[raycastCacheKey];
+      }
+
+      const {
+         raycastFar,
+         direction,
+         origin,
+         target,
+         raycaster,
+      } = this.raycaster;
+
+      origin.set(x, raycastFar / 2, z);
+      target.set(x, -raycastFar / 2, z);
+      raycaster.set(origin, direction.subVectors(target, origin).normalize());
+      const intersects = raycaster.intersectObjects(this.environmentMeshes);
+      const environmentY = Math.max(intersectTo, ...intersects.map(i => raycastFar / 2 - i.distance));
+
+      if (!isCache && environmentY !== this.raycaster.intersectTo) {
+         this.raycaster.cache[raycastCacheKey] = environmentY;
+      }
+
+      return environmentY;
    }
 
    getAreas() {

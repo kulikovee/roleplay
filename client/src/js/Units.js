@@ -49,6 +49,7 @@ export default class Units extends AutoBindMethods {
 					input: this.scene.input,
 					complexAnimations: true,
 					checkWay: this.scene.colliders.checkWay,
+					getEnvironmentY: this.scene.location.getEnvironmentY,
 					name: this.scene.user ? this.scene.user.userName : ' ',
 					onDamageDeal: damagedUnit => onDamageDeal(damagedUnit),
 					onDamageTaken: (attacker) => {
