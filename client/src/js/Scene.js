@@ -33,6 +33,7 @@ export default class Scene extends AutoBindMethods {
      */
     constructor(renderer, ui) {
         super();
+        this.isServer = false;
         this.clock = new THREE.Clock();
         this.intervals = new Intervals(this);
         this.renderer = renderer;

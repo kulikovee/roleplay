@@ -17,6 +17,7 @@ export default class Player extends FiringUnit {
             fraction: 'friendly',
             sensitivity: 1,
             type: 'player',
+            equippedItems: {},
             ...params,
         });
 

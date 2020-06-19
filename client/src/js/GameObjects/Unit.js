@@ -9,8 +9,13 @@ export default class Unit extends MovingGameObject {
             attackTimeout: 0.9,
             hitTime: 0.3,
             attackDamageTimeout: 0.3,
+            equippedItems: {
+                leftHand: null,
+            },
             ...params,
         });
+
+        this._attachedModels = {};
 
         this.shouldAttack = false;
         this.latestAttackTimestamp = 0;
@@ -36,9 +41,15 @@ export default class Unit extends MovingGameObject {
 
         if (this.isAttackReleased(time) && hitReleased) {
             this.animationState.isAttack = false;
+            this.animationState.isAttackWeapon1 = false;
 
             if (this.shouldAttack) {
-                this.animationState.isAttack = true;
+                if (this.params.equippedItems && this.params.equippedItems.leftHand) {
+                    this.animationState.isAttackWeapon1 = true;
+                } else {
+                    this.animationState.isAttack = true;
+                }
+
                 this.latestAttackTimestamp = time;
                 this.params.attack && this.params.attack();
             }
@@ -67,6 +78,7 @@ export default class Unit extends MovingGameObject {
     releaseAttack(time) {
         this.latestAttackTimestamp = time - this.params.attackTimeout * 1000;
         this.animationState.isAttack = false;
+        this.animationState.isAttackWeaponAttach1 = false;
     }
 
     isAttackReleased(time) {
@@ -189,6 +201,25 @@ export default class Unit extends MovingGameObject {
     }
 
     getDamage() {
-        return this.params.damage;
+        return this.params.damage + this.getDamageFromEffects();
+    }
+
+    getDamageFromEffects() {
+        let damage = 0;
+        const { equippedItems } = this.params;
+
+        if (equippedItems) {
+            const { leftHand } = equippedItems;
+
+            if (leftHand) {
+                leftHand.effects.forEach((effect) => {
+                    if (effect.damage) {
+                        damage += effect.damage;
+                    }
+                });
+            }
+        }
+
+        return damage;
     }
 }

@@ -25,6 +25,7 @@ exports.unitToNetwork = (unit, connectionId, locationName) => {
          speed,
          unspentTalents,
          money,
+         equippedItems,
       } = unit.params;
 
       const {
@@ -69,6 +70,7 @@ exports.unitToNetwork = (unit, connectionId, locationName) => {
             speed,
             money,
             unspentTalents,
+            equippedItems,
             acceleration: vectorToObject(acceleration),
             input: {
                vertical, horizontal,

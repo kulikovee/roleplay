@@ -56,7 +56,7 @@ export default class FiringUnit extends Unit {
             this.isFire = false;
         }
 
-        if (!this.animationState.isAttack) {
+        if (!this.animationState.isAttack && !this.animationState.isAttackWeapon1) {
             this.animationState.isAttack = !this.isFireReleased(time);
         }
     }

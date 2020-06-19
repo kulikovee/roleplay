@@ -77,7 +77,6 @@ export default class Location extends AbstractLocation {
       }, 1000);
 
       this.scene.intervals.setInterval(() => {
-         console.log({ raycastCache: this.raycaster.cache });
          this.raycaster.cache = {};
       }, 60000);
    }
@@ -188,7 +187,47 @@ export default class Location extends AbstractLocation {
             }, 10000)
          );
 
+         const createSwordItem = () => (
+            this.scene.intervals.setTimeout(() => {
+               const itemHealPosition = new THREE.Vector3(-26.5, 0, 102);
+
+               const item = this.scene.gameObjectsService.createItem({
+                  model: 'item-sword',
+                  name: 'Steel Sword',
+                  type: 'One Handed',
+                  boneName: 'Left_Hand',
+                  attachModelName: 'sword1',
+                  effects: [{
+                     damage: +25,
+                  }],
+                  position: itemHealPosition,
+                  canPickup: (unit) => (
+                     !unit.params.equippedItems
+                     || !unit.params.equippedItems.leftHand
+                     || unit.params.equippedItems.leftHand.name !== 'Steel Sword'
+                  ),
+                  onPickup: (unit) => {
+                     const previousWeapon = (
+                        unit.params.equippedItems
+                        && unit.params.equippedItems.leftHand
+                     );
+
+                     if (previousWeapon) {
+                        // previousWeapon.object.parent.remove(previousWeapon.object);
+                     }
+
+                     unit.params.equippedItems.leftHand = item;
+
+                     this.scene.gameObjectsService.attachItem(unit, item);
+
+                     createSwordItem();
+                  },
+               });
+            }, 10000)
+         );
+
          createHealItem();
+         createSwordItem();
       }
 
       const getAIParams = ({ level, ...params }) => {
@@ -243,12 +282,12 @@ export default class Location extends AbstractLocation {
 
          getGoatsParams(99, { x: 101, y: 155, z: 113 }, { y: 0.3 }, 'God of Goats'),
 
-         getFriendlyParams(10, { x: -25, y: 1, z: 108 }, { y: -1.53 }, { name: 'Silencing Bob' }),
+         getFriendlyParams(10, { x: -25, y: 1, z: 108 }, { y: -1.53 }, { name: 'Siltent Bob' }),
          getFriendlyParams(2, { x: -69, y: 0, z: 117 }, { y: 0.13 }, { name: 'Talking John' }),
          getFriendlyParams(3, { x: -69, y: 0, z: 119 }, { y: 3.1 }, { name: 'Talking Ien' }),
          getFriendlyParams(8, { x: -48, y: 6, z: 84 }, { y: 2.8 }, { name: 'Warlike Ken' }),
-         getFriendlyParams(3, { x: -80, y: 0, z: 97 }, { y: 1.1 }, { name: 'Scaring Dominic' }),
-         getFriendlyParams(3, { x: -33, y: 0, z: 137 }, { y: 2.8 }, { name: 'Grunting Glen' }),
+         getFriendlyParams(3, { x: -80, y: 0, z: 97 }, { y: 1.1 }, { name: 'Scarring Dominic' }),
+         getFriendlyParams(3, { x: -33, y: 0, z: 137 }, { y: 2.8 }, { name: 'Arrogant Glen' }),
       ].forEach(this.scene.units.createAI);
    }
 

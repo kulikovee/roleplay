@@ -20,7 +20,9 @@ const animationNames = {
     topWalkBack: 'Top Walk Back',
     bottomWalkBack: 'Bottom Walk Back',
     topAttack: 'Top Attack',
+    topAttackWeapon1: 'Top Attack Weapon 1',
     bottomAttack: 'Bottom Attack',
+    bottomAttackWeapon1: 'Bottom Attack',
     topStand: 'Top Stand',
     bottomStand: 'Bottom Stand',
     topRunRight: 'Top Run Right',
@@ -41,6 +43,7 @@ const topAnimations = [
     'topRun',
     'topWalkBack',
     'topAttack',
+    'topAttackWeapon1',
     'topStand',
     'topRunRight',
     'topRunLeft',
@@ -53,6 +56,7 @@ const bottomAnimations = [
     'bottomRun',
     'bottomWalkBack',
     'bottomAttack',
+    'bottomAttackWeapon1',
     'bottomStand',
     'bottomRunRight',
     'bottomRunLeft',
@@ -111,6 +115,7 @@ export default class AnimatedGameObject extends GameObject {
             isRotateLeft: false,
             isRotateRight: false,
             isAttack: false,
+            isAttackWeapon1: false,
             isJump: false,
             isDie: false,
             isHit: false,
@@ -205,13 +210,15 @@ export default class AnimatedGameObject extends GameObject {
                 jump,
                 attack,
                 topAttack,
+                topAttackWeapon1,
                 die,
                 spawn,
                 topDie,
                 bottomDie,
                 topJump,
                 bottomJump,
-                bottomAttack
+                bottomAttack,
+                bottomAttackWeapon1
             } = {}
         } = this;
 
@@ -222,7 +229,7 @@ export default class AnimatedGameObject extends GameObject {
             }
         });
 
-        [attack, topAttack, bottomAttack].forEach((attackAnimation) => {
+        [attack, topAttack, bottomAttack, topAttackWeapon1, bottomAttackWeapon1].forEach((attackAnimation) => {
             if (attackAnimation) {
                 attackAnimation.setDuration(this.params.attackTimeout);
             }
@@ -273,6 +280,7 @@ export default class AnimatedGameObject extends GameObject {
         const {
             animations: {
                 topAttack, bottomAttack,
+                topAttackWeapon1, bottomAttackWeapon1,
                 topWalkBack, bottomWalkBack,
                 topRun, bottomRun,
                 topRunRight,
@@ -287,6 +295,7 @@ export default class AnimatedGameObject extends GameObject {
 
         const {
             isAttack,
+            isAttackWeapon1,
             isMovingRight,
             isMovingLeft,
             isMovingBackward,
@@ -301,6 +310,7 @@ export default class AnimatedGameObject extends GameObject {
             top: (
                 (isDie && topDie)
                 || (isHit && topHit)
+                || (isAttackWeapon1 && topAttackWeapon1)
                 || (isAttack && topAttack)
                 || (isJump && topJump)
                 || (isMovingBackward && isMovingRight && topRunLeft)
@@ -321,6 +331,7 @@ export default class AnimatedGameObject extends GameObject {
                 || (isMovingRight && bottomRun)
                 || (isMovingLeft && bottomRun)
                 || (isMovingForward && bottomRun)
+                || (isAttackWeapon1 && bottomAttackWeapon1)
                 || (isAttack && bottomAttack)
                 || (isHit && bottomHit)
                 || (isSpawn && bottomSpawn)

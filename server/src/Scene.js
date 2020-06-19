@@ -25,5 +25,7 @@ exports.initScene = (rendererParams, MockGUI) => {
    scene.camera.updateThirdPerson = () => ({});
    scene.camera.toScreenPosition = () => ({});
 
+   scene.isServer = true;
+
    return scene;
 };

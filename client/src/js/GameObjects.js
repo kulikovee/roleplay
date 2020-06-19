@@ -62,7 +62,7 @@ export default class GameObjectsService extends AutoBindMethods {
 
 			attackedUnits.forEach((collisionGameObject) => {
 				collisionGameObject.damageTaken({
-					damage: attackingUnit.params.damage,
+					damage: attackingUnit.getDamage(),
 					unit: attackingUnit,
 				}, gameTime)
 			});
@@ -151,29 +151,51 @@ export default class GameObjectsService extends AutoBindMethods {
 	createItem({
 		scale = 1.5,
 		model = 'item-heal',
+		name,
+		type,
+		effects,
 		position = {},
+		boneName,
+		attachModelName,
+		onLoad,
 		canPickup,
 		onPickup,
 	}) {
+		const item = {
+			name,
+			type,
+			effects,
+			boneName,
+			attachModelName,
+			model,
+		};
+
 		this.scene.models.loadGLTF({
 			baseUrl: './assets/models/items/' + model,
 			noScene: true,
 			callback: loadedObject => {
 				const positionVector = new THREE.Vector3(position.x || 0, position.y || 0, position.z || 0);
-				loadedObject.scene.scale.set(scale, scale, scale);
 
-				loadedObject.scene.traverse((child) => {
+				const object = loadedObject.scene;
+				object.scale.set(scale, scale, scale);
+
+				object.traverse((child) => {
 					if (child.isMesh) {
 						child.material.transparent = true;
 						child.material.alphaTest = 0.5;
 					}
 				});
 
-				loadedObject.scene.position.set(positionVector.x, positionVector.y, positionVector.z);
-				this.scene.scene.add(loadedObject.scene);
+				object.position.set(positionVector.x, positionVector.y, positionVector.z);
+
+				if (onLoad) {
+					onLoad(object);
+				}
+
+				this.scene.scene.add(object);
 
 				const gameItem = new AnimatedGameObject({
-					object: loadedObject.scene,
+					object,
 					animations: loadedObject.animations,
 				});
 
@@ -211,6 +233,50 @@ export default class GameObjectsService extends AutoBindMethods {
 				};
 
 				checkPickup();
+			}
+		});
+
+		return item;
+	}
+
+	updateAttachedItems(unit) {
+		if (!this.scene.isServer && unit.params.equippedItems) {
+			Object.values(unit.params.equippedItems).forEach(equippedItem => {
+				if (!unit._attachedModels[equippedItem.name]) {
+					this.attachItem(unit, equippedItem);
+				}
+			});
+		}
+	}
+
+	attachItem(unit, item) {
+		let bone;
+
+		const {
+			boneName,
+			name: itemName,
+			attachModelName: modelName,
+		} = item;
+
+		unit._attachedModels[itemName] = {};
+
+		this.scene.models.loadGLTF({
+			baseUrl: './assets/models/items/' + modelName,
+			noScene: true,
+			callback: (loadedModel) => {
+				const itemObject = loadedModel.scene;
+
+				unit._attachedModels[itemName] = itemObject;
+
+				unit.object.traverse(object => {
+					if (object.name === boneName) {
+						bone = object;
+					}
+				});
+
+				if (bone) {
+					bone.add(itemObject);
+				}
 			}
 		});
 	}

@@ -92,6 +92,9 @@ export default class Units extends AutoBindMethods {
 					playerParams.experience = params.experience;
 					playerParams.money = params.money;
 					playerParams.unspentTalents = params.unspentTalents;
+					playerParams.equippedItems = params.equippedItems;
+
+					this.scene.gameObjectsService.updateAttachedItems(player);
 
 					if (!playerParams.hp) {
 						player.animationState.isDie = true;
@@ -262,14 +265,13 @@ export default class Units extends AutoBindMethods {
 					},
 				}));
 
-
 				callback(ai);
 			},
 		});
 	}
 
 	createNetworkPlayer({
-		params: { connectionId, unitNetworkId, name, damage, fireDamage },
+		params: { connectionId, unitNetworkId, name, damage, fireDamage, equippedItems },
 		onDamageDeal,
 		onKill,
 		onDie,
@@ -279,7 +281,7 @@ export default class Units extends AutoBindMethods {
 		const gameObjectsService = this.scene.gameObjectsService;
 
 		return this.scene.models.loadGLTF({
-			baseUrl: './assets/models/units/network-player',
+			baseUrl: './assets/models/units/player',
 			callback: (loadedObject) => {
 				/** @type {Player} */
 				const player = gameObjectsService.hookGameObject(new Player({
@@ -293,6 +295,7 @@ export default class Units extends AutoBindMethods {
 					fromNetwork: true,
 					complexAnimations: true,
 					checkWay: this.scene.colliders.checkWay,
+					equippedItems,
 					input: {
 						vertical: 0,
 						horizontal: 0,
