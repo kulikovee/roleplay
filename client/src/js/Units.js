@@ -92,7 +92,10 @@ export default class Units extends AutoBindMethods {
 					playerParams.experience = params.experience;
 					playerParams.money = params.money;
 					playerParams.unspentTalents = params.unspentTalents;
-					playerParams.equippedItems = params.equippedItems;
+
+					if (params.equippedItems) {
+						playerParams.equippedItems = params.equippedItems;
+					}
 
 					this.scene.gameObjectsService.updateAttachedItems(player);
 
@@ -271,7 +274,7 @@ export default class Units extends AutoBindMethods {
 	}
 
 	createNetworkPlayer({
-		params: { connectionId, unitNetworkId, name, damage, fireDamage, equippedItems },
+		params: { connectionId, unitNetworkId, name, damage, fireDamage },
 		onDamageDeal,
 		onKill,
 		onDie,
@@ -295,7 +298,6 @@ export default class Units extends AutoBindMethods {
 					fromNetwork: true,
 					complexAnimations: true,
 					checkWay: this.scene.colliders.checkWay,
-					equippedItems,
 					input: {
 						vertical: 0,
 						horizontal: 0,

@@ -30,10 +30,11 @@ export default class Scene extends AutoBindMethods {
      *  setFps: function,
      *  notify: function,
      * }} ui
+     * @param {boolean} isServer
      */
-    constructor(renderer, ui) {
+    constructor(renderer, ui, isServer = false) {
         super();
-        this.isServer = false;
+        this.isServer = isServer;
         this.clock = new THREE.Clock();
         this.intervals = new Intervals(this);
         this.renderer = renderer;

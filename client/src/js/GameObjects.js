@@ -240,7 +240,7 @@ export default class GameObjectsService extends AutoBindMethods {
 	}
 
 	updateAttachedItems(unit) {
-		if (!this.scene.isServer && unit.params.equippedItems) {
+		if (!this.scene.isServer) {
 			Object.values(unit.params.equippedItems).forEach(equippedItem => {
 				if (!unit._attachedModels[equippedItem.name]) {
 					this.attachItem(unit, equippedItem);

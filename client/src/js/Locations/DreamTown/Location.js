@@ -202,14 +202,12 @@ export default class Location extends AbstractLocation {
                   }],
                   position: itemHealPosition,
                   canPickup: (unit) => (
-                     !unit.params.equippedItems
-                     || !unit.params.equippedItems.leftHand
+                     !unit.params.equippedItems.leftHand
                      || unit.params.equippedItems.leftHand.name !== 'Steel Sword'
                   ),
                   onPickup: (unit) => {
                      const previousWeapon = (
-                        unit.params.equippedItems
-                        && unit.params.equippedItems.leftHand
+                        unit.params.equippedItems.leftHand
                      );
 
                      if (previousWeapon) {
@@ -280,7 +278,7 @@ export default class Location extends AbstractLocation {
 
          getGoatsParams(1, { x: -33, y: 6, z: -1 }),
 
-         getGoatsParams(99, { x: 101, y: 155, z: 113 }, { y: 0.3 }, 'God of Goats'),
+         getGoatsParams(99, { x: 103, y: 155, z: 92 }, { y: 0.3 }, 'God of Goats'),
 
          getFriendlyParams(10, { x: -25, y: 1, z: 108 }, { y: -1.53 }, { name: 'Siltent Bob' }),
          getFriendlyParams(2, { x: -69, y: 0, z: 117 }, { y: 0.13 }, { name: 'Talking John' }),

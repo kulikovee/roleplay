@@ -264,10 +264,13 @@ export default class Connection extends AutoBindMethods {
 			playerParams.speed = params.speed;
 			playerParams.money = params.money;
 			playerParams.level = params.level;
-			playerParams.equippedItems = params.equippedItems;
 			playerParams.unspentTalents = params.unspentTalents;
 			playerParams.experience = params.experience;
 			playerParams.acceleration.set(acceleration.x, acceleration.y, acceleration.z);
+
+			if (params.equippedItems) {
+				playerParams.equippedItems = params.equippedItems;
+			}
 
 			this.scene.gameObjectsService.updateAttachedItems(player);
 		}

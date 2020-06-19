@@ -44,7 +44,7 @@ export default class Unit extends MovingGameObject {
             this.animationState.isAttackWeapon1 = false;
 
             if (this.shouldAttack) {
-                if (this.params.equippedItems && this.params.equippedItems.leftHand) {
+                if (this.params.equippedItems.leftHand) {
                     this.animationState.isAttackWeapon1 = true;
                 } else {
                     this.animationState.isAttack = true;

@@ -107,7 +107,6 @@ global.THREE = THREE;
 global.GLTFLoader = GLTFLoader;
 
 exports.MockGUI = {
-		isServer: true,
 		setRestartButtonVisible: () => null,
 		setPause: () => null,
 		restartGame: () => null,

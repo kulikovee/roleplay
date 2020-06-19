@@ -1,5 +1,12 @@
 #!/bin/bash
 
+SCRIPTPATH="$( cd "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
+
+cd "$SCRIPTPATH/server"
+
+npm run build
+scp ./dist/server-scene.js gohtml@gohtml:~/roleplay/server/dist/
+
 ssh -tt gohtml@gohtml.ru << EOF
   echo "Updating repository ..."
   cd roleplay/
@@ -12,11 +19,13 @@ ssh -tt gohtml@gohtml.ru << EOF
 
   cd ../server/
   # npm i
-  npm run build
+  # npm run build
 
   echo "Killing server ..."
   pkill -f server.js
   pkill -f Xvfb
+
+  sleep 1
 
   Xvfb :5 -screen 0 1x1x24 &
   export DISPLAY=:5

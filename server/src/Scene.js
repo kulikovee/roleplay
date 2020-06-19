@@ -5,7 +5,7 @@ import Scene from '../../client/src/js/Scene';
 exports.initScene = (rendererParams, MockGUI) => {
    debug('Starting server scene initialization ...');
 
-   const scene = new Scene(new Renderer(null, rendererParams), MockGUI);
+   const scene = new Scene(new Renderer(null, rendererParams), MockGUI, true);
 
    scene.particles.update = () => {};
    scene.particles.createSnow = () => ({});
@@ -24,8 +24,6 @@ exports.initScene = (rendererParams, MockGUI) => {
    scene.camera.getHeight = () => 1;
    scene.camera.updateThirdPerson = () => ({});
    scene.camera.toScreenPosition = () => ({});
-
-   scene.isServer = true;
 
    return scene;
 };
