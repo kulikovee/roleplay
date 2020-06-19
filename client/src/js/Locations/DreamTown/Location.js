@@ -195,7 +195,7 @@ export default class Location extends AbstractLocation {
                   model: 'item-sword',
                   name: 'Steel Sword',
                   type: 'One Handed',
-                  boneName: 'Left_Hand',
+                  boneName: 'Right_Hand',
                   attachModelName: 'sword1',
                   effects: [{
                      damage: +25,
