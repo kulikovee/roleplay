@@ -140,6 +140,7 @@ export default class Units extends AutoBindMethods {
 						fraction,
 						name,
 						level,
+						loot: this.getLoot(level),
 						checkWay: this.scene.colliders.checkWay,
 						getNextPoint: this.scene.pathFinder.getNextPoint,
 						attack: () => gameObjectsService.attack(ai),
@@ -151,15 +152,26 @@ export default class Units extends AutoBindMethods {
 						onDamageTaken: () => this.scene.particles.loadEffect({
 							position: ai.position.clone().add(new THREE.Vector3(0, 0.75, 0))
 						}),
-						onDie: () => this.scene.intervals.setTimeout(() => {
-							if (ai.isDead()) {
-								gameObjectsService.destroyGameObject(ai);
-
-								if (onDie) {
-									onDie();
-								}
+						onDie: () => {
+							if (ai.params.loot) {
+								Object.values(ai.params.loot).forEach(loot => this.scene.gameObjectsService.createWeaponItem({
+									...loot,
+									position: ai.position.clone(),
+								}));
 							}
-						}, 10000),
+
+							ai.params.loot = [];
+
+							this.scene.intervals.setTimeout(() => {
+								if (ai.isDead()) {
+									gameObjectsService.destroyGameObject(ai);
+
+									if (onDie) {
+										onDie();
+									}
+								}
+							}, 10000)
+						},
 						findTarget: () => {
 							const nearEnemyUnits = this.getAliveUnits()
 								.filter(unit => (
@@ -182,6 +194,72 @@ export default class Units extends AutoBindMethods {
 				}
 			},
 		});
+	}
+
+	getLoot(level) {
+		let loot = [];
+
+		if (level > 10 && level < 20 && Math.random() < 0.1 + level / 20) {
+			const damage = +15 + Math.round(Math.random() * 5);
+			loot = [{
+				model: 'item-sword-1',
+				name: `Advanced Saber (+${damage} Damage)`,
+				type: 'One Handed',
+				boneName: 'Right_Hand',
+				attachModelName: 'item-sword-1',
+				effects: [{ damage }]
+			}];
+		}
+
+		if (level > 20 && level < 30 && Math.random() < 0.1 + level / 40) {
+			const damage = +25 + Math.round(Math.random() * 5);
+			loot = [{
+				model: 'item-sword-4',
+				name: `Capitan Saber (+${damage} Damage)`,
+				type: 'One Handed',
+				boneName: 'Right_Hand',
+				attachModelName: 'item-sword-4',
+				effects: [{ damage }]
+			}];
+		}
+
+		if (level > 30 && level < 40 && Math.random() < 0.1 + level / 60) {
+			const damage = +35 + Math.round(Math.random() * 5);
+			loot = [{
+				model: 'item-sword-2',
+				name: `Dark Saber (+${damage} Damage)`,
+				type: 'One Handed',
+				boneName: 'Right_Hand',
+				attachModelName: 'item-sword-2',
+				effects: [{ damage }]
+			}];
+		}
+
+		if (level > 40 && level < 60 && Math.random() < 0.1 + level / 80) {
+			const damage = +45 + Math.round(Math.random() * 2) * 5;
+			loot = [{
+				model: 'item-sword-3',
+				name: `Sea King Saber (+${damage} Damage)`,
+				type: 'One Handed',
+				boneName: 'Right_Hand',
+				attachModelName: 'item-sword-3',
+				effects: [{ damage }]
+			}];
+		}
+
+		if (level > 60 && Math.random() < 0.1 + level / 100) {
+			const damage = +55 + Math.round(Math.random() * 2) * 5;
+			loot = [{
+				model: 'item-sword-5',
+				name: `Black Unholy Saber (+${damage} Damage)`,
+				type: 'One Handed',
+				boneName: 'Right_Hand',
+				attachModelName: 'item-sword-5',
+				effects: [{ damage }]
+			}];
+		}
+
+		return loot;
 	}
 
 	createNetworkAI(
@@ -236,24 +314,33 @@ export default class Units extends AutoBindMethods {
 						}
 					},
 
-					onDie: () => this.scene.intervals.setTimeout(() => {
-						if (ai.isDead()) {
-							gameObjectsService.destroyGameObject(ai);
-
-							if (!ai.params.fromNetwork) {
-								this.createNetworkAI({
-									fraction,
-									unitNetworkId,
-									name,
-									hp,
-									hpMax,
-									damage,
-									fromNetwork: false,
-									level: level + 1 + Math.round(Math.random() * level / 4),
-								});
-							}
+					onDie: () => {
+						if (ai.params.loot) {
+							Object.values(ai.params.loot).forEach(loot => this.scene.gameObjectsService.createWeaponItem({
+								...loot,
+								position: ai.position.clone(),
+							}));
 						}
-					}, 10000),
+
+						this.scene.intervals.setTimeout(() => {
+							if (ai.isDead()) {
+								gameObjectsService.destroyGameObject(ai);
+
+								if (!ai.params.fromNetwork) {
+									this.createNetworkAI({
+										fraction,
+										unitNetworkId,
+										name,
+										hp,
+										hpMax,
+										damage,
+										fromNetwork: false,
+										level: level + 1 + Math.round(Math.random() * level / 4),
+									});
+								}
+							}
+						}, 10000);
+					},
 					findTarget: () => {
 						if (!ai.params.fromNetwork) {
 							const nearEnemyUnits = this.getAliveUnits()

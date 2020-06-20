@@ -315,6 +315,7 @@ export default class Connection extends AutoBindMethods {
 				networkAIParams.damage = params.damage;
 				networkAIParams.fireDamage = params.fireDamage;
 				networkAIParams.level = params.level;
+				networkAIParams.loot = params.loot;
 				networkAIParams.acceleration.set(acceleration.x, acceleration.y, acceleration.z);
 			}
 		}

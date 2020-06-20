@@ -278,6 +278,12 @@ export default class GameObjectsService extends AutoBindMethods {
 
 				if (bone) {
 					bone.add(itemObject);
+
+					const mixer = new THREE.AnimationMixer(itemObject);
+					const idleAnimation = loadedModel.animations.find(animation => animation.name === 'Idle');
+					const idleAction = mixer.clipAction(idleAnimation);
+					idleAction.play();
+					itemObject._mixer = mixer;
 				}
 			}
 		});
@@ -334,6 +340,41 @@ export default class GameObjectsService extends AutoBindMethods {
 		position,
 		onPickup,
 	}) {
+		const _canPickup = (pickingUnit) => {
+			const { equippedItems } = pickingUnit.params;
+
+			if (pickingUnit === this.scene.getPlayer()) {
+				if (!equippedItems.leftHand) {
+					this.scene.notify('Press and Hold \'E\' to pickup \'' + item.name + '\'', 1000);
+				} else {
+					this.scene.notify('Press \'G\' to drop your \'' + equippedItems.leftHand.name + '\' first and then you can pick up \'' + item.name + '\'', 1000);
+				}
+			}
+
+			if (equippedItems.leftHand) {
+				return false;
+			}
+
+			if (pickingUnit instanceof Player) {
+				return pickingUnit.params.input && pickingUnit.params.input.isAction;
+			}
+		};
+
+		const _onPickup = (pickingUnit) => {
+			const { equippedItems } = pickingUnit.params;
+
+			equippedItems.leftHand = item;
+			this.scene.gameObjectsService.attachItem(pickingUnit, item);
+
+			if (pickingUnit === this.scene.getPlayer()) {
+				this.scene.notify('Press \'G\' if you need to drop \'' + item.name + '\'');
+			}
+
+			if (onPickup) {
+				onPickup(pickingUnit);
+			}
+		};
+
 		const item = this.scene.gameObjectsService.createItem({
 			model,
 			name,
@@ -342,32 +383,8 @@ export default class GameObjectsService extends AutoBindMethods {
 			attachModelName,
 			effects,
 			position,
-
-			canPickup: (pickingUnit) => {
-				const { equippedItems } = pickingUnit.params;
-
-				if (pickingUnit === this.scene.getPlayer() && !equippedItems.leftHand) {
-					this.scene.notify('Press and Hold \'E\' to pickup \'' + item.name + '\'', 1000);
-				}
-
-				if (pickingUnit instanceof Player) {
-					return pickingUnit.params.input && pickingUnit.params.input.isAction;
-				}
-			},
-			onPickup: (pickingUnit) => {
-				const { equippedItems } = pickingUnit.params;
-
-				equippedItems.leftHand = item;
-				this.scene.gameObjectsService.attachItem(pickingUnit, item);
-
-				if (pickingUnit === this.scene.getPlayer()) {
-					this.scene.notify('Press \'G\' if you need to drop \'' + item.name + '\'');
-				}
-
-				if (onPickup) {
-					onPickup(pickingUnit);
-				}
-			},
+			canPickup: _canPickup,
+			onPickup: _onPickup,
 		});
 	}
 

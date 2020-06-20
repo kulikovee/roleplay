@@ -144,6 +144,14 @@ export default class AnimatedGameObject extends GameObject {
             this.mixer.update(deltaTime / 1000);
         }
 
+        if (this._attachedModels) {
+            Object.values(this._attachedModels).forEach((attachedModel) => {
+                if (attachedModel && attachedModel._mixer) {
+                    attachedModel._mixer.update(deltaTime / 1000);
+                }
+            });
+        }
+
         if (this.params.complexAnimations) {
             this.updateComplexAnimations();
         } else {

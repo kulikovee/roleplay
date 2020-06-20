@@ -26,6 +26,7 @@ exports.unitToNetwork = (unit, connectionId, locationName) => {
          unspentTalents,
          money,
          equippedItems,
+         loot,
       } = unit.params;
 
       const {
@@ -74,6 +75,7 @@ exports.unitToNetwork = (unit, connectionId, locationName) => {
             unspentTalents,
             equippedItems,
             acceleration: vectorToObject(acceleration),
+            loot,
             input: {
                vertical, horizontal,
                attack1: attack1 || isPostponedAttack,

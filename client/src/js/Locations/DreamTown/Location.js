@@ -194,7 +194,7 @@ export default class Location extends AbstractLocation {
                   name: 'Starter\'s Sword (+10 Damage)',
                   type: 'One Handed',
                   boneName: 'Right_Hand',
-                  attachModelName: 'sword1',
+                  attachModelName: 'item-sword',
                   effects: [{ damage: +10 }],
                   position: new THREE.Vector3(-26.5, 0, 102),
                   onPickup: () => createSwordItem(),
