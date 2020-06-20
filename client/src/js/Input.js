@@ -18,6 +18,7 @@ const KEYS = {
     R: 82,
     F: 70,
     V: 86,
+    G: 71,
     1: 49,
     2: 50,
     ARROW_LEFT: 37,
@@ -117,6 +118,8 @@ export default class Input extends AutoBindMethods {
                 case KEYS.D: case KEYS.ARROW_RIGHT: this.horizontal = 1; break;
                 case KEYS.X: this.look.back = true; break;
                 case KEYS.F: this.look.cinematic = true; break;
+                case KEYS.E: this.isAction = true; break;
+                case KEYS.G: this.isDrop = true; break;
                 case KEYS.SPACE: this.jump = 1; break;
             }
         });
@@ -144,6 +147,12 @@ export default class Input extends AutoBindMethods {
                     break;
                 case KEYS.F:
                     this.look.cinematic = false;
+                    break;
+                case KEYS.E:
+                    this.isAction = false;
+                    break;
+                case KEYS.G:
+                    this.isDrop = false;
                     break;
                 case KEYS.SPACE:
                     this.jump = 0;

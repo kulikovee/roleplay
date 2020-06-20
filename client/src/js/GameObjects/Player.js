@@ -34,7 +34,7 @@ export default class Player extends FiringUnit {
             return;
         }
 
-        const { input, object, acceleration, fromNetwork } = this.params;
+        const { input, object, acceleration, fromNetwork, equippedItems } = this.params;
 
         acceleration.add(this.getMovingAcceleration(time, deltaTime));
 
@@ -77,6 +77,10 @@ export default class Player extends FiringUnit {
 
                 object.rotation.set(0, rotationY, 0);
             }
+        }
+
+        if (input.isDrop && equippedItems.leftHand && this.params.dropItem) {
+            this.params.dropItem(this.params.equippedItems.leftHand);
         }
     }
 

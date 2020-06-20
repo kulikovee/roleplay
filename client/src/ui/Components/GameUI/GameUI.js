@@ -47,6 +47,7 @@ class App extends Component {
 			showRestart: false,
 			notification: '',
 			isNotificationVisible: false,
+			notificationTimeout: 0,
 			isLoading: false,
 
 			// Renderer
@@ -197,10 +198,17 @@ class App extends Component {
 		this.scene.camera.update();
 	}
 
-	setNotification(notification) {
-		this.setState({ notification, isNotificationVisible: true });
+	setNotification(notification, timeout = 8000) {
+		if (this.state.notificationTimeout) {
+			clearInterval(this.state.notificationTimeout);
+		}
 
-		setTimeout(() => this.setState({ isNotificationVisible: false }), 8000);
+		const notificationTimeout = setTimeout(
+			() => this.setState({ isNotificationVisible: false }),
+			timeout,
+		);
+
+		this.setState({ notification, isNotificationVisible: true, notificationTimeout });
 	}
 
 	buy(type) {

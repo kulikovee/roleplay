@@ -143,9 +143,10 @@ input[type=button] {
   }
 
   &.top-center {
-    left: 50%;
     top: 150px;
-    transform: translate(-50%);
+    width: 90%;
+    text-align: center;
+    padding: 0 5%;
   }
 }
 

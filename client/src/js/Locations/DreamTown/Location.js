@@ -189,37 +189,15 @@ export default class Location extends AbstractLocation {
 
          const createSwordItem = () => (
             this.scene.intervals.setTimeout(() => {
-               const itemHealPosition = new THREE.Vector3(-26.5, 0, 102);
-
-               const item = this.scene.gameObjectsService.createItem({
+               this.scene.gameObjectsService.createWeaponItem({
                   model: 'item-sword',
-                  name: 'Steel Sword',
+                  name: 'Starter\'s Sword (+10 Damage)',
                   type: 'One Handed',
                   boneName: 'Right_Hand',
                   attachModelName: 'sword1',
-                  effects: [{
-                     damage: +25,
-                  }],
-                  position: itemHealPosition,
-                  canPickup: (unit) => (
-                     !unit.params.equippedItems.leftHand
-                     || unit.params.equippedItems.leftHand.name !== 'Steel Sword'
-                  ),
-                  onPickup: (unit) => {
-                     const previousWeapon = (
-                        unit.params.equippedItems.leftHand
-                     );
-
-                     if (previousWeapon) {
-                        // previousWeapon.object.parent.remove(previousWeapon.object);
-                     }
-
-                     unit.params.equippedItems.leftHand = item;
-
-                     this.scene.gameObjectsService.attachItem(unit, item);
-
-                     createSwordItem();
-                  },
+                  effects: [{ damage: +10 }],
+                  position: new THREE.Vector3(-26.5, 0, 102),
+                  onPickup: () => createSwordItem(),
                });
             }, 10000)
          );

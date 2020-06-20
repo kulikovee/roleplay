@@ -133,7 +133,7 @@ export default class Scene extends AutoBindMethods {
         this.scene.remove(object);
     }
 
-    notify(text) {
-        this.ui.notify(text);
+    notify(text, timeout) {
+        this.ui.notify(text, timeout);
     }
 }

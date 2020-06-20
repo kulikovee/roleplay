@@ -208,8 +208,8 @@ export default class GameObjectsService extends AutoBindMethods {
 							const nearUnits = this.scene.units
 								.getAliveUnits()
 								.filter((unit) => (
-									(!canPickup || canPickup(unit))
-									&& positionVector.distanceTo(unit.position) < 2
+									positionVector.distanceTo(unit.position) < 2
+									&& (!canPickup || canPickup(unit))
 								))
 								.sort((unitA, unitB) => getPriority(unitB) - getPriority(unitA));
 
@@ -241,11 +241,13 @@ export default class GameObjectsService extends AutoBindMethods {
 
 	updateAttachedItems(unit) {
 		if (!this.scene.isServer) {
-			Object.values(unit.params.equippedItems).forEach(equippedItem => {
-				if (!unit._attachedModels[equippedItem.name]) {
-					this.attachItem(unit, equippedItem);
-				}
-			});
+			Object.values(unit.params.equippedItems)
+				.filter(i => i)
+				.forEach(equippedItem => {
+					if (!unit._attachedModels[equippedItem.name]) {
+						this.attachItem(unit, equippedItem);
+					}
+				});
 		}
 	}
 
@@ -278,6 +280,94 @@ export default class GameObjectsService extends AutoBindMethods {
 					bone.add(itemObject);
 				}
 			}
+		});
+	}
+
+	dropItem(unit, item) {
+		const attached = unit._attachedModels;
+		const equipped = unit.params.equippedItems;
+		const leftHand = equipped.leftHand;
+
+		if (leftHand === item) {
+			const {
+				model,
+				name,
+				type,
+				boneName,
+				attachModelName,
+				effects,
+			} = item;
+
+			equipped.leftHand = null;
+
+			this.createWeaponItem({
+				model,
+				name,
+				type,
+				boneName,
+				attachModelName,
+				effects,
+				position: unit.position.clone()
+			});
+
+			const attachedModel = attached[item.name];
+
+			if (attachedModel) {
+				const parent = attachedModel && attachedModel.parent;
+
+				if (parent && parent.remove) {
+					parent.remove(attachedModel);
+				} else {
+					console.error('Cannot find object parent of attached item to remove the object', attachedModel);
+				}
+			}
+		}
+	}
+
+	createWeaponItem({
+		model,
+		name,
+		type,
+		boneName,
+		attachModelName,
+		effects,
+		position,
+		onPickup,
+	}) {
+		const item = this.scene.gameObjectsService.createItem({
+			model,
+			name,
+			type,
+			boneName,
+			attachModelName,
+			effects,
+			position,
+
+			canPickup: (pickingUnit) => {
+				const { equippedItems } = pickingUnit.params;
+
+				if (pickingUnit === this.scene.getPlayer() && !equippedItems.leftHand) {
+					this.scene.notify('Press and Hold \'E\' to pickup \'' + item.name + '\'', 1000);
+				}
+
+				if (pickingUnit instanceof Player) {
+					return pickingUnit.params.input && pickingUnit.params.input.isAction;
+				}
+			},
+			onPickup: (pickingUnit) => {
+				const { equippedItems } = pickingUnit.params;
+
+				equippedItems.leftHand = item;
+				this.scene.gameObjectsService.attachItem(pickingUnit, item);
+
+				if (pickingUnit === this.scene.getPlayer()) {
+					this.scene.notify('Press \'G\' if you need to drop \'' + item.name + '\'');
+				}
+
+				if (onPickup) {
+					onPickup(pickingUnit);
+				}
+			},
 		});
 	}
 

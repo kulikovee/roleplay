@@ -256,6 +256,8 @@ export default class Connection extends AutoBindMethods {
 			playerParams.input.horizontal = input.horizontal;
 			playerParams.input.attack1 = input.attack1;
 			playerParams.input.attack2 = input.attack2;
+			playerParams.input.isDrop = input.isDrop;
+			playerParams.input.isAction = input.isAction;
 			playerParams.hp = params.hp;
 			playerParams.hpMax = params.hpMax;
 			playerParams.fraction = params.fraction;
@@ -268,8 +270,8 @@ export default class Connection extends AutoBindMethods {
 			playerParams.experience = params.experience;
 			playerParams.acceleration.set(acceleration.x, acceleration.y, acceleration.z);
 
-			if (params.equippedItems) {
-				playerParams.equippedItems = params.equippedItems;
+			if (params.equippedItems && params.equippedItems.leftHand) {
+				playerParams.equippedItems.leftHand = params.equippedItems.leftHand;
 			}
 
 			this.scene.gameObjectsService.updateAttachedItems(player);

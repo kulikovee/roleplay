@@ -1,15 +1,11 @@
 #!/bin/bash
 
-SCRIPTPATH="$( cd "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
-
-cd "$SCRIPTPATH/server"
-
 npm run build
-scp ./dist/server-scene.js gohtml@gohtml:~/roleplay/server/dist/
+scp ./dist/server-scene.js gohtml@gohtml.ru:~/roleplay/server/dist/
 
 ssh -tt gohtml@gohtml.ru << EOF
   echo "Updating repository ..."
-  cd roleplay/
+  cd ./roleplay/
   git reset HEAD~1 --hard
   git pull origin master
 
@@ -19,7 +15,6 @@ ssh -tt gohtml@gohtml.ru << EOF
 
   cd ../server/
   # npm i
-  # npm run build
 
   echo "Killing server ..."
   pkill -f server.js

@@ -71,6 +71,7 @@ export default class Units extends AutoBindMethods {
 					attack: () => gameObjectsService.attack(player),
 					fire: () => gameObjectsService.fire(player),
 					destroy: () => gameObjectsService.destroyGameObject(player),
+					dropItem: item => gameObjectsService.dropItem(player, item),
 				}));
 
 				this.player = player;
@@ -298,6 +299,7 @@ export default class Units extends AutoBindMethods {
 					fromNetwork: true,
 					complexAnimations: true,
 					checkWay: this.scene.colliders.checkWay,
+					dropItem: item => gameObjectsService.dropItem(player, item),
 					input: {
 						vertical: 0,
 						horizontal: 0,

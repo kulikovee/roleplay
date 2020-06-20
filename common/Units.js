@@ -33,6 +33,8 @@ exports.unitToNetwork = (unit, connectionId, locationName) => {
          horizontal,
          attack1,
          attack2,
+         isDrop,
+         isAction,
       } = unit.params.input || {};
 
       const vectorToObject = (vector, eps = 1000) => ({
@@ -76,6 +78,8 @@ exports.unitToNetwork = (unit, connectionId, locationName) => {
                vertical, horizontal,
                attack1: attack1 || isPostponedAttack,
                attack2: attack2 || isPostponedFire,
+               isDrop,
+               isAction,
             },
          },
       });
