@@ -1,1 +1,27 @@
-* text eol=lf
+# Auto-detect text files and normalize their line endings to LF on commit.
+# `text=auto` leaves binary files (detected by content) untouched.
+* text=auto eol=lf
+
+# Belt-and-suspenders: force binary handling for asset types so Git never
+# applies line-ending/encoding filters to them (this is what corrupted the
+# .glb/.png/.jpg/.ogg blobs under the previous `* text eol=lf` rule).
+*.glb   binary
+*.gltf  binary
+*.bin   binary
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.bmp   binary
+*.webp  binary
+*.ico   binary
+*.mp3   binary
+*.ogg   binary
+*.wav   binary
+*.ttf   binary
+*.otf   binary
+*.woff  binary
+*.woff2 binary
+*.blend binary
+*.blend1 binary
+*.fbx   binary
