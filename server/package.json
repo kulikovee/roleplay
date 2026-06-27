@@ -1,36 +1,18 @@
 {
+  "name": "roleplay-server",
+  "private": true,
   "scripts": {
-    "build": "webpack --mode production",
-    "start": "webpack --mode development && node ./server.js"
+    "build": "node ./build.js",
+    "start": "npm run build && node ./server.js"
   },
   "dependencies": {
-    "canvas": "^2.6.1",
-    "cross-blob": "^1.2.3",
-    "fs": "0.0.1-security",
-    "gl": "^4.5.2",
+    "canvas": "^3.2.3",
+    "gl": "^8.1.6",
     "mock-browser": "^0.92.14",
-    "three": "^0.111.0",
-    "three-gltf-loader": "^1.110.0",
-    "ws": "^7.2.0"
+    "three": "^0.185.0",
+    "ws": "^8.21.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.0.0",
-    "@babel/preset-env": "^7.7.4",
-    "@babel/preset-react": "^7.7.4",
-    "babel-loader": "^8.0.0",
-    "clean-webpack-plugin": "^3.0.0",
-    "copy-webpack-plugin": "^5.0.5",
-    "css-loader": "^3.2.1",
-    "html-webpack-plugin": "^3.2.0",
-    "node-loader": "^0.6.0",
-    "three": "^0.111.0",
-    "webpack": "^4.17.1",
-    "webpack-cli": "^3.1.0"
-  },
-  "babel": {
-    "presets": [
-      "@babel/env",
-      "@babel/react"
-    ]
+    "esbuild": "^0.28.1"
   }
 }

@@ -1,4 +1,4 @@
-exports.unitToNetwork = (unit, connectionId, locationName) => {
+export const unitToNetwork = (unit, connectionId, locationName) => {
    if (unit) {
       const unitRotation = unit.object.rotation.toVector3();
 

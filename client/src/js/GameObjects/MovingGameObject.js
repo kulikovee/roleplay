@@ -7,7 +7,7 @@ export default class MovingGameObject extends AnimatedGameObject {
             gravity: 1,
             slideThrottling: new THREE.Vector3(1, 1, 1),
             throttling: new THREE.Vector3(0.5, 0.95, 0.5),
-            acceleration: new THREE.Vector3(),
+            acceleration: new THREE.Vector3(0, 0, 0),
             checkWay: () => true,
             ...params
         });

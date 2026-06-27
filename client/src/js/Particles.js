@@ -143,7 +143,18 @@ export default class Particles extends AutoBindMethods {
 		),
 	} = {}) {
 		const particalesCount = count;
-		const particles = new THREE.Geometry;
+		const particles = new THREE.BufferGeometry();
+		const vertices = [];
+		const positions = new Float32Array(particalesCount * 3);
+		particles.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+		const syncPositions = () => {
+			for (let i = 0; i < vertices.length; i++) {
+				positions[i * 3] = vertices[i].x;
+				positions[i * 3 + 1] = vertices[i].y;
+				positions[i * 3 + 2] = vertices[i].z;
+			}
+			particles.attributes.position.needsUpdate = true;
+		};
 		const particlesInitialPositions = {};
 		const particlesCreatedAt = {};
 		const particlesLocalPosition = {};
@@ -162,8 +173,10 @@ export default class Particles extends AutoBindMethods {
 
 			velocities[i] = getDefaultParticleVelocity(i);
 			particlesLocalPosition[i] = { x: 0, y: 0, z: 0 };
-			particles.vertices.push(particle);
+			vertices.push(particle);
 		}
+
+		syncPositions();
 
 		const particleObject = new THREE.Points(particles, material);
 		particleObject.position.copy(parent.position);
@@ -177,7 +190,7 @@ export default class Particles extends AutoBindMethods {
 			update: function(time) {
 				particleObject.position.copy(parent.position);
 
-				particles.vertices.forEach((particle, i) => {
+				vertices.forEach((particle, i) => {
 					if (!particlesCreatedAt[i]) {
 						particlesCreatedAt[i] = getCreatedAt(time, -500);
 					} else if (time - particlesCreatedAt[i] > lifeTimeMs) {
@@ -210,7 +223,7 @@ export default class Particles extends AutoBindMethods {
 					particle.z = particlesLocalPosition[i].z + currentDelta.z;
 				});
 
-				particles.verticesNeedUpdate = true;
+				syncPositions();
 			},
 		};
 
@@ -246,16 +259,29 @@ export default class Particles extends AutoBindMethods {
 		getParticleVelocity = () => new THREE.Vector3(-0.01, -0.01, 0),
 		getParticlePosition = (i, position = this.getRandomPosition(area)) => position,
 	} = {}) {
-		const particles = new THREE.Geometry;
-		const material = new THREE.PointCloudMaterial({ color, size, blending, depthTest, transparent });
+		const particles = new THREE.BufferGeometry();
+		const vertices = [];
+		const positions = new Float32Array(particleCount * 3);
+		particles.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+		const syncPositions = () => {
+			for (let i = 0; i < vertices.length; i++) {
+				positions[i * 3] = vertices[i].x;
+				positions[i * 3 + 1] = vertices[i].y;
+				positions[i * 3 + 2] = vertices[i].z;
+			}
+			particles.attributes.position.needsUpdate = true;
+		};
+
+		const material = new THREE.PointsMaterial({ color, size, blending, depthTest, transparent });
 
 		for (var i = 0; i < particleCount; i++) {
 			const particle = getParticlePosition(i);
-			particles.velocity = getParticleVelocity(i, particle);
-			particles.vertices.push(particle);
+			vertices.push(particle);
 		}
 
-		const particleSystem = new THREE.PointCloud(particles, material);
+		syncPositions();
+
+		const particleSystem = new THREE.Points(particles, material);
 		particleSystem.position.copy(position);
 
 		this.particles.push({
@@ -264,7 +290,7 @@ export default class Particles extends AutoBindMethods {
 				let index = particleCount;
 
 				while (index--) {
-					const particle = particles.vertices[index];
+					const particle = vertices[index];
 
 					particle.velocity = getParticleVelocity(index, particle);
 
@@ -279,7 +305,7 @@ export default class Particles extends AutoBindMethods {
 					particle.z = particlePosition.z;
 				}
 
-				particles.verticesNeedUpdate = true;
+				syncPositions();
 			},
 		});
 

@@ -1,8 +1,7 @@
-import * as THREE from 'three';
 import Renderer from '../../client/src/js/Renderer';
 import Scene from '../../client/src/js/Scene';
 
-exports.initScene = (rendererParams, MockGUI) => {
+export const initScene = (rendererParams, MockGUI) => {
    debug('Starting server scene initialization ...');
 
    const scene = new Scene(new Renderer(null, rendererParams), MockGUI, true);

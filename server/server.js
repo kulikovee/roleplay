@@ -1,4 +1,4 @@
-const { MockGUI }  = require('./src/MockBrowserGlobals');
+const { MockGUI, threeReady }  = require('./src/MockBrowserGlobals');
 const { SocketServer } = require('./src/SocketServer');
 const { unitToNetwork } = require('../common/Units');
 const { initScene } = require('./dist/server-scene');
@@ -75,4 +75,5 @@ function Server() {
 	};
 }
 
-new Server();
+// Wait for three.js / GLTFLoader globals to be ready before booting the scene.
+threeReady.then(() => new Server());

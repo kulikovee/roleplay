@@ -4,7 +4,6 @@ global.console.log = () => undefined;
 
 const fs = require('fs');
 const path = require('path');
-const Blob = require('cross-blob');
 const Mocks = require('mock-browser');
 
 const { MockBrowser } = Mocks.mocks;
@@ -12,7 +11,7 @@ var mockBrowser = new MockBrowser();
 
 global.document = MockBrowser.createDocument();
 global.window = MockBrowser.createWindow();
-global.Blob = Blob;
+// Blob is a Node.js global since v18, no polyfill needed.
 
 
 let animationFrameFunctions = [];
@@ -100,11 +99,15 @@ global.XMLHttpRequest = function() {
 	};
 };
 
-const THREE = require('three');
-const GLTFLoader = require('three-gltf-loader');
-
-global.THREE = THREE;
-global.GLTFLoader = GLTFLoader;
+// Load three.js and its GLTFLoader addon from the same ES module instance, so
+// that `instanceof THREE.*` checks against the global THREE keep working for
+// models loaded through GLTFLoader (the addon is ESM-only). `threeReady`
+// resolves once the globals are set; the scene must not be initialised before.
+exports.threeReady = (async () => {
+	global.THREE = await import('three');
+	const { GLTFLoader } = await import('three/addons/loaders/GLTFLoader.js');
+	global.GLTFLoader = GLTFLoader;
+})();
 
 exports.MockGUI = {
 		setRestartButtonVisible: () => null,

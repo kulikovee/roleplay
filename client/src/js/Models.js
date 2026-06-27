@@ -38,7 +38,7 @@ export default class Models extends AutoBindMethods {
         }
 
         const geometry = new THREE.Mesh(
-            params.geometry || new THREE.CubeGeometry(1, 1, 1),
+            params.geometry || new THREE.BoxGeometry(1, 1, 1),
             new THREE.MeshLambertMaterial(materialParams)
         );
 

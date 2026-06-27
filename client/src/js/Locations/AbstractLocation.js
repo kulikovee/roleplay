@@ -47,19 +47,16 @@ export default class AbstractLocation extends AutoBindMethods {
     }
 
 
-    createSkybox() {
-        const materialArray = ['xpos', 'xneg', 'ypos', 'yneg', 'zpos', 'zneg'].map(function (direction) {
-            const url = `./assets/textures/sky-nebula/nebula-${direction}.png`;
-            return new THREE.MeshBasicMaterial({
-                map: new THREE.TextureLoader().load(url),
-                side: THREE.BackSide,
-                fog: false
-            });
-        });
+    createSkybox(skyboxName) {
+        const materialArray = [
+            'skyboxRT',
+            'skyboxLF',
+            'skyboxUP',
+            'skyboxDN',
+            'skyboxFT',
+            'skyboxBK',
+        ].map(filename => `./assets/textures/${skyboxName}/${filename}.jpg`);
 
-        const skyGeometry = new THREE.CubeGeometry(75000, 75000, 75000);
-        const skyMaterial = new THREE.MeshFaceMaterial(materialArray);
-
-        return new THREE.Mesh(skyGeometry, skyMaterial);
+        return new THREE.CubeTextureLoader().load(materialArray);
     }
 }

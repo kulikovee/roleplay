@@ -134,7 +134,7 @@ export default class Player extends FiringUnit {
             ? (-horizontal * speed * 0.6)
             : (-horizontal * speed );
 
-        const isJump = (
+        const isJump = Boolean(
             time - this.lastJumpTimestamp > this.params.jumpTimeout * 1000
             && jump
             && this.isGrounded

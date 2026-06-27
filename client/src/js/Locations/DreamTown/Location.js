@@ -2,7 +2,6 @@ import AbstractLocation from '../AbstractLocation';
 import { Player } from '../../GameObjects';
 import { createEnvironment } from './Environment';
 import Areas from './Areas';
-import { Vector3 } from "three";
 
 export default class Location extends AbstractLocation {
    /**
@@ -47,8 +46,8 @@ export default class Location extends AbstractLocation {
       const raycastFar = 500;
       this.raycaster = {
          raycaster: new THREE.Raycaster(),
-         origin: new Vector3(),
-         target: new Vector3(),
+         origin: new THREE.Vector3(),
+         target: new THREE.Vector3(),
          direction: new THREE.Vector3(),
          raycastFar,
          intersectTo: -raycastFar / 2,
@@ -58,14 +57,15 @@ export default class Location extends AbstractLocation {
 
       this.ambientLight = this.createAmbientLight();
       this.shadowLight = this.createShadowLight();
+      this.scene.scene.background = this.createSkybox("sky-blue");
 
       this.scene.add(this.environment);
       this.scene.add(this.ambientLight);
       this.scene.add(this.shadowLight);
 
-      const color = 0xffffff;
-      const near = 10;
-      const far = 250;
+      const color = 0xd7e6f3;
+      const near = 100;
+      const far = 300;
       this.scene.scene.fog = new THREE.Fog(color, near, far);
 
       this.scene.intervals.setInterval(() => {
@@ -276,7 +276,6 @@ export default class Location extends AbstractLocation {
          }
 
          const environmentY = this.getEnvironmentY(position);
-
 
          return environmentY === this.raycaster.intersectTo || y < environmentY;
       });
