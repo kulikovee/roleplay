@@ -1,0 +1,21 @@
+version: 2
+updates:
+  # Client app (Vite / React / three.js) — public npm registry only.
+  - package-ecosystem: "npm"
+    directory: "/client"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+
+  # Headless server (esbuild / ws / three.js) — public npm registry only.
+  - package-ecosystem: "npm"
+    directory: "/server"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+
+  # Keep the GitHub Actions in the deploy workflow up to date.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
