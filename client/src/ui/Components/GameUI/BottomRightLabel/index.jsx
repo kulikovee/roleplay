@@ -1,22 +1,9 @@
-import React, { Component } from 'react';
+import React from 'react';
 
-class App extends Component {
-    render() {
-        const {
-            level,
-            experience,
-            levelExperience,
-            unspentTalents,
-        } = this.props;
-
-        return (
-            <div className="label--in-game bottom-right">
-                Exp: {Math.floor(experience)} / {Math.floor(levelExperience)}
-                &nbsp;| Talents: {unspentTalents}
-                &nbsp;| Level: {level}
-            </div>
-        );
-    }
-}
-
-export default App;
+export default ({ level, experience, levelExperience, unspentTalents }) => (
+    <div className="label--in-game bottom-right">
+        Exp: {Math.floor(experience)} / {Math.floor(levelExperience)}
+        &nbsp;| Talents: {unspentTalents}
+        &nbsp;| Level: {level}
+    </div>
+);

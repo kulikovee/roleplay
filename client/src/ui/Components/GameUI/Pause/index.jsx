@@ -1,122 +1,118 @@
-import React, { Component } from 'react';
+import React from 'react';
 import Button from '../../Common/Button';
 
-class App extends Component {
-	render() {
-		const {
-			isThirdPerson,
-			unspentTalents,
-			money,
-			showRestart,
-			switchCamera,
-			restartServer,
-			reviveHero,
-			setPause,
-			buy,
-			speed,
-			moveToSpawn,
-		} = this.props;
+export default ({
+	isThirdPerson,
+	unspentTalents,
+	money,
+	showRestart,
+	switchCamera,
+	restartServer,
+	reviveHero,
+	setPause,
+	buy,
+	speed,
+	moveToSpawn,
+}) => (
+	<div className="overlay theme">
+		<div className="menu">
+			<div className="row">
+				<label>Settings</label>
+			</div>
 
-		return (
-			<div className="overlay theme">
-				<div className="menu">
-					<div className="row">
-						<label>Settings</label>
-					</div>
+			<hr />
+			<div className="row">
+				{showRestart
+					? (
+						<div>
+							<Button onClick={() => reviveHero()}>Revive hero</Button>
+						</div>
+					)
+					: null
+				}
+			</div>
+			<div className="row">
+				<div>
+					<Button className="hide-menu" onClick={() => setPause(false)}>
+						Close menu & Play
+					</Button>
+				</div>
+			</div>
 
-					<hr />
-					<div className="row">
-						{showRestart
-							? (
-								<div>
-									<Button onClick={() => reviveHero()}>Revive hero</Button>
-								</div>
-							)
-							: null
+			<div className="row">
+				<div>
+					<Button onClick={() => switchCamera()}>
+						{isThirdPerson
+							? 'Switch to Third Person Camera'
+							: 'Switch to Isometric Camera'
 						}
-					</div>
-					<div className="row">
-						<div>
-							<Button className="hide-menu" onClick={() => setPause(false)}>
-								Close menu & Play
-							</Button>
-						</div>
-					</div>
-
-					<div className="row">
-						<div>
-							<Button onClick={() => switchCamera()}>
-								{isThirdPerson
-									? 'Switch to Third Person Camera'
-									: 'Switch to Isometric Camera'
-								}
-							</Button>
-						</div>
-					</div>
-					{
-						<div className="row">
-							<div>
-								<Button onClick={() => restartServer()}>
-									Restart server
-								</Button>
-							</div>
-						</div>
-					}
-					<hr />
-					<div className="row title">
-						<label>Talents ({unspentTalents} unspent talents left):</label>
-					</div>
-					<div className="row">
-						<div>
-							<Button onClick={() => buy('talent-hp')}>
-								+10 MAX HP
-							</Button>
-						</div>
-					</div>
-					{speed < 1 && <div className="row">
-						<div>
-							<Button onClick={() => buy('talent-speed')}>
-								Movement Speed +5%
-							</Button>
-						</div>
-					</div>}
-					<div className="row">
-						<div>
-							<Button onClick={() => buy('talent-damage')}>
-								Melee Damage +5
-							</Button>
-						</div>
-					</div>
-					<div className="row">
-						<div>
-							<Button onClick={() => buy('talent-fire-damage')}>
-								Ranged Damage +3
-							</Button>
-						</div>
-					</div>
-
-					<hr />
-					<div className="row title">
-						<label>Shop (${money} left):</label>
-					</div>
-					<div className="row">
-						<div>
-							<Button onClick={() => buy('hp')}>
-								Buy: Heal to full HP ($100)
-							</Button>
-						</div>
-					</div>
-
-					<hr />
-					<div className="row">
-						<div>
-							<Button onClick={() => moveToSpawn()}>
-								I'm stuck!
-							</Button>
-						</div>
+					</Button>
+				</div>
+			</div>
+			{
+				<div className="row">
+					<div>
+						<Button onClick={() => restartServer()}>
+							Restart server
+						</Button>
 					</div>
 				</div>
-				{/*<div>
+			}
+			<hr />
+			<div className="row title">
+				<label>Talents ({unspentTalents} unspent talents left):</label>
+			</div>
+			<div className="row">
+				<div>
+					<Button onClick={() => buy('talent-hp')}>
+						+10 MAX HP
+					</Button>
+				</div>
+			</div>
+			{speed < 1 && <div className="row">
+				<div>
+					<Button onClick={() => buy('talent-speed')}>
+						Movement Speed +5%
+					</Button>
+				</div>
+			</div>}
+			<div className="row">
+				<div>
+					<Button onClick={() => buy('talent-damage')}>
+						Melee Damage +5
+					</Button>
+				</div>
+			</div>
+			<div className="row">
+				<div>
+					<Button onClick={() => buy('talent-fire-damage')}>
+						Ranged Damage +3
+					</Button>
+				</div>
+			</div>
+
+			<hr />
+			<div className="row title">
+				<label>Shop (${money} left):</label>
+			</div>
+			<div className="row">
+				<div>
+					<Button onClick={() => buy('hp')}>
+						Buy: Heal to full HP ($100)
+					</Button>
+				</div>
+			</div>
+
+			<hr />
+			<div className="row">
+				<div>
+					<Button onClick={() => moveToSpawn()}>
+						I'm stuck!
+					</Button>
+				</div>
+			</div>
+		</div>
+		{/*<div>
                     <div className="h2">
                         <span className="h1">Click here to fullscreen</span>
                         <br />
@@ -124,9 +120,5 @@ class App extends Component {
                         attack, Right to fire)
                     </div>
                 </div>*/}
-			</div>
-		);
-	}
-}
-
-export default App;
+	</div>
+);

@@ -150,11 +150,11 @@ class App extends Component {
 		}
 
 		if (this.updateCursor) {
-			this.updateCursor();
+			this.updateCursor(this.scene.input.cursor.x, this.scene.input.cursor.y);
 		}
 
 		if (this.updateHpBars) {
-			this.updateHpBars();
+			this.updateHpBars(this.scene);
 		}
 	}
 
@@ -362,13 +362,10 @@ class App extends Component {
 							fireDamage={fireDamage}
 						/>}
 						{!isThirdPerson
-							? <Cursor scene={this.scene} setUpdate={callback => this.updateCursor = callback} />
+							? <Cursor setUpdate={callback => this.updateCursor = callback} />
 							: null
 						}
 						{this.scene.camera && <HpBars
-							scene={this.scene}
-							camera={this.scene.camera.camera}
-							toScreenPosition={this.scene.camera.toScreenPosition}
 							setUpdate={callback => this.updateHpBars = callback}
 							setClearHpBars={callback => this.clearHpBars = callback}
 						/>}

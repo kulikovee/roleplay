@@ -1,14 +1,7 @@
-import React, { Component } from 'react';
+import React from 'react';
 
-class App extends Component {
-    render() {
-        const { action, isVisible } = this.props;
-        return (
-            <div className={`notification label--in-game h2 monospace top-center ${isVisible ? 'visible' : 'hidden'}`}>
-                {action}
-            </div>
-        );
-    }
-}
-
-export default App;
+export default ({ action, isVisible }) => (
+    <div className={`notification label--in-game h2 monospace top-center ${isVisible ? 'visible' : 'hidden'}`}>
+        {action}
+    </div>
+);
