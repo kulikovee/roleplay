@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
 import TopRight from './TopRightLabel';
 import BottomRight from './BottomRightLabel';
 import BottomLeft from './BottomLeftLabel';
@@ -17,202 +17,127 @@ import {
 import Renderer from '../../../js/Renderer';
 import Scene from '../../../js/Scene';
 
-class App extends Component {
-	constructor(props) {
-		super(props);
+export default ({ userName, password }) => {
+	// Imperative handles that must not trigger re-renders.
+	const containerRef = useRef(null);
+	const sceneRef = useRef(null);
+	const updateCursorRef = useRef(null);
+	const updateHpBarsRef = useRef(null);
+	const clearHpBarsRef = useRef(() => {});
+	const notificationTimeoutRef = useRef(0);
 
-		this.initScene = this.initScene.bind(this);
-		this.getAPI = this.getAPI.bind(this);
-		this.update = this.update.bind(this);
-		this.setPause = this.setPause.bind(this);
-		this.switchCamera = this.switchCamera.bind(this);
-		this.buy = this.buy.bind(this);
-		this.setRestartButtonVisible = this.setRestartButtonVisible.bind(this);
-		this.reviveHero = this.reviveHero.bind(this);
-		this.restartServer = this.restartServer.bind(this);
-		this.updatePlayerParams = this.updatePlayerParams.bind(this);
-		this.setFps = this.setFps.bind(this);
-		this.setPing = this.setPing.bind(this);
-		this.setNotification = this.setNotification.bind(this);
-		this.setConnectionRole = this.setConnectionRole.bind(this);
-		this.moveToSpawn = this.moveToSpawn.bind(this);
-		this.setLoading = this.setLoading.bind(this);
-		this.render = this.render.bind(this);
-		this.clearHpBars = () => {
-		};
+	// Live mirrors of state read synchronously from the game loop / event handlers.
+	const pauseRef = useRef(false);
+	const isThirdPersonRef = useRef(true);
+	const isPointerLockedRef = useRef(false);
 
-		this.state = {
-			// UI
-			pause: false,
-			showRestart: false,
-			notification: '',
-			isNotificationVisible: false,
-			notificationTimeout: 0,
-			isLoading: false,
+	// Rendered state, one setter per value.
+	const [isSceneReady, setSceneReady] = useState(false);
+	const [pause, setPauseState] = useState(false);
+	const [showRestart, setRestartButtonVisible] = useState(false);
+	const [notification, setNotificationText] = useState('');
+	const [isNotificationVisible, setNotificationVisible] = useState(false);
+	const [isLoading, setLoading] = useState(false);
+	const [fps, setFps] = useState(0);
+	const [targetFps, setTargetFps] = useState(0);
+	const [ping, setPing] = useState(0);
+	const [connectionRole, setConnectionRole] = useState(null);
+	const [isThirdPerson, setIsThirdPerson] = useState(true);
+	const [unspentTalents, setUnspentTalents] = useState(0);
+	const [level, setLevel] = useState(0);
+	const [hp, setHp] = useState(0);
+	const [hpMax, setHpMax] = useState(0);
+	const [speed, setSpeed] = useState(0);
+	const [damage, setDamage] = useState(0);
+	const [fireDamage, setFireDamage] = useState(0);
+	const [money, setMoney] = useState(0);
+	const [experience, setExperience] = useState(0);
+	const [levelExperience, setLevelExperience] = useState(0);
+	const [position, setPosition] = useState({ x: 0, y: 0, z: 0 });
+	const [rotation, setRotation] = useState(null);
 
-			// Renderer
-			fps: 0,
-			targetFps: 0,
+	const setUpdateCursorRef = useCallback(callback => updateCursorRef.current = callback, []);
+	const setUpdateHpBarsRef = useCallback(callback => updateHpBarsRef.current = callback, []);
+	const setClearHpBarsRef = useCallback(callback => clearHpBarsRef.current = callback, []);
 
-			// Input
-			isPointerLocked: false,
+	const setPause = useCallback((next = !pauseRef.current) => {
+		pauseRef.current = next;
+		setPauseState(next);
 
-			// Connection
-			connectionRole: null,
-
-			// Camera
-			isThirdPerson: true,
-
-			// Player
-			unspentTalents: 0,
-			hp: 0,
-			hpMax: 0,
-			speed: 0,
-			damage: 0,
-			fireDamage: 0,
-			money: 0,
-			experience: 0,
-			levelExperience: 0,
-			position: { x: 0, y: 0, z: 0 },
-			render: 0,
-		};
-
-		this.container = React.createRef();
-	}
-
-	componentDidMount() {
-		this.initScene();
-	}
-
-	initScene() {
-		if (this.container.current) {
-			THREE.Cache.enabled = true;
-
-			const container = this.container.current,
-				renderer = new Renderer(container),
-				scene = new Scene(renderer, this.getAPI()),
-				onResize = () => {
-					scene.camera.camera.aspect = container.clientWidth / container.clientHeight;
-					scene.camera.camera.updateProjectionMatrix();
-					renderer.setSize(container.clientWidth, container.clientHeight);
-				},
-				nonPauseRequestPointerLock = () => !scene.ui.isPause() && requestPointerLock();
-
-			window.addEventListener('resize', onResize, false);
-			document.body.addEventListener('click', nonPauseRequestPointerLock, false);
-			addPointerLockEvents({
-				onPointerLock: () => onPointerLockChange((isPointerLocked) => {
-					if (this.state.isPointerLocked === isPointerLocked) {
-						return;
-					}
-
-					this.setState({ isPointerLocked });
-
-					if (isPointerLocked) {
-						this.scene.input.cursor.x = this.scene.input.mouse.x;
-						this.scene.input.cursor.y = this.scene.input.mouse.y;
-					} else {
-						this.setPause(true);
-					}
-				})
-			});
-
-			/**
-			 * @type {Scene}
-			 */
-			this.scene = scene;
-			this.scene.setLoggedUser(this.props.userName, this.props.password);
-		}
-	}
-
-	getAPI() {
-		return {
-			setRestartButtonVisible: this.setRestartButtonVisible,
-			setPause: this.setPause,
-			restartGame: this.restartGame,
-			isPause: () => this.state.pause,
-			isThirdPerson: () => this.state.isThirdPerson,
-			update: this.update,
-			setConnectionRole: this.setConnectionRole,
-			updatePlayerParams: this.updatePlayerParams,
-			clearHpBars: this.clearHpBars,
-			switchCamera: this.switchCamera,
-			setFps: this.setFps,
-			setPing: this.setPing,
-			notify: this.setNotification,
-			setLoading: this.setLoading,
-		};
-	}
-
-	update() {
-		if (!this.scene || !this.scene.input || !this.scene.getPlayer()) {
-			return;
-		}
-
-		if (this.updateCursor) {
-			this.updateCursor(this.scene.input.cursor.x, this.scene.input.cursor.y);
-		}
-
-		if (this.updateHpBars) {
-			this.updateHpBars(this.scene);
-		}
-	}
-
-	setLoading(isLoading) {
-		this.setState({ isLoading });
-	}
-
-	setFps(fps, targetFps) {
-		this.setState({ fps, targetFps });
-	}
-
-	setPing(ping) {
-		this.setState({ ping });
-	}
-
-	setConnectionRole(connectionRole) {
-		this.setState({ connectionRole });
-	}
-
-	setPause(pause = !this.state.pause) {
-		this.setState({ pause });
-
-		if (pause) {
+		if (next) {
 			exitPointerLock();
 
-			const player = this.scene && this.scene.getPlayer();
+			const player = sceneRef.current && sceneRef.current.getPlayer();
 
 			if (player) {
-				this.setRestartButtonVisible(!player.getHP());
+				setRestartButtonVisible(!player.getHP());
 			}
-		} else if (this.scene.location.isLoaded) {
+		} else if (sceneRef.current.location.isLoaded) {
 			requestPointerLock();
 		}
-	}
+	}, []);
 
-	switchCamera() {
-		const { isThirdPerson } = this.state;
+	const switchCamera = useCallback(() => {
+		const next = !isThirdPersonRef.current;
 
-		this.setState({ isThirdPerson: !isThirdPerson });
-		this.scene.input.isThirdPerson = !isThirdPerson;
-		this.scene.camera.update();
-	}
+		isThirdPersonRef.current = next;
+		setIsThirdPerson(next);
+		sceneRef.current.input.isThirdPerson = next;
+		sceneRef.current.camera.update();
+	}, []);
 
-	setNotification(notification, timeout = 8000) {
-		if (this.state.notificationTimeout) {
-			clearInterval(this.state.notificationTimeout);
+	const setFpsAndTarget = useCallback((fps, targetFps) => {
+		setFps(fps);
+		setTargetFps(targetFps);
+	}, []);
+
+	const setNotification = useCallback((notification, timeout = 8000) => {
+		if (notificationTimeoutRef.current) {
+			clearInterval(notificationTimeoutRef.current);
 		}
 
-		const notificationTimeout = setTimeout(
-			() => this.setState({ isNotificationVisible: false }),
+		notificationTimeoutRef.current = setTimeout(
+			() => setNotificationVisible(false),
 			timeout,
 		);
 
-		this.setState({ notification, isNotificationVisible: true, notificationTimeout });
-	}
+		setNotificationText(notification);
+		setNotificationVisible(true);
+	}, []);
 
-	buy(type) {
-		const player = this.scene.getPlayer();
+	const updatePlayerParams = useCallback(() => {
+		const scene = sceneRef.current;
+
+		if (scene) {
+			const player = scene.getPlayer();
+
+			if (player) {
+				setLevel(player.getLevel());
+				setUnspentTalents(player.getUnspentTalents());
+				setHp(player.getHP());
+				setHpMax(player.getMaxHP());
+				setSpeed(player.getSpeed());
+				setDamage(player.getDamage());
+				setFireDamage(player.getFireDamage());
+				setMoney(player.getMoney());
+				setExperience(player.getExperience());
+				setLevelExperience(player.getLevelExperience());
+				setPosition({
+					x: player.position.x,
+					y: player.position.y,
+					z: player.position.z,
+				});
+				setRotation({
+					x: player.rotation.x,
+					y: player.rotation.y,
+					z: player.rotation.z,
+				});
+			}
+		}
+	}, []);
+
+	const buy = useCallback((type) => {
+		const player = sceneRef.current.getPlayer();
 		const unspentTalents = player.getUnspentTalents();
 
 		switch (type) {
@@ -250,145 +175,164 @@ class App extends Component {
 				break;
 		}
 
-		this.updatePlayerParams();
-	}
+		updatePlayerParams();
+	}, [updatePlayerParams]);
 
-	updatePlayerParams() {
-		if (this.scene) {
-			const player = this.scene.getPlayer();
+	const restartGame = useCallback(() => {
+		sceneRef.current.location.restartLevel();
+		sceneRef.current.camera.update();
+		clearHpBarsRef.current();
+		setRestartButtonVisible(false);
+	}, []);
 
-			if (player) {
-				this.setState({
-					level: player.getLevel(),
-					unspentTalents: player.getUnspentTalents(),
-					hp: player.getHP(),
-					hpMax: player.getMaxHP(),
-					speed: player.getSpeed(),
-					damage: player.getDamage(),
-					fireDamage: player.getFireDamage(),
-					money: player.getMoney(),
-					experience: player.getExperience(),
-					levelExperience: player.getLevelExperience(),
-					position: {
-						x: player.position.x,
-						y: player.position.y,
-						z: player.position.z,
-					},
-					rotation: {
-						x: player.rotation.x,
-						y: player.rotation.y,
-						z: player.rotation.z,
-					},
-				});
-			}
+	const reviveHero = useCallback(() => {
+		sceneRef.current.location.reviveHero();
+		setRestartButtonVisible(false);
+		setPause(false);
+	}, [setPause]);
+
+	const moveToSpawn = useCallback(() => {
+		sceneRef.current.getPlayer().position.set(-58, 0, 106);
+		setPause(false);
+	}, [setPause]);
+
+	const restartServer = useCallback(() => {
+		sceneRef.current.connection.restartServer();
+	}, []);
+
+	const update = useCallback(() => {
+		const scene = sceneRef.current;
+
+		if (!scene || !scene.input || !scene.getPlayer()) {
+			return;
 		}
-	}
 
-	setRestartButtonVisible(showRestart) {
-		this.setState({ showRestart });
-	}
+		if (updateCursorRef.current) {
+			updateCursorRef.current(scene.input.cursor.x, scene.input.cursor.y);
+		}
 
-	restartGame() {
-		this.scene.location.restartLevel();
-		this.scene.camera.update();
-		this.clearHpBars();
-		this.setState({ showRestart: false });
-	}
+		if (updateHpBarsRef.current) {
+			updateHpBarsRef.current(scene);
+		}
+	}, []);
 
-	reviveHero() {
-		this.scene.location.reviveHero();
-		this.setState({ showRestart: false });
-		this.setPause(false);
-	}
+	const clearHpBars = useCallback(() => clearHpBarsRef.current(), []);
 
-	moveToSpawn() {
-		this.scene.getPlayer().position.set(-58, 0, 106);
-		this.setPause(false);
-	}
+	useEffect(() => {
+		if (!containerRef.current) {
+			return;
+		}
 
-	restartServer() {
-		this.scene.connection.restartServer();
-	}
+		THREE.Cache.enabled = true;
 
-	render() {
-		const {
-			hp,
-			hpMax,
-			speed,
-			damage,
-			fireDamage,
-			pause,
-			money,
-			unspentTalents,
-			showRestart,
-			level,
-			experience,
-			levelExperience,
-			isThirdPerson,
-			ping,
-			fps,
-			targetFps,
-			position,
-			rotation,
-			notification,
-			isNotificationVisible,
-			isLoading,
-		} = this.state;
+		const container = containerRef.current;
+		const renderer = new Renderer(container);
+		const api = {
+			setRestartButtonVisible,
+			setPause,
+			restartGame,
+			isPause: () => pauseRef.current,
+			isThirdPerson: () => isThirdPersonRef.current,
+			update,
+			setConnectionRole,
+			updatePlayerParams,
+			clearHpBars,
+			switchCamera,
+			setFps: setFpsAndTarget,
+			setPing,
+			notify: setNotification,
+			setLoading,
+		};
+		const scene = new Scene(renderer, api);
+		const onResize = () => {
+			scene.camera.camera.aspect = container.clientWidth / container.clientHeight;
+			scene.camera.camera.updateProjectionMatrix();
+			renderer.setSize(container.clientWidth, container.clientHeight);
+		};
+		const nonPauseRequestPointerLock = () => !scene.ui.isPause() && requestPointerLock();
 
-		return (
-			<div>
-				<div ref={this.container}></div>
-				{this.scene && (
-					<div>
-						{!isLoading && <TopRight
-							money={money}
-							rotation={rotation}
-							position={position}
-							fps={fps}
-							ping={ping}
-							targetFps={targetFps}
-						/>}
-						{!isLoading && <BottomRight
-							unspentTalents={unspentTalents}
-							level={level}
-							experience={experience}
-							levelExperience={levelExperience}
-						/>}
-						{!isLoading && <BottomLeft
-							hp={hp}
-							hpMax={hpMax}
-							speed={speed}
-							damage={damage}
-							fireDamage={fireDamage}
-						/>}
-						{!isThirdPerson
-							? <Cursor setUpdate={callback => this.updateCursor = callback} />
-							: null
-						}
-						{this.scene.camera && <HpBars
-							setUpdate={callback => this.updateHpBars = callback}
-							setClearHpBars={callback => this.clearHpBars = callback}
-						/>}
-						{notification && <ActionLabel action={notification} isVisible={isNotificationVisible} />}
-						{!isLoading && pause && <Pause
-							isThirdPerson={isThirdPerson}
-							unspentTalents={unspentTalents}
-							money={money}
-							speed={speed}
-							showRestart={showRestart}
-							setPause={this.setPause}
-							switchCamera={this.switchCamera}
-							restartServer={this.restartServer}
-							reviveHero={this.reviveHero}
-							moveToSpawn={this.moveToSpawn}
-							buy={this.buy}
-						/>}
-						{isLoading && <LoadingScreen />}
-					</div>
-				)}
-			</div>
-		);
-	}
-}
+		window.addEventListener('resize', onResize, false);
+		document.body.addEventListener('click', nonPauseRequestPointerLock, false);
+		addPointerLockEvents({
+			onPointerLock: () => onPointerLockChange((isPointerLocked) => {
+				if (isPointerLockedRef.current === isPointerLocked) {
+					return;
+				}
 
-export default App;
+				isPointerLockedRef.current = isPointerLocked;
+
+				if (isPointerLocked) {
+					scene.input.cursor.x = scene.input.mouse.x;
+					scene.input.cursor.y = scene.input.mouse.y;
+				} else {
+					setPause(true);
+				}
+			})
+		});
+
+		sceneRef.current = scene;
+		scene.setLoggedUser(userName, password);
+		setSceneReady(true);
+
+		return () => {
+			window.removeEventListener('resize', onResize, false);
+			document.body.removeEventListener('click', nonPauseRequestPointerLock, false);
+		};
+	}, []);
+
+	const scene = sceneRef.current;
+
+	return (
+		<div>
+			<div ref={containerRef}></div>
+			{isSceneReady && (
+				<div>
+					{!isLoading && <TopRight
+						money={money}
+						rotation={rotation}
+						position={position}
+						fps={fps}
+						ping={ping}
+						targetFps={targetFps}
+					/>}
+					{!isLoading && <BottomRight
+						unspentTalents={unspentTalents}
+						level={level}
+						experience={experience}
+						levelExperience={levelExperience}
+					/>}
+					{!isLoading && <BottomLeft
+						hp={hp}
+						hpMax={hpMax}
+						speed={speed}
+						damage={damage}
+						fireDamage={fireDamage}
+					/>}
+					{!isThirdPerson
+						? <Cursor setUpdate={setUpdateCursorRef} />
+						: null
+					}
+					{scene.camera && <HpBars
+						setUpdate={setUpdateHpBarsRef}
+						setClearHpBars={setClearHpBarsRef}
+					/>}
+					{notification && <ActionLabel action={notification} isVisible={isNotificationVisible} />}
+					{!isLoading && pause && <Pause
+						isThirdPerson={isThirdPerson}
+						unspentTalents={unspentTalents}
+						money={money}
+						speed={speed}
+						showRestart={showRestart}
+						setPause={setPause}
+						switchCamera={switchCamera}
+						restartServer={restartServer}
+						reviveHero={reviveHero}
+						moveToSpawn={moveToSpawn}
+						buy={buy}
+					/>}
+					{isLoading && <LoadingScreen />}
+				</div>
+			)}
+		</div>
+	);
+};

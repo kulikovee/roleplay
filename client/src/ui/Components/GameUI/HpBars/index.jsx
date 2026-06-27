@@ -4,7 +4,6 @@ export default ({ setUpdate, setClearHpBars }) => {
     const containerRef = useRef(null);
 
     useEffect(() => {
-        console.log("HP BARS EFFECT");
         const clearHpBars = () => {
             containerRef.current.innerHTML = '';
         };
