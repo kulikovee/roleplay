@@ -2,3 +2,5 @@
 node_modules
 ./sources/blender/*.blend1
 ./server/dist/sessions
+server/dist/
+client/dist/
