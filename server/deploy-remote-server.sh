@@ -40,7 +40,8 @@ ssh -tt "$REMOTE" << 'EOF'
 
   echo "Killing server ..."
   # Kill the node12 bundle and any lingering legacy `node server.js` process so the
-  # new one can bind port 1337.
+  # new one can bind its port. (prod:node12 runs plain ws on 127.0.0.1:1338; nginx
+  # terminates wss on the public :1337 and proxies in.)
   pkill -f server.node12.cjs || true
   pkill -f 'server\.js' || true
 

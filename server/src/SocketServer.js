@@ -29,10 +29,8 @@ class SocketServer {
 		const isProduction = process.env.NODE_ENV === 'production';
 
 		this.config = {
-			ssl: isProduction,
-			port: 1337,
-			sslKey: path.join(__dirname, '../../../certs/privkey.pem'),
-			sslCertificate: path.join(__dirname, '../../../certs/fullchain.pem'),
+			ssl: false,
+			port: isProduction ? 1338 : 1337,
 			sessionsPath: path.join(__dirname, '../../../roleplay-sessions/'),
 			debug: false
 		};
@@ -61,16 +59,7 @@ class SocketServer {
 			sslCertificateExists: fs.existsSync(config.sslCertificate),
 		});
 
-		if (config.ssl) {
-			const sslParams = {
-				key: fs.readFileSync(config.sslKey),
-				cert: fs.readFileSync(config.sslCertificate),
-			};
-
-			return require('https').createServer(sslParams, processRequest).listen(config.port);
-		} else {
-			return require('http').createServer(processRequest).listen(config.port);
-		}
+		return require('http').createServer(processRequest).listen(config.port, config.host);
 	}
 
 	createSocketServer(config) {
