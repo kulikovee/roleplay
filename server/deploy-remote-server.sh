@@ -1,8 +1,5 @@
 #!/bin/bash
 
-npm run build
-scp ./dist/server-scene.js gohtml@gohtml.ru:~/roleplay/server/dist/
-
 ssh -tt gohtml@gohtml.ru << EOF
   echo "Updating repository ..."
   cd ./roleplay/
@@ -12,9 +9,11 @@ ssh -tt gohtml@gohtml.ru << EOF
   echo "Installing dependencies ..."
   cd client/
   npm i
+  npm run build
 
   cd ../server/
   npm i
+  npm run build
 
   echo "Killing server ..."
   pkill -f server.js
