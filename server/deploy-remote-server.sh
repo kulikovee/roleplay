@@ -11,19 +11,15 @@ ssh -tt gohtml@gohtml.ru << EOF
 
   echo "Installing dependencies ..."
   cd client/
-  # npm i
+  npm i
 
   cd ../server/
-  # npm i
+  npm i
 
   echo "Killing server ..."
   pkill -f server.js
-  pkill -f Xvfb
 
   sleep 1
-
-  Xvfb :5 -screen 0 1x1x24 &
-  export DISPLAY=:5
 
   NODE_ENV=production nohup node server.js > server.log 2> server.error.log < /dev/null &
 

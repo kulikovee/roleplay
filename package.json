@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "type": "module",
   "description": "[demo](https://kulikovee.github.io/roleplay/)",
+  "scripts": {
+    "deploy": "sh ./server/deploy-remote-server.sh"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/kulikovee/roleplay.git"
