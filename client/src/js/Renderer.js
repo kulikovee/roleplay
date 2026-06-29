@@ -86,12 +86,13 @@ export default class Renderer extends AutoBindMethods {
         const timeSinceLastRender = time - this.lastRender;
         const currentFPS = 1000 / timeSinceLastRender;
         this.fps -= (this.fps - currentFPS) / 60;
+        this.targetFps = this.fps;
 
-        if (timeSinceLastRender >= 1000 / this.targetFps) {
+        if (timeSinceLastRender >= 1000 / this.targetFps || this.fps > 60) {
             this.renderer.render(scene, camera);
             this.lastRender = time;
         }
 
-        this.targetFps = this.fps + 10;
+        this.targetFps += 10;
     }
 }
