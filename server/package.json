@@ -6,8 +6,6 @@
     "start": "npm run build && node ./server.js"
   },
   "dependencies": {
-    "canvas": "^3.2.3",
-    "gl": "^8.1.6",
     "mock-browser": "^0.92.14",
     "three": "^0.185.0",
     "ws": "^8.21.0"

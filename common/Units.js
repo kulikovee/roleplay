@@ -1,6 +1,8 @@
 export const unitToNetwork = (unit, connectionId, locationName) => {
    if (unit) {
-      const unitRotation = unit.object.rotation.toVector3();
+      // Euler.toVector3() was removed in modern three; the Euler already exposes
+      // numeric x/y/z, which is all vectorToObject needs.
+      const unitRotation = unit.object.rotation;
 
       if (!unit.params.unitNetworkId) {
          const getRandomString = () => Math.random().toString(36).substr(2);

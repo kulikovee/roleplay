@@ -4,19 +4,11 @@ const { unitToNetwork } = require('../common/Units');
 const { initScene } = require('./dist/server-scene');
 
 function Server() {
-	var Canvas = require("canvas");
-	var glContext = require('gl')(1, 1); //headless-gl
-	var canvasGL = new Canvas.Canvas(1, 1);
-	canvasGL.addEventListener = function(event, func, bind_) {};
-
-	const scene = initScene({ context: glContext, canvas: canvasGL }, MockGUI);
+	// Headless simulation: no GL context is created (see Renderer headless mode), so the
+	// server has no native canvas/headless-gl dependency and the scene is never drawn.
+	const scene = initScene({ headless: true }, MockGUI);
 
 	scene.location.onLoad = () => {
-		const renderer = scene.renderer.renderer;
-		const render = renderer.render;
-		render.call(renderer, scene.scene, scene.camera.camera);
-		renderer.render = () => null;
-
 		debug('Scene is loaded', {
 			THREE: Boolean(THREE),
 			document: Boolean(document),

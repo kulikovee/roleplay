@@ -12,11 +12,26 @@ export default class Renderer extends AutoBindMethods {
         this.lastRender = 0;
         this.backend = null;
 
-        // WebGPURenderer is only present in the browser bundle (three/webgpu). When
-        // available we use it: it drives a WebGPU backend if the machine supports it
-        // and transparently falls back to a WebGL2 backend otherwise. The headless
-        // server bundle imports classic three (no WebGPURenderer) and keeps using the
-        // synchronous WebGLRenderer with its injected headless-gl context.
+        // Headless mode (authoritative game server): the scene is simulated, not drawn,
+        // so we avoid creating a GL context entirely. A stub satisfies the few calls
+        // Scene/Camera make on the renderer. This keeps the server free of native GL
+        // dependencies (canvas/headless-gl) and of the WebGL2 requirement of modern three.
+        if (params.headless) {
+            this.renderer = {
+                domElement: { width: 1, height: 1 },
+                setSize: () => {},
+                render: () => {},
+                getContext: () => null,
+            };
+            this.backend = 'headless';
+            this.isReady = true;
+            this.ready = Promise.resolve();
+            return;
+        }
+
+        // WebGPURenderer is only present in the browser bundle (three/webgpu). It drives
+        // a WebGPU backend if the machine supports it and transparently falls back to a
+        // WebGL2 backend otherwise.
         const useWebGPU = typeof THREE.WebGPURenderer === 'function';
 
         this.renderer = useWebGPU

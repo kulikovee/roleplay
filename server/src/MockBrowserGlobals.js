@@ -36,67 +36,54 @@ global.WebSocket = global.window.WebSocket = function() {
 	this.onmessage = (...params) => debug('window.WebSocket.onmessage', ...params);
 };
 
-global.URL = global.window.URL = {
-	createObjectURL: () => '',
-	revokeObjectURL: () => '',
+// Keep Node's native URL constructor (three's fetch-based loaders build `new Request`
+// from it); only add the object-URL helpers the code expects from a browser.
+global.URL.createObjectURL = () => '';
+global.URL.revokeObjectURL = () => {};
+global.window.URL = global.URL;
+
+// three r0.185's loaders fetch assets via the Fetch API instead of XMLHttpRequest.
+// Back fetch() with the local filesystem: the two real environment models are served
+// from disk, everything else (effects, units, external textures) falls back to a tiny
+// dummy model since the headless server never renders.
+const REAL_MODELS = [
+	'./assets/models/environment/static-objects.glb',
+	'./assets/models/environment/island.glb',
+];
+
+const resolveAssetPath = (url) => {
+	const rel = String(url).split(/[?#]/)[0];
+	const model = REAL_MODELS.includes(rel) ? rel : './assets/models/dummy.glb';
+	return path.resolve(path.join(__dirname, '../../client/src/', model));
 };
 
-global.XMLHttpRequest = function() {
-	this.onload = [];
-	this.resolved = false;
-	this.status = 200;
-	this.mimeType = 'model/gltf-binary';
-	this.responseType = 'arraybuffer';
+// Lenient Request shim so relative URLs (e.g. './assets/...') don't fail URL parsing.
+global.Request = global.window.Request = function Request(url, init = {}) {
+	this.url = typeof url === 'string' ? url : (url && url.url) || '';
+	this.headers = init.headers || null;
+};
 
-	function toArrayBuffer(buf) {
-		var ab = new ArrayBuffer(buf.length);
-		var view = new Uint8Array(ab);
-		for (var i = 0; i < buf.length; ++i) {
-			view[i] = buf[i];
-		}
-		return ab;
+// GLTFLoader reads textures via `self` and decodes them with createImageBitmap. The
+// headless server never renders, so resolve every image to a 1x1 stub bitmap. This
+// keeps texture promises from hanging (which would stall the whole glTF parse).
+global.self = global;
+global.createImageBitmap = async () => ({ width: 1, height: 1, close() {} });
+
+// three reports download progress with ProgressEvent, which Node doesn't define.
+global.ProgressEvent = global.window.ProgressEvent || class ProgressEvent {
+	constructor(type, init = {}) {
+		this.type = type;
+		Object.assign(this, init);
 	}
+};
 
-	const addOnLoad = (fn) => {
-		this.onload.push({ sent: false, fn });
-
-		if (this.resolved) {
-			this.send();
-		}
-	};
-
-	this.addEventListener = (name, fn) => {
-		if (name === 'load') {
-			addOnLoad(fn);
-		}
-	};
-
-	this.onreadystatechange = addOnLoad;
-
-	this.getResponse = () => ({
-		status: this.status,
-		response: this.response,
-		mimeType: this.mimeType,
-		// responseText: this.responseText,
-		responseType: this.responseType,
+global.fetch = global.window.fetch = async (input) => {
+	const url = typeof input === 'string' ? input : (input && input.url) || '';
+	const buffer = fs.readFileSync(resolveAssetPath(url));
+	return new Response(buffer, {
+		status: 200,
+		headers: { 'Content-Length': String(buffer.length) },
 	});
-
-	this.open = (method, url) => {
-		if (url !== './assets/models/environment/static-objects.glb' && url !== './assets/models/environment/island.glb') {
-			url = './assets/models/dummy.glb';
-		}
-
-		const filePath = path.resolve(path.join(__dirname , '../../client/src/', url));
-		this.response = toArrayBuffer(fs.readFileSync(filePath));
-	};
-
-	this.send = () => {
-		this.resolved = true;
-		this.onload.filter(({ sent }) => !sent).forEach(onLoad => {
-			onLoad.sent = true;
-			onLoad.fn.call(this, this.getResponse());
-		});
-	};
 };
 
 // Load three.js and its GLTFLoader addon from the same ES module instance, so
