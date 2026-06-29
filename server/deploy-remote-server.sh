@@ -1,26 +1,53 @@
 #!/bin/bash
+set -euo pipefail
 
-ssh -tt gohtml@gohtml.ru << EOF
-  echo "Updating repository ..."
+# Deploys the headless server to a Node 12.8 host.
+#
+# esbuild needs Node >=18, so the bundle is built HERE (on a modern Node) and the
+# single artifact is shipped to prod, which only ever runs `node` (v12). three and
+# the GLTFLoader addon are bundled into the artifact; prod just needs the external
+# runtime deps (ws, mock-browser). See build-node12.js / src/node12-globals.js.
+#
+# The browser client (hosted separately on GitHub Pages) is no longer built here —
+# the server only reads the git-tracked asset sources under client/src/assets, and
+# its bundler wouldn't run on Node 12 anyway.
+
+SERVER_DIR="$(cd "$(dirname "$0")" && pwd)"
+REMOTE=gohtml@gohtml.ru
+REMOTE_DIR=roleplay/server
+
+echo "Building Node 12 bundle locally ($(node -v)) ..."
+( cd "$SERVER_DIR" && npm run build:node12 )
+
+echo "Uploading bundle to $REMOTE ..."
+ssh "$REMOTE" "mkdir -p $REMOTE_DIR/dist"
+# Upload to a staging name so a half-transferred file can never replace a good one.
+scp "$SERVER_DIR/dist/server.node12.cjs" "$REMOTE:$REMOTE_DIR/dist/server.node12.cjs.new"
+
+ssh -tt "$REMOTE" << 'EOF'
+  echo "Updating repository (asset sources + runtime deps) ..."
   cd ./roleplay/
   git reset HEAD~1 --hard
-  git pull origin master
+  GIT_SSH_COMMAND='ssh -o CheckHostIP=no' git pull origin master
 
-  echo "Installing dependencies ..."
-  cd client/
-  npm i
-  npm run build
+  cd server/
+  # npm 6 (ships with Node 12) doesn't support --omit=dev; --production skips
+  # devDependencies, i.e. esbuild, which cannot run here anyway.
+  npm i --production
 
-  cd ../server/
-  npm i
-  npm run build
+  echo "Swapping in fresh bundle ..."
+  mv -f dist/server.node12.cjs.new dist/server.node12.cjs
 
   echo "Killing server ..."
-  pkill -f server.js
+  # Kill the node12 bundle and any lingering legacy `node server.js` process so the
+  # new one can bind port 1337.
+  pkill -f server.node12.cjs || true
+  pkill -f 'server\.js' || true
 
   sleep 1
 
-  NODE_ENV=production nohup node server.js > server.log 2> server.error.log < /dev/null &
+  echo "Starting server on $(node -v) ..."
+  nohup npm run prod:node12 > server.log 2> server.error.log < /dev/null &
 
   sleep 3
 

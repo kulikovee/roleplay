@@ -3,7 +3,10 @@
   "private": true,
   "scripts": {
     "build": "node ./build.js",
-    "start": "npm run build && node ./server.js"
+    "start": "npm run build && node ./server.js",
+    "build:node12": "node ./build-node12.js",
+    "start:node12": "node ./dist/server.node12.cjs",
+    "prod:node12": "NODE_ENV=production node dist/server.node12.cjs"
   },
   "dependencies": {
     "mock-browser": "^0.92.14",

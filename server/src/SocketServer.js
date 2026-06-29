@@ -33,7 +33,7 @@ class SocketServer {
 			port: 1337,
 			sslKey: path.join(__dirname, '../../../certs/privkey.pem'),
 			sslCertificate: path.join(__dirname, '../../../certs/fullchain.pem'),
-			sessionsPath: path.join(__dirname, '../../../sessions/'),
+			sessionsPath: path.join(__dirname, '../../../roleplay-sessions/'),
 			debug: false
 		};
 
