@@ -55,14 +55,14 @@ export default class Camera extends AutoBindMethods {
     }
 
     getWidth() {
-        const renderer = this.scene.renderer.renderer;
-        const canvas = renderer.getContext().canvas;
+        // Use the canvas directly (domElement) rather than getContext(): the WebGPU
+        // backend throws from getContext() until its device has finished initialising.
+        const canvas = this.scene.renderer.renderer.domElement;
         return canvas ? canvas.width : 1;
     }
 
     getHeight() {
-        const renderer = this.scene.renderer.renderer;
-        const canvas = renderer.getContext().canvas;
+        const canvas = this.scene.renderer.renderer.domElement;
         return canvas ? canvas.height : 1;
     }
 

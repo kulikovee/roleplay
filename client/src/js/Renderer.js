@@ -6,17 +6,34 @@ export default class Renderer extends AutoBindMethods {
      */
     constructor(container = null, params = {}) {
         super();
-        this.renderer = new THREE.WebGLRenderer({
-            antialias: true,
-            logarithmicDepthBuffer: true,
-            alpha: true,
-            powerPreference: 'high-performance',
-            ...params,
-        });
 
         this.fps = 60;
         this.targetFps = 70;
         this.lastRender = 0;
+        this.backend = null;
+
+        // WebGPURenderer is only present in the browser bundle (three/webgpu). When
+        // available we use it: it drives a WebGPU backend if the machine supports it
+        // and transparently falls back to a WebGL2 backend otherwise. The headless
+        // server bundle imports classic three (no WebGPURenderer) and keeps using the
+        // synchronous WebGLRenderer with its injected headless-gl context.
+        const useWebGPU = typeof THREE.WebGPURenderer === 'function';
+
+        this.renderer = useWebGPU
+            ? new THREE.WebGPURenderer({
+                antialias: true,
+                logarithmicDepthBuffer: true,
+                alpha: true,
+                powerPreference: 'high-performance',
+                ...params,
+            })
+            : new THREE.WebGLRenderer({
+                antialias: true,
+                logarithmicDepthBuffer: true,
+                alpha: true,
+                powerPreference: 'high-performance',
+                ...params,
+            });
 
         if (container) {
             this.renderer.setSize(window.innerWidth, window.innerHeight);
@@ -27,6 +44,21 @@ export default class Renderer extends AutoBindMethods {
             this.renderer.shadowMap.type = THREE.PCFShadowMap;
 
             container.appendChild(this.renderer.domElement);
+        }
+
+        if (useWebGPU) {
+            // The WebGPU/WebGL2 backend initialises asynchronously; rendering is
+            // skipped until it resolves.
+            this.isReady = false;
+            this.ready = this.renderer.init().then(() => {
+                this.backend = this.renderer.backend.isWebGPUBackend ? 'WebGPU' : 'WebGL';
+                this.isReady = true;
+                console.info(`Renderer: using ${this.backend} backend`);
+            });
+        } else {
+            this.backend = 'WebGL';
+            this.isReady = true;
+            this.ready = Promise.resolve();
         }
     }
 
@@ -43,6 +75,10 @@ export default class Renderer extends AutoBindMethods {
      * @param {THREE.Camera} camera
      */
     render(time, deltaTime, scene, camera) {
+        if (!this.isReady) {
+            return;
+        }
+
         if (!this.lastRender) {
             this.lastRender = time - deltaTime;
         }

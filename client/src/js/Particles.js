@@ -143,17 +143,19 @@ export default class Particles extends AutoBindMethods {
 		),
 	} = {}) {
 		const particalesCount = count;
-		const particles = new THREE.BufferGeometry();
+		// WebGPU renders THREE.Points at a fixed 1px size, so particles are drawn as an
+		// instanced billboard Sprite with a PointsNodeMaterial (works on WebGPU and the
+		// WebGL2 fallback alike). Per-particle positions are fed via an instanced attribute.
 		const vertices = [];
 		const positions = new Float32Array(particalesCount * 3);
-		particles.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+		const positionAttribute = new THREE.InstancedBufferAttribute(positions, 3);
 		const syncPositions = () => {
 			for (let i = 0; i < vertices.length; i++) {
 				positions[i * 3] = vertices[i].x;
 				positions[i * 3 + 1] = vertices[i].y;
 				positions[i * 3 + 2] = vertices[i].z;
 			}
-			particles.attributes.position.needsUpdate = true;
+			positionAttribute.needsUpdate = true;
 		};
 		const particlesInitialPositions = {};
 		const particlesCreatedAt = {};
@@ -165,7 +167,8 @@ export default class Particles extends AutoBindMethods {
 			materialParameters.map = texture;
 		}
 
-		const material = new THREE.PointsMaterial(materialParameters);
+		const material = new THREE.PointsNodeMaterial(materialParameters);
+		material.positionNode = THREE.TSL.instancedBufferAttribute(positionAttribute);
 
 		for (let i = 0; i < particalesCount; i++) {
 			const particle = getDefaultParticlePosition(i);
@@ -178,7 +181,9 @@ export default class Particles extends AutoBindMethods {
 
 		syncPositions();
 
-		const particleObject = new THREE.Points(particles, material);
+		const particleObject = new THREE.Sprite(material);
+		particleObject.count = particalesCount;
+		particleObject.frustumCulled = false;
 		particleObject.position.copy(parent.position);
 		const lifeTimeMs = lifeTime * 1000;
 
@@ -259,20 +264,22 @@ export default class Particles extends AutoBindMethods {
 		getParticleVelocity = () => new THREE.Vector3(-0.01, -0.01, 0),
 		getParticlePosition = (i, position = this.getRandomPosition(area)) => position,
 	} = {}) {
-		const particles = new THREE.BufferGeometry();
+		// See createAttachedParticles: instanced billboard sprites instead of THREE.Points
+		// so particle size is honoured on the WebGPU backend.
 		const vertices = [];
 		const positions = new Float32Array(particleCount * 3);
-		particles.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+		const positionAttribute = new THREE.InstancedBufferAttribute(positions, 3);
 		const syncPositions = () => {
 			for (let i = 0; i < vertices.length; i++) {
 				positions[i * 3] = vertices[i].x;
 				positions[i * 3 + 1] = vertices[i].y;
 				positions[i * 3 + 2] = vertices[i].z;
 			}
-			particles.attributes.position.needsUpdate = true;
+			positionAttribute.needsUpdate = true;
 		};
 
-		const material = new THREE.PointsMaterial({ color, size, blending, depthTest, transparent });
+		const material = new THREE.PointsNodeMaterial({ color, size, blending, depthTest, transparent });
+		material.positionNode = THREE.TSL.instancedBufferAttribute(positionAttribute);
 
 		for (var i = 0; i < particleCount; i++) {
 			const particle = getParticlePosition(i);
@@ -281,7 +288,9 @@ export default class Particles extends AutoBindMethods {
 
 		syncPositions();
 
-		const particleSystem = new THREE.Points(particles, material);
+		const particleSystem = new THREE.Sprite(material);
+		particleSystem.count = particleCount;
+		particleSystem.frustumCulled = false;
 		particleSystem.position.copy(position);
 
 		this.particles.push({

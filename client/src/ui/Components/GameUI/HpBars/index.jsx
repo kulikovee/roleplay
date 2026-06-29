@@ -61,23 +61,29 @@ export default ({ setUpdate, setClearHpBars }) => {
                             distance = player.position.distanceTo(unitPosition),
                             isNearEnough = distance < 20,
                             screenBarPosition = isNearEnough && camera.toScreenPosition(unitPosition),
-                            width = Math.min(70, 1000 / distance);
+                            width = Math.min(70, 1000 / distance),
+                            isHpBarHidden = screenBarPosition.z > 1 || !isNearEnough;
 
-                        hpBarElement.style.display = screenBarPosition.z > 1 || !isNearEnough ? 'none' : 'block';
+                        if (isHpBarHidden !== unit.__unit_hp_bar_hidden) {
+                            unit.__unit_hp_bar_hidden = isHpBarHidden;
+                            hpBarElement.style.display = isHpBarHidden ? 'none' : 'block';
+                        }
 
                         if (isNearEnough) {
                             hpBarElement.style.left = `${screenBarPosition.x}px`;
                             hpBarElement.style.top = `${screenBarPosition.y}px`;
                             hpBarElement.style.width = `${width}px`;
-                        }
 
-                        const barContainer = hpBarElement.children[2];
-                        const barLine = barContainer.children[0];
-                        barLine.style.width = `${Math.round(100 * unit.getHP() / unit.getMaxHP())}%`;
+                            const barContainer = hpBarElement.children[2];
+                            const barLine = barContainer.children[0];
+                            barLine.style.width = `${Math.round(100 * unit.getHP() / unit.getMaxHP())}%`;
 
-                        const levelElement = hpBarElement.children[0];
-                        if (levelElement.innerHTML !== levelElement) {
-                            levelElement.innerHTML = unit.getLevel();
+                            const unitLevel = unit.getLevel();
+                            if (unit.__unit_hp_bar_level !== unitLevel) {
+                                unit.__unit_hp_bar_level = unitLevel;
+                                const levelElement = hpBarElement.children[0];
+                                levelElement.innerHTML = unit.__unit_hp_bar_level;
+                            }
                         }
                     } else if (hpBarElement) {
                         hpBarElement.remove();
